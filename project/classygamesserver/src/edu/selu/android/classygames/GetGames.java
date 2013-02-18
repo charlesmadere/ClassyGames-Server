@@ -99,7 +99,7 @@ public class GetGames extends HttpServlet
 			sqlConnection = Utilities.getSQLConnection();
 
 			// prepare a SQL statement to be run on the MySQL database
-			String sqlStatementString = "SELECT * FROM " + Utilities.DATABASE_TABLE_GAMES + " WHERE " + Utilities.DATABASE_TABLE_GAMES_COLUMN_FINISHED + " = ? AND (" + Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CREATOR + " = ? OR " + Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?)";
+			final String sqlStatementString = "SELECT * FROM " + Utilities.DATABASE_TABLE_GAMES + " WHERE " + Utilities.DATABASE_TABLE_GAMES_COLUMN_FINISHED + " = ? AND (" + Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CREATOR + " = ? OR " + Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?)";
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
@@ -134,6 +134,9 @@ public class GetGames extends HttpServlet
 
 	private void createReturnGameData(final Connection sqlConnection, final ResultSet sqlResult) throws SQLException
 	{
+		// TODO
+		// convert this json making code into the org.json way of doing JSON
+
 		final Map<String, Object> jsonData = new LinkedHashMap<String, Object>();
 		final List<Map<String, Object>> turnYours = new LinkedList<Map<String, Object>>();
 		final List<Map<String, Object>> turnTheirs = new LinkedList<Map<String, Object>>();
