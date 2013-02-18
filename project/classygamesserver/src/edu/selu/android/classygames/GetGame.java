@@ -23,6 +23,8 @@ public class GetGame extends HttpServlet
 	private final static long serialVersionUID = 1L;
 
 
+	private Connection sqlConnection;
+	private PreparedStatement sqlStatement;
 	private PrintWriter printWriter;
 
 	private String parameter_gameId;
@@ -74,9 +76,6 @@ public class GetGame extends HttpServlet
 
 	private void getGame()
 	{
-		Connection sqlConnection = null;
-		PreparedStatement sqlStatement = null;
-
 		try
 		{
 			sqlConnection = Utilities.getSQLConnection();

@@ -28,6 +28,8 @@ public class GetGames extends HttpServlet
 	private final static long serialVersionUID = 1L;
 
 
+	private Connection sqlConnection;
+	private PreparedStatement sqlStatement;
 	private PrintWriter printWriter;
 
 	private String parameter_userId;
@@ -91,9 +93,6 @@ public class GetGames extends HttpServlet
 
 	private void getGames()
 	{
-		Connection sqlConnection = null;
-		PreparedStatement sqlStatement = null;
-
 		try
 		{
 			sqlConnection = Utilities.getSQLConnection();
@@ -113,7 +112,7 @@ public class GetGames extends HttpServlet
 			if (sqlResult.next())
 			// check to see that we got some SQL return data
 			{
-				createReturnGameData(sqlConnection, sqlResult);
+				createReturnGameData(sqlResult);
 			}
 			else
 			// we did not get any SQL return data
@@ -132,7 +131,7 @@ public class GetGames extends HttpServlet
 	}
 
 
-	private void createReturnGameData(final Connection sqlConnection, final ResultSet sqlResult) throws SQLException
+	private void createReturnGameData(final ResultSet sqlResult) throws SQLException
 	{
 		// TODO
 		// convert this json making code into the org.json way of doing JSON
