@@ -1,24 +1,28 @@
-package edu.selu.android.classygames.games.checkers;
+package edu.selu.android.classygames.games.chess;
 
 
 import edu.selu.android.classygames.games.GenericPiece;
 
 
 /**
- * Class representing a single Checkers piece.
+ * Class representing a single Chess piece.
  */
 public class Piece extends GenericPiece
 {
 
 
-	public final static byte TYPE_NORMAL = 1;
-	public final static byte TYPE_KING = 2;
+	public final static byte TYPE_PAWN = 1;
+	public final static byte TYPE_BISHOP = 2;
+	public final static byte TYPE_KNIGHT = 3;
+	public final static byte TYPE_ROOK = 4;
+	public final static byte TYPE_QUEEN = 5;
+	public final static byte TYPE_KING = 6;
 
 
 	/**
 	 * Creates a Piece object. As this constructor <strong>does not</strong>
 	 * take a type parameter, this Piece's type will be set to the default
-	 * (a normal piece).
+	 * (a pawn).
 	 * 
 	 * @param team
 	 * What team is this Piece on? Use one of this class's public members for
@@ -26,7 +30,7 @@ public class Piece extends GenericPiece
 	 */
 	public Piece(final byte team)
 	{
-		super(team, TYPE_NORMAL);
+		super(team, TYPE_PAWN);
 	}
 
 
@@ -39,7 +43,7 @@ public class Piece extends GenericPiece
 	 * 
 	 * @param type
 	 * What type of Piece is this? Use one of this class's public members for
-	 * this parameter. So that'd be either TYPE_NORMAL or TYPE_KING.
+	 * this parameter. So that'd be either TYPE_PAWN or TYPE_KNIGHT or...
 	 */
 	public Piece(final byte team, final byte type)
 	{
@@ -56,7 +60,7 @@ public class Piece extends GenericPiece
 	 * 
 	 * @param type
 	 * What type of Piece is this? Use one of this class's public members for
-	 * this parameter. So that'd be either TYPE_NORMAL or TYPE_KING.
+	 * this parameter. So that'd be either TYPE_PAWN or TYPE_KNIGHT or...
 	 */
 	public Piece(final byte team, final int type)
 	{
@@ -64,38 +68,71 @@ public class Piece extends GenericPiece
 	}
 
 
-	public Piece(final Piece piece)
-	{
-		super(piece.getTeam(), piece.getType());
-	}
-
-
 	/**
-	 * Crowns a Piece object. This Piece object is now a King.
-	 */
-	public void ascendToKing()
-	{
-		type = TYPE_KING;
-	}
-
-
-	/**
-	 * Checks to see if this Piece is a normal piece.
+	 * Checks to see if this Piece is a pawn.
 	 * 
 	 * @return
-	 * Returns true if this Piece is a normal piece.
+	 * Returns true if this Piece is a pawn.
 	 */
-	public boolean isTypeNormal()
+	public boolean isTypePawn()
 	{
-		return type == TYPE_NORMAL;
+		return type == TYPE_PAWN;
 	}
 
 
 	/**
-	 * Checks to see if this Piece is a king piece.
+	 * Checks to see if this Piece is a bishop.
 	 * 
 	 * @return
-	 * Returns true if this Piece is a king piece.
+	 * Returns true if this Piece is a bishop.
+	 */
+	public boolean isTypeBishop()
+	{
+		return type == TYPE_BISHOP;
+	}
+
+
+	/**
+	 * Checks to see if this Piece is a knight.
+	 * 
+	 * @return
+	 * Returns true if this Piece is a knight.
+	 */
+	public boolean isTypeKnight()
+	{
+		return type == TYPE_KNIGHT;
+	}
+
+
+	/**
+	 * Checks to see if this Piece is a rook.
+	 * 
+	 * @return
+	 * Returns true if this Piece is a rook.
+	 */
+	public boolean isTypeRook()
+	{
+		return type == TYPE_ROOK;
+	}
+
+
+	/**
+	 * Checks to see if this Piece is a queen.
+	 * 
+	 * @return
+	 * Returns true if this Piece is a queen.
+	 */
+	public boolean isTypeQueen()
+	{
+		return type == TYPE_QUEEN;
+	}
+
+
+	/**
+	 * Checks to see if this Piece is a king.
+	 * 
+	 * @return
+	 * Returns true if this Piece is a king.
 	 */
 	public boolean isTypeKing()
 	{
@@ -110,7 +147,11 @@ public class Piece extends GenericPiece
 	{
 		switch (type)
 		{
-			case TYPE_NORMAL:
+			case TYPE_PAWN:
+			case TYPE_BISHOP:
+			case TYPE_KNIGHT:
+			case TYPE_ROOK:
+			case TYPE_QUEEN:
 			case TYPE_KING:
 				return true;
 
@@ -140,8 +181,24 @@ public class Piece extends GenericPiece
 
 		switch (getType())
 		{
-			case TYPE_NORMAL:
-				builder.append("Normal");
+			case TYPE_PAWN:
+				builder.append("Pawn");
+				break;
+
+			case TYPE_BISHOP:
+				builder.append("Bishop");
+				break;
+
+			case TYPE_KNIGHT:
+				builder.append("Knight");
+				break;
+
+			case TYPE_ROOK:
+				builder.append("Rook");
+				break;
+
+			case TYPE_QUEEN:
+				builder.append("Queen");
 				break;
 
 			case TYPE_KING:

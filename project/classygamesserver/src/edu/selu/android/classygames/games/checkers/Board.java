@@ -1,17 +1,18 @@
 package edu.selu.android.classygames.games.checkers;
 
 
-import java.util.List;
-import java.util.Map;
-
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import edu.selu.android.classygames.games.Coordinate;
 import edu.selu.android.classygames.games.GenericBoard;
-import edu.selu.android.classygames.utilities.Utilities;
+import edu.selu.android.classygames.games.Position;
 
 
+/**
+ * Class representing a Checkers board. This board is made up of a bunch of
+ * positions. Checkers is 8 by 8, so that's 64 positions.
+ */
 public class Board extends GenericBoard
 {
 
@@ -20,367 +21,214 @@ public class Board extends GenericBoard
 	private final static byte LENGTH_VERTICAL = 8;
 
 
-	public Board()
-	{
-		super();
+	/**
+	 * Holds a handle to the piece that the user last moved. This isn eeded for
+	 * multijump purposes.
+	 */
+	private Piece lastMovedPiece;
 
-		maxTeamSize = 12;
+
+
+
+	/**
+	 * Creates a Checkers board object.
+	 * 
+	 * @throws JSONException
+	 * If a glitch or something happened while trying to create some JSON data
+	 * then this JSONException will be thrown. When using this particular
+	 * constructor this should never happen.
+	 */
+	public Board() throws JSONException
+	{
+		super(LENGTH_HORIZONTAL, LENGTH_VERTICAL);
 	}
 
 
 	/**
-	 * Creates a Board object from JSON data.
+	 * Creates a Checkers board object using the given JSON String.
 	 * 
-	 * @param boardJSONData
-	 * A String of JSON data that represents the Board object.
+	 * @param boardJSON
+	 * JSONObject that represents the board.
+	 * 
+	 * @throws JSONException
+	 * If a glitch or something happened while trying to create some JSON data
+	 * then this JSONException will be thrown.
 	 */
-	@SuppressWarnings("unchecked")
-	public Board(final String boardJSONData)
+	public Board(final JSONObject boardJSON) throws JSONException
 	{
-		this();
+		super(LENGTH_HORIZONTAL, LENGTH_VERTICAL, boardJSON);
+	}
 
-		if (boardJSONData != null && !boardJSONData.isEmpty())
-		{
-			try
-			{
-				final Map<String, Object> data = (Map<String, Object>) new JSONParser().parse(boardJSONData);
-				final Map<String, Object> board = (Map<String, Object>) data.get("board");
-				final List<Object> teams = (List<Object>) board.get("teams");
 
-				final int teamsSize = teams.size();
-				for (byte i = 0; i < teamsSize; ++i)
-				{
-					parseTeamData((List<Object>) teams.get(i), i);
-				}
-			}
-			catch (final ParseException e)
-			{
 
-			}
-		}
+
+	@Override
+	protected Piece buildPiece(final byte whichTeam, final int type)
+	{
+		return new Piece(whichTeam, type);
 	}
 
 
 	@Override
 	public byte checkValidity()
 	{
-		byte userCount = 0;
-		byte challengedCount = 0;
-
-		for (byte x = 0; x < LENGTH_HORIZONTAL; ++x)
-		{
-			for (byte y = 0; y < LENGTH_VERTICAL; ++y)
-			{
-				//Check to see if position is in a legal spot in the first place. For example:
-				//[0,0] , [1,1] , [0,2] , [5,7] are all positions that a piece should never land on.
-				if (((y % 2 == 0) && (x % 2 == 0)) || ((y % 2 != 0) && (x % 2 != 0)))
-				{
-					if (getPosition(x, y).hasPiece())
-					{
-						return Utilities.BOARD_INVALID;
-					}
-				}
-
-				//Check to make sure all pieces are in their proper place.
-				if (((y % 2 == 0) && (x % 2 != 0)) || ((y % 2 != 0) && (x % 2 == 0)))
-				{
-					if (y > 4)
-					{
-						//Check if piece is missing.
-						if (!getPosition(x, y).hasPiece())
-						{
-							return Utilities.BOARD_INVALID;
-						}
-
-						//Make sure this piece belongs to the challenged team.
-						if (getPosition(x,y).getPiece().getTeam() != Piece.TEAM_CHALLENGED)
-						{
-							return Utilities.BOARD_INVALID;
-						}
-
-						if (!getPosition(x,y).getPiece().isTypeNormal())
-						{
-							return Utilities.BOARD_INVALID;
-						}
-
-						challengedCount++;
-					}
-
-					if (y < 2)
-					{
-						//Check if piece is missing.
-						if (!getPosition(x, y).hasPiece())
-						{
-							return Utilities.BOARD_INVALID;
-						}
-
-						//Make sure this piece belongs to the user team.
-						if (getPosition(x,y).getPiece().getTeam() != Piece.TEAM_USER)
-						{
-							return Utilities.BOARD_INVALID;
-						}
-
-						if (!getPosition(x,y).getPiece().isTypeNormal())
-						{
-							return Utilities.BOARD_INVALID;
-						}
-
-						userCount++;
-					}
-
-					if (y == 2)
-					{
-						if(getPosition(x,y).hasPiece())
-						{
-							//Make sure this piece belongs to the user team.
-							if (getPosition(x,y).getPiece().getTeam() != Piece.TEAM_USER)
-							{
-								return Utilities.BOARD_INVALID;
-							}
-
-							if (!getPosition(x,y).getPiece().isTypeNormal())
-							{
-								return Utilities.BOARD_INVALID;
-							}
-
-							userCount++;
-						}
-					}
-				}
-
-				//Only the first row should have a piece moved from a valid spot at first.
-				if ((y == 7) && (x % 2 == 0) || (y == 1) && (x % 2 == 0) || (y == 5) && (x % 2 == 0) || (y == 6) && (x % 2 != 0) || (y == 0) && (x % 2 != 0))
-				{
-					if (!getPosition(x,y).hasPiece())
-					{
-						return Utilities.BOARD_INVALID;
-					}
-				}
-
-				//Make sure first move came from a valid piece.
-				if (y == 3)
-				{
-					if (x == 0)
-					{
-						//Check if piece has moved from farthest left.
-						if (getPosition(x, y).hasPiece())
-						{
-							if (getPosition((byte)(x+1),(byte)(y-1)).hasPiece())
-							{
-								return Utilities.BOARD_INVALID;
-							}
-
-							userCount++;
-						}
-					}
-					//Check the rest of the pieces.
-					else if (x % 2 == 0)
-					{
-						if (getPosition(x,y).hasPiece())
-						{
-							if (getPosition((byte)(x+1),(byte)(y-1)).hasPiece() && getPosition((byte)(x-1),(byte)(y-1)).hasPiece())
-							{
-								return Utilities.BOARD_INVALID;
-							}
-
-							if (!getPosition((byte)(x+1),(byte)(y-1)).hasPiece() && !getPosition((byte)(x-1),(byte)(y-1)).hasPiece())
-							{
-								return Utilities.BOARD_INVALID;
-							}
-
-							userCount++;
-						}
-					}
-				}
-
-			}
-		}
-
-		if(challengedCount != maxTeamSize || userCount != maxTeamSize)
-		{
-			return Utilities.BOARD_INVALID;
-		}
-
-		return Utilities.BOARD_NEW_GAME;
+		return (byte) 0;
 	}
 
 
 	@Override
-	public byte checkValidity(final String boardJSONData)
+	public byte checkValidity(final JSONObject boardJSON)
 	{
-		if (boardJSONData != null && !boardJSONData.isEmpty())
+		return (byte) 0;
+	}
+
+
+	@Override
+	protected void initializeDefaultBoard()
+	{
+		// player team
+		getPosition(1, 0).setPiece(new Piece(Piece.TEAM_PLAYER));
+		getPosition(3, 0).setPiece(new Piece(Piece.TEAM_PLAYER));
+		getPosition(5, 0).setPiece(new Piece(Piece.TEAM_PLAYER));
+		getPosition(7, 0).setPiece(new Piece(Piece.TEAM_PLAYER));
+		getPosition(0, 1).setPiece(new Piece(Piece.TEAM_PLAYER));
+		getPosition(2, 1).setPiece(new Piece(Piece.TEAM_PLAYER));
+		getPosition(4, 1).setPiece(new Piece(Piece.TEAM_PLAYER));
+		getPosition(6, 1).setPiece(new Piece(Piece.TEAM_PLAYER));
+		getPosition(1, 2).setPiece(new Piece(Piece.TEAM_PLAYER));
+		getPosition(3, 2).setPiece(new Piece(Piece.TEAM_PLAYER));
+		getPosition(5, 2).setPiece(new Piece(Piece.TEAM_PLAYER));
+		getPosition(7, 2).setPiece(new Piece(Piece.TEAM_PLAYER));
+
+		// opponent team
+		getPosition(0, 7).setPiece(new Piece(Piece.TEAM_OPPONENT));
+		getPosition(2, 7).setPiece(new Piece(Piece.TEAM_OPPONENT));
+		getPosition(4, 7).setPiece(new Piece(Piece.TEAM_OPPONENT));
+		getPosition(6, 7).setPiece(new Piece(Piece.TEAM_OPPONENT));
+		getPosition(1, 6).setPiece(new Piece(Piece.TEAM_OPPONENT));
+		getPosition(3, 6).setPiece(new Piece(Piece.TEAM_OPPONENT));
+		getPosition(5, 6).setPiece(new Piece(Piece.TEAM_OPPONENT));
+		getPosition(7, 6).setPiece(new Piece(Piece.TEAM_OPPONENT));
+		getPosition(0, 5).setPiece(new Piece(Piece.TEAM_OPPONENT));
+		getPosition(2, 5).setPiece(new Piece(Piece.TEAM_OPPONENT));
+		getPosition(4, 5).setPiece(new Piece(Piece.TEAM_OPPONENT));
+		getPosition(6, 5).setPiece(new Piece(Piece.TEAM_OPPONENT));
+	}
+
+
+
+
+	@Override
+	public boolean move(final Position previous, final Position current)
+	{
+		boolean isMoveValid = false;
+
+		if (isBoardLocked)
 		{
-			final Board boardNew = new Board(boardJSONData);
-			
-//			byte userCount = 0;
-			byte challengedCount = 0;
-//			byte challangedKings = 0;
-			byte userKings = 0;
+			isMoveValid = false;
+		}
+		else if (previous.hasPiece() && current.hasPiece())
+		{
+			isMoveValid = false;
+		}
+		else if ((previous.hasPiece() && previous.getPiece().isTeamOpponent()) || (current.hasPiece() && current.getPiece().isTeamPlayer()))
+		{
+			isMoveValid = false;
+		}
+		else if (previous.hasPiece())
+		{
+			final Piece piece = (Piece) previous.getPiece();
 
-			for (byte x = 0; x < LENGTH_HORIZONTAL; ++x)
+			if ((previous.getCoordinate().getX() == current.getCoordinate().getX() - 1)
+				|| (previous.getCoordinate().getX() == current.getCoordinate().getX() + 1))
 			{
-				for (byte y = 0; y < LENGTH_VERTICAL; ++y)
+				switch (piece.getType())
 				{
-					//Check to see if position is in a legal spot in the first place. For example:
-					//[0,0] , [1,1] , [0,2] , [5,7] are all positions that a piece should never land on.
-					if (((y % 2 == 0) && (x % 2 == 0)) || ((y % 2 != 0) && (x % 2 != 0)))
-					{
-						if (boardNew.getPosition(x, y).hasPiece())
+					case Piece.TYPE_KING:
+						if (previous.getCoordinate().getY() == current.getCoordinate().getY() + 1)
 						{
-							return Utilities.BOARD_INVALID;
+							isMoveValid = true;
+							isBoardLocked = true;
 						}
-					}
 
-					//Head count for each team - may need to implement something to subtract if jump is detected.
-					if (boardNew.getPosition(x, y).hasPiece())
-					{
-						if(boardNew.getPosition(x,y).getPiece().getTeam() == Piece.TEAM_CHALLENGED)
+					case Piece.TYPE_NORMAL:
+						if (previous.getCoordinate().getY() == current.getCoordinate().getY() - 1)
 						{
-							challengedCount++;
+							isMoveValid = true;
+							isBoardLocked = true;
 						}
-						else
-						{
-//							userCount++;
-						}
-					}
+				}
+			}
+			else if ((previous.getCoordinate().getX() == current.getCoordinate().getX() - 2)
+				|| (previous.getCoordinate().getX() == current.getCoordinate().getX() + 2))
+			{
+				boolean isJumpValid = false;
 
-					//TODO:Check if a piece moved from a previous position, then attempt to find piece in legal position
-					// probably best to check if enemy was in front first then if in the following board it got skipped
-					// or did the skipping ALSO be aware of pieces overlapping.
-					if (boardNew.getPosition(x, y).hasPiece() && !getPosition(x,y).hasPiece())
-					{
-						//Count number of new kings user made in one turn...no cheating only 1 new king per turn!!
-						if (boardNew.getPosition(x, y).getPiece().isTypeNormal() != true)
+				switch (piece.getType())
+				{
+					case Piece.TYPE_KING:
+						if (previous.getCoordinate().getY() == current.getCoordinate().getY() + 2)
 						{
-							userKings++;
+							isJumpValid = true;
+						}
+						break;
+
+					case Piece.TYPE_NORMAL:
+						if (previous.getCoordinate().getY() == current.getCoordinate().getY() - 2)
+						{
+							isJumpValid = true;
+						}
+						break;
+				}
+
+				if (isJumpValid)
+				{
+					final byte middleX = (byte) Math.abs(previous.getCoordinate().getX() - current.getCoordinate().getX());
+					final byte middleY = (byte) Math.abs(previous.getCoordinate().getY() - current.getCoordinate().getY());
+					final Coordinate middleCoordinate = new Coordinate(middleX, middleY);
+					final Position middlePosition = getPosition(middleCoordinate);
+
+					if (middlePosition.hasPiece() && middlePosition.getPiece().isTeamOpponent())
+					{
+						if (lastMovedPiece != null && lastMovedPiece == piece)
+						{
+							middlePosition.getPiece().kill();
+							isMoveValid = true;
 						}
 					}
 				}
 			}
 
-			//Check for illegal amount of kings.
-			if (userKings > 1)
+			if (isMoveValid)
 			{
-				return Utilities.BOARD_INVALID;
-			}
+				current.setPiece(new Piece(piece));
+				previous.removePiece();
+				lastMovedPiece = (Piece) current.getPiece();
 
-			//WIN CONDITION: Check if challenged user is out of pieces.
-			if (challengedCount == 0)
-			{
-				return Utilities.BOARD_WIN;
+				if (current.getCoordinate().getY() == lengthVertical - 1)
+				{
+					((Piece) current.getPiece()).ascendToKing();
+				}
 			}
-
-			return Utilities.BOARD_NEW_MOVE;
+		}
+		else if (current.hasPiece())
+		{
+			isMoveValid = false;
 		}
 		else
 		{
-			return Utilities.BOARD_INVALID;
+			isMoveValid = false;
 		}
+
+		return isMoveValid;
 	}
 
 
 	@Override
-	public Position getPosition(final byte x, final byte y)
+	protected void resetBoard()
 	{
-		if ((x >= 0 && x < LENGTH_HORIZONTAL) && (y >= 0 && y < LENGTH_VERTICAL))
-		{
-			return (Position) positions[x][y];
-		}
-		else
-		{
-			return null;
-		}
-	}
-
-
-	@Override
-	protected void initializeBoard()
-	{
-		positions = new Position[LENGTH_HORIZONTAL][LENGTH_VERTICAL];
-
-		for (byte i = 0; i < LENGTH_HORIZONTAL; ++i)
-		{
-			for (byte j = 0; j < LENGTH_VERTICAL; ++j)
-			{
-				positions[i][j] = new Position();
-			}
-		}
-	}
-
-
-	@SuppressWarnings("unchecked")
-	private void parseTeamData(final List<Object> team, final byte pieceTeam)
-	{
-		final byte teamSize = (byte) team.size();
-
-		for (byte i = 0, currentTeamSize = 0; i < teamSize && currentTeamSize < maxTeamSize; ++i, ++currentTeamSize)
-		{
-			final Map<String, Object> piece = (Map<String, Object>) team.get(i);
-			final byte pieceType = Long.valueOf((Long) piece.get("type")).byteValue();
-			final List<Long> unparsedCoordinate = (List<Long>) piece.get("coordinate");
-
-			final byte x = unparsedCoordinate.get(0).byteValue();
-			final byte y = unparsedCoordinate.get(1).byteValue();
-
-			if ((x >= 0 && x < LENGTH_HORIZONTAL) && (y >= 0 && y < LENGTH_VERTICAL))
-			{
-				final Coordinate coordinate = new Coordinate(x, y);
-
-				if (!positions[coordinate.getX()][coordinate.getY()].hasPiece())
-				{
-					positions[coordinate.getX()][coordinate.getY()] = new Position(coordinate, (byte) (pieceTeam + 1), pieceType);
-				}
-			}
-		}
-	}
-
-
-	@SuppressWarnings("unchecked")
-	public static String flipTeams(final String board)
-	{
-		if (board != null && !board.isEmpty())
-		{
-			try
-			{
-				final Map<String, Object> data = (Map<String, Object>) new JSONParser().parse(board);
-				final Map<String, Object> boardData = (Map<String, Object>) data.get("board");
-				final List<Object> teamData = (List<Object>) boardData.get("teams");
-
-				// flip the teams
-				final Object team0 = teamData.get(0);
-				final Object team1 = teamData.get(1);
-				teamData.set(0, team1);
-				teamData.set(1, team0);
-
-				for (byte i = 0; i < 2; ++i)
-				// loop through each team
-				{
-					final List<Object> team = (List<Object>) teamData.get(i);;
-					final byte teamSize = (byte) team.size();
-
-					for (byte j = 0; j < teamSize; ++j)
-					// flip the team's piece's coordinates
-					{
-						final Map<String, Object> piece = (Map<String, Object>) team.get(j);
-						final List<Long> coordinate = (List<Long>) piece.get("coordinate");
-						coordinate.set(0, (long) (LENGTH_HORIZONTAL - 1 - coordinate.get(0).byteValue()));
-						coordinate.set(1, (long) (LENGTH_VERTICAL - 1 - coordinate.get(1).byteValue()));
-					}
-
-					teamData.set(i, team);
-				}
-
-				return data.toString();
-			}
-			catch (final ParseException e)
-			{
-
-			}
-		}
-
-		return null;
+		lastMovedPiece = null;
 	}
 
 
 }
-

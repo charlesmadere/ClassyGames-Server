@@ -24,6 +24,16 @@ public class RemoveRegId extends HttpServlet
 	private final static long serialVersionUID = 1L;
 
 
+	private Connection sqlConnection;
+	private PrintWriter printWriter;
+
+	private String parameter_userId;
+
+	private Long userId;
+
+
+
+
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
@@ -36,10 +46,10 @@ public class RemoveRegId extends HttpServlet
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doGet(final HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException
 	{
 		response.setContentType(Utilities.CONTENT_TYPE_JSON);
-		PrintWriter printWriter = response.getWriter();
+		printWriter = response.getWriter();
 		printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_NOT_DETECTED));
 	}
 
@@ -47,46 +57,50 @@ public class RemoveRegId extends HttpServlet
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doPost(final HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException
 	{
 		response.setContentType(Utilities.CONTENT_TYPE_JSON);
-		PrintWriter printWriter = response.getWriter();
+		printWriter = response.getWriter();
 
-		final String user_id_parameter = request.getParameter(Utilities.POST_DATA_ID);
+		parameter_userId = request.getParameter(Utilities.POST_DATA_ID);
 
-		if (user_id_parameter == null || user_id_parameter.isEmpty())
-		// check for invalid inputs
+		if (Utilities.verifyValidString(parameter_userId))
+		// check inputs for validity
 		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
-		}
-		else
-		{
-			final Long user_id = Long.valueOf(user_id_parameter);
+			userId = Long.valueOf(parameter_userId);
 
-			if (user_id.longValue() < 0)
-			// check for invalid inputs
+			if (Utilities.verifyValidLong(userId))
+			// check inputs for validity
 			{
-				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
+				removeRegId();
 			}
 			else
 			{
-				Connection sqlConnection = null;
-
-				try
-				{
-					sqlConnection = Utilities.getSQLConnection();
-					Utilities.removeUserRegId(sqlConnection, user_id.longValue());
-					printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_REMOVED_FROM_DATABASE));
-				}
-				catch (final SQLException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
-				}
-				finally
-				{
-					Utilities.closeSQLConnection(sqlConnection);
-				}
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
 			}
+		}
+		else
+		{
+			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
+		}
+	}
+
+
+	private void removeRegId()
+	{
+		try
+		{
+			sqlConnection = Utilities.getSQLConnection();
+			Utilities.removeUserRegId(sqlConnection, userId.longValue());
+			printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_REMOVED_FROM_DATABASE));
+		}
+		catch (final SQLException e)
+		{
+			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+		}
+		finally
+		{
+			Utilities.closeSQLConnection(sqlConnection);
 		}
 	}
 

@@ -32,7 +32,7 @@ public class GCMUtilities
 		if (reg_id != null && !reg_id.isEmpty())
 		// ensure that we were able to grab a valid regId for the user
 		{
-			final Sender sender = new Sender(SecretConstants.GOOGLE_API_KEY);
+			final Sender sender = new Sender("");
 
 			// build the message that will be sent to the client device
 			// https://developer.android.com/guide/google/gcm/server-javadoc/index.html
@@ -85,7 +85,7 @@ public class GCMUtilities
 	 */
 	public static void sendMessage(final Connection sqlConnection, final String game_id, final Long userIdToShow, final Long userIdOfReceiver, final Byte game_type)
 	{
-		sendMessage(sqlConnection, game_id, userIdToShow, Utilities.grabUserName(sqlConnection, userIdToShow.longValue()), userIdOfReceiver, game_type);
+		sendMessage(sqlConnection, game_id, userIdToShow, Utilities.grabUsersName(sqlConnection, userIdToShow.longValue()), userIdOfReceiver, game_type);
 	}
 
 
@@ -97,7 +97,7 @@ public class GCMUtilities
 	 */
 	public static void sendMessages(final Connection sqlConnection, final String game_id, final Long userIdToShow, final Long userIdOfReceiver, final Byte game_type, final String userNameOfReceiver)
 	{
-		final String userNameToShow = Utilities.grabUserName(sqlConnection, userIdToShow.longValue());
+		final String userNameToShow = Utilities.grabUsersName(sqlConnection, userIdToShow.longValue());
 
 		sendMessage(sqlConnection, game_id, userIdToShow, userNameToShow, userIdOfReceiver, Utilities.BOARD_LOSE);
 		sendMessage(sqlConnection, game_id, userIdOfReceiver, userNameOfReceiver, userIdToShow, Utilities.BOARD_WIN);

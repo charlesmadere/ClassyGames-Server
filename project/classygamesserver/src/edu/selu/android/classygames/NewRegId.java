@@ -26,6 +26,19 @@ public class NewRegId extends HttpServlet
 	private final static long serialVersionUID = 1L;
 
 
+	private Connection sqlConnection;
+	private PreparedStatement sqlStatement;
+	private PrintWriter printWriter;
+
+	private String parameter_userId;
+	private String parameter_userName;
+	private String parameter_userRegId;
+
+	private Long userId;
+
+
+
+
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
@@ -38,10 +51,10 @@ public class NewRegId extends HttpServlet
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doGet(final HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException
 	{
 		response.setContentType(Utilities.CONTENT_TYPE_JSON);
-		PrintWriter printWriter = response.getWriter();
+		printWriter = response.getWriter();
 		printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_NOT_DETECTED));
 	}
 
@@ -49,88 +62,94 @@ public class NewRegId extends HttpServlet
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doPost(final HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException
 	{
 		response.setContentType(Utilities.CONTENT_TYPE_JSON);
-		PrintWriter printWriter = response.getWriter();
+		printWriter = response.getWriter();
 
-		final String id_parameter = request.getParameter(Utilities.POST_DATA_ID);
-		final String name = request.getParameter(Utilities.POST_DATA_NAME);
-		final String reg_id = request.getParameter(Utilities.POST_DATA_REG_ID);
+		parameter_userId = request.getParameter(Utilities.POST_DATA_ID);
+		parameter_userName = request.getParameter(Utilities.POST_DATA_NAME);
+		parameter_userRegId = request.getParameter(Utilities.POST_DATA_REG_ID);
 
-		if (id_parameter == null || id_parameter.isEmpty() || name == null || name.isEmpty()
-			|| reg_id == null || reg_id.isEmpty())
-		// check for invalid inputs
+		if (Utilities.verifyValidStrings(parameter_userId, parameter_userName, parameter_userRegId))
+		// check inputs for validity
 		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
-		}
-		else
-		{
-			final Long id = Long.valueOf(id_parameter);
+			userId = Long.valueOf(parameter_userId);
 
-			if (id.longValue() < 0)
-			// check for invalid inputs
+			if (Utilities.verifyValidLong(userId))
+			// check inputs for validity
 			{
-				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
+				newRegId();
 			}
 			else
 			{
-				Connection sqlConnection = null;
-				PreparedStatement sqlStatement = null;
-
-				try
-				{
-					sqlConnection = Utilities.getSQLConnection();
-
-					// prepare a SQL statement to be run on the database
-					String sqlStatementString = "SELECT * FROM " + Utilities.DATABASE_TABLE_USERS + " WHERE " + Utilities.DATABASE_TABLE_USERS_COLUMN_ID + " = ?";
-					sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-
-					// prevent SQL injection by inserting data this way
-					sqlStatement.setLong(1, id.longValue());
-
-					// run the SQL statement and acquire any return information
-					final ResultSet sqlResult = sqlStatement.executeQuery();
-
-					if (sqlResult.next())
-					// the id already exists in the table therefore it's data needs to be updated
-					{
-						// prepare a SQL statement to be run on the database
-						sqlStatementString = "UPDATE " + Utilities.DATABASE_TABLE_USERS + " SET " + Utilities.DATABASE_TABLE_USERS_COLUMN_NAME + " = ?, " + Utilities.DATABASE_TABLE_USERS_COLUMN_REG_ID + " = ? WHERE " + Utilities.DATABASE_TABLE_USERS_COLUMN_ID + " = ?";
-						sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-
-						// prevent SQL injection by inserting data this way
-						sqlStatement.setString(1, name);
-						sqlStatement.setString(2, reg_id);
-						sqlStatement.setLong(3, id.longValue());
-					}
-					else
-					// id does not already exist in the table. let's insert it
-					{
-						// prepare a SQL statement to be run on the database
-						sqlStatementString = "INSERT INTO " + Utilities.DATABASE_TABLE_USERS + " " + Utilities.DATABASE_TABLE_USERS_FORMAT + " " + Utilities.DATABASE_TABLE_USERS_VALUES;
-						sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-
-						// prevent SQL injection by inserting data this way
-						sqlStatement.setLong(1, id.longValue());
-						sqlStatement.setString(2, name);
-						sqlStatement.setString(3, reg_id);
-					}
-
-					// run the SQL statement
-					sqlStatement.executeUpdate();
-
-					printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_ADDED_TO_DATABASE));
-				}
-				catch (final SQLException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT + e.getMessage()));
-				}
-				finally
-				{
-					Utilities.closeSQL(sqlConnection, sqlStatement);
-				}
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
 			}
+		}
+		else
+		{
+			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
+		}
+	}
+
+
+	private void newRegId()
+	{
+		try
+		{
+			sqlConnection = Utilities.getSQLConnection();
+
+			// prepare a SQL statement to be run on the database
+			String sqlStatementString = "SELECT * FROM " + Utilities.DATABASE_TABLE_USERS + " WHERE " + Utilities.DATABASE_TABLE_USERS_COLUMN_ID + " = ?";
+			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+
+			// prevent SQL injection by inserting data this way
+			sqlStatement.setLong(1, userId.longValue());
+
+			// run the SQL statement and acquire any return information
+			final ResultSet sqlResult = sqlStatement.executeQuery();
+
+			if (sqlResult.next())
+			// the id already exists in the table therefore it's data needs to be updated
+			{
+				Utilities.closeSQLStatement(sqlStatement);
+
+				// prepare a SQL statement to be run on the database
+				sqlStatementString = "UPDATE " + Utilities.DATABASE_TABLE_USERS + " SET " + Utilities.DATABASE_TABLE_USERS_COLUMN_NAME + " = ?, " + Utilities.DATABASE_TABLE_USERS_COLUMN_REG_ID + " = ? WHERE " + Utilities.DATABASE_TABLE_USERS_COLUMN_ID + " = ?";
+				sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+
+				// prevent SQL injection by inserting data this way
+				sqlStatement.setString(1, parameter_userName);
+				sqlStatement.setString(2, parameter_userRegId);
+				sqlStatement.setLong(3, userId.longValue());
+			}
+			else
+			// id does not already exist in the table. let's insert it
+			{
+				Utilities.closeSQLStatement(sqlStatement);
+
+				// prepare a SQL statement to be run on the database
+				sqlStatementString = "INSERT INTO " + Utilities.DATABASE_TABLE_USERS + " " + Utilities.DATABASE_TABLE_USERS_FORMAT + " " + Utilities.DATABASE_TABLE_USERS_VALUES;
+				sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+
+				// prevent SQL injection by inserting data this way
+				sqlStatement.setLong(1, userId.longValue());
+				sqlStatement.setString(2, parameter_userName);
+				sqlStatement.setString(3, parameter_userRegId);
+			}
+
+			// run the SQL statement
+			sqlStatement.executeUpdate();
+
+			printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_ADDED_TO_DATABASE));
+		}
+		catch (final SQLException e)
+		{
+			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT + " " + e.getMessage()));
+		}
+		finally
+		{
+			Utilities.closeSQL(sqlConnection, sqlStatement);
 		}
 	}
 

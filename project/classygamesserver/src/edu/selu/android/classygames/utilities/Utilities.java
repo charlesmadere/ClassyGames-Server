@@ -6,11 +6,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Random;
 
-import org.json.simple.JSONValue;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class Utilities
@@ -58,6 +57,9 @@ public class Utilities
 	public final static String POST_DATA_FINISHED = DATABASE_TABLE_GAMES_COLUMN_FINISHED;
 	public final static String POST_DATA_ID = DATABASE_TABLE_USERS_COLUMN_ID;
 	public final static String POST_DATA_GAME_ID = "game_id";
+	public final static String POST_DATA_GAME_TYPE = "game_type";
+	public final static byte POST_DATA_GAME_TYPE_CHECKERS = 16;
+	public final static byte POST_DATA_GAME_TYPE_CHESS = 32;
 	public final static String POST_DATA_LAST_MOVE = DATABASE_TABLE_GAMES_COLUMN_LAST_MOVE;
 	public final static String POST_DATA_NAME = DATABASE_TABLE_USERS_COLUMN_NAME;
 	public final static String POST_DATA_REG_ID = DATABASE_TABLE_USERS_COLUMN_REG_ID;
@@ -74,7 +76,7 @@ public class Utilities
 
 	public final static String POST_ERROR_BOARD_INVALID = "Invalid board!";
 	public final static String POST_ERROR_COULD_NOT_CREATE_GAME_ID = "Was unable to create a Game ID.";
-	public final static String POST_ERROR_DATA_IS_EMPTY = "POST data is empty.";
+	public final static String POST_ERROR_DATA_IS_EMPTY = "POST data is empty or incomplete.";
 	public final static String POST_ERROR_DATA_IS_MALFORMED = "POST data is malformed.";
 	public final static String POST_ERROR_DATA_NOT_DETECTED = "No POST data detected.";
 	public final static String POST_ERROR_DATABASE_COULD_NOT_CONNECT = "Database connection was unable to be established.";
@@ -83,6 +85,7 @@ public class Utilities
 	public final static String POST_ERROR_DATABASE_COULD_NOT_GET_BOARD_DATA = "Was unable to acquire board data from the database.";
 	public final static String POST_ERROR_DATABASE_COULD_NOT_GET_GAMES = "Was unable to acquire a list of games from the database";
 	public final static String POST_ERROR_DATABASE_COULD_NOT_LOAD = "Database DriverManager could not be loaded.";
+	public final static String POST_ERROR_JSON_EXCEPTION = "JSONException error!";
 	public final static String POST_ERROR_GAME_IS_ALREADY_OVER = "Attempted to add a new move to a game that has already been completed!";
 	public final static String POST_ERROR_GENERIC = "POST data received but an error occurred.";
 	public final static String POST_ERROR_INVALID_CHALLENGER = "Invalid challenger!";
@@ -227,7 +230,7 @@ public class Utilities
 	 * @return
 	 * The name of the user that you queried for as a String.
 	 */
-	public static String grabUserName(final Connection sqlConnection, final long user)
+	public static String grabUsersName(final Connection sqlConnection, final long user)
 	{
 		PreparedStatement sqlStatement = null;
 		String username = null;
@@ -305,46 +308,86 @@ public class Utilities
 		final String password = System.getProperty("RDS_PASSWORD");
 
 		// create the connection string
-		String connectionString = "jdbc:mysql://" + hostname + ":" + port + "/" + dbName + "?user=" + username + "&password=" + password;
+		final String connectionString = "jdbc:mysql://" + hostname + ":" + port + "/" + dbName + "?user=" + username + "&password=" + password;
 
 		// return a new connection to the database
 		return DriverManager.getConnection(connectionString);
 	}
 
 
+	/**
+	 * Prepares the message that should be written out using the PrintWriter.
+	 * 
+	 * @param data
+	 * Data to include in this output message.
+	 * 
+	 * @param hasError
+	 * Whether or not an error ocurred.
+	 * 
+	 * @return
+	 * Output message that should be written out using the PrintWriter.
+	 */
 	private static String makePostData(final Object data, final boolean hasError)
 	{
-		Map<String, Object> result = new LinkedHashMap<String, Object>();
+		String outputString = null;
 
-		if (hasError)
+		try
 		{
-			result.put("error", data);
+			final JSONObject result = new JSONObject();
+	
+			if (hasError)
+			{
+				result.put("error", data);
+			}
+			else
+			{
+				result.put("success", data);
+			}
+	
+			final JSONObject output = new JSONObject();
+			output.put("result", result);
+			outputString = output.toString();
 		}
-		else
+		catch (final JSONException e)
 		{
-			result.put("success", data);
+
 		}
 
-		Map<String, Map<String, Object>> jsonData = new LinkedHashMap<String, Map<String, Object>>();
-		jsonData.put("result", result);
-
-		return JSONValue.toJSONString(jsonData);
+		return outputString;
 	}
 
 
+	/**
+	 * Makes a message to write out using the PrintWriter.
+	 * 
+	 * @param data
+	 * The data to include in the output message.
+	 * 
+	 * @return
+	 * Output message that should be written out using the PrintWriter.
+	 */
 	public static String makePostDataError(final Object data)
 	{
 		return makePostData(data, true);
 	}
 
 
+	/**
+	 * Makes a message to write out using the PrintWriter.
+	 * 
+	 * @param data
+	 * The data to include in the output message.
+	 * 
+	 * @return
+	 * Output message that should be written out using the PrintWriter.
+	 */
 	public static String makePostDataSuccess(final Object data)
 	{
 		return makePostData(data, false);
 	}
 
 
-	public static void removeUserRegId(final Connection sqlConnection, final long user_id)
+	public static void removeUserRegId(final Connection sqlConnection, final long userId)
 	{
 		PreparedStatement sqlStatement = null;
 
@@ -355,7 +398,7 @@ public class Utilities
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
-			sqlStatement.setLong(1, user_id);
+			sqlStatement.setLong(1, userId);
 
 			// run the SQL statement
 			sqlStatement.executeUpdate();
@@ -371,7 +414,7 @@ public class Utilities
 	}
 
 
-	public static void updateUserRegId(final Connection sqlConnection, final String reg_id, final long user_id)
+	public static void updateUserRegId(final Connection sqlConnection, final String userRegId, final long userId)
 	{
 		PreparedStatement sqlStatement = null;
 
@@ -382,8 +425,8 @@ public class Utilities
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting user data this way
-			sqlStatement.setString(1, reg_id);
-			sqlStatement.setLong(2, user_id);
+			sqlStatement.setString(1, userRegId);
+			sqlStatement.setLong(2, userId);
 		} 
 		catch (final SQLException e)
 		{
@@ -410,6 +453,120 @@ public class Utilities
 			default:
 				return false;
 		}
+	}
+
+
+	/**
+	 * Verifies a Byte object for validity.
+	 * 
+	 * @param theByte
+	 * The Byte to check.
+	 * 
+	 * @return
+	 * Returns true if the given Byte is valid.
+	 */
+	public static boolean verifyValidByte(final Byte theByte)
+	{
+		return theByte != null && theByte.byteValue() >= 1;
+	}
+
+
+	/**
+	 * Verifies a set of Byte objects for validity.
+	 * 
+	 * @param bytes
+	 * The Bytes to check.
+	 * 
+	 * @return
+	 * Returns true if all of the given Bytes are valid.
+	 */
+	public static boolean verifyValidBytes(final Byte... bytes)
+	{
+		for (int i = 0; i < bytes.length; ++i)
+		{
+			if (!verifyValidByte(bytes[i]))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+
+	/**
+	 * Verifies a Long object for validity.
+	 * 
+	 * @param theLong
+	 * The Long to check.
+	 * 
+	 * @return
+	 * Returns true if the given Long is valid.
+	 */
+	public static boolean verifyValidLong(final Long theLong)
+	{
+		return theLong != null && theLong.longValue() >= 1;
+	}
+
+
+	/**
+	 * Verifies a set of Long objects for validity.
+	 * 
+	 * @param longs
+	 * The Longs to check.
+	 * 
+	 * @return
+	 * Returns true if all of the given Longs are valid.
+	 */
+	public static boolean verifyValidLongs(final Long... longs)
+	{
+		for (int i = 0; i < longs.length; ++i)
+		{
+			if (!verifyValidLong(longs[i]))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+
+	/**
+	 * Verifies a String object for validity.
+	 * 
+	 * @param string
+	 * The String to check.
+	 * 
+	 * @return
+	 * Returns true if the given String is valid.
+	 */
+	public static boolean verifyValidString(final String string)
+	{
+		return string != null && !string.isEmpty();
+	}
+
+
+	/**
+	 * Verifies a set of String objects for validity.
+	 * 
+	 * @param strings
+	 * The Strings to check.
+	 * 
+	 * @return
+	 * Returns true if all of the given Strings are valid.
+	 */
+	public static boolean verifyValidStrings(final String... strings)
+	{
+		for (int i = 0; i < strings.length; ++i)
+		{
+			if (!verifyValidString(strings[i]))
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 

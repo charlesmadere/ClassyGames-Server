@@ -16,14 +16,18 @@ import javax.servlet.http.HttpServletResponse;
 import edu.selu.android.classygames.utilities.Utilities;
 
 
-/**
- * Servlet implementation class GetGame
- */
 public class GetGame extends HttpServlet
 {
 
 
 	private final static long serialVersionUID = 1L;
+
+
+	private PrintWriter printWriter;
+
+	private String parameter_gameId;
+
+
 
 
 	/**
@@ -38,10 +42,10 @@ public class GetGame extends HttpServlet
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doGet(final HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException
 	{
 		response.setContentType(Utilities.CONTENT_TYPE_JSON);
-		PrintWriter printWriter = response.getWriter();
+		printWriter = response.getWriter();
 		printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_NOT_DETECTED));
 	}
 
@@ -49,66 +53,72 @@ public class GetGame extends HttpServlet
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doPost(final HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException
 	{
 		response.setContentType(Utilities.CONTENT_TYPE_JSON);
-		PrintWriter printWriter = response.getWriter();
+		printWriter = response.getWriter();
 
-		final String id = request.getParameter(Utilities.POST_DATA_ID);
+		parameter_gameId = request.getParameter(Utilities.POST_DATA_ID);
 
-		if (id == null || id.isEmpty())
-		// check for invalid inputs
+		if (Utilities.verifyValidString(parameter_gameId))
+		// check inputs for validity
 		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
+			getGame();
 		}
 		else
 		{
-			Connection sqlConnection = null;
-			PreparedStatement sqlStatement = null;
+			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
+		}
+	}
 
-			try
+
+	private void getGame()
+	{
+		Connection sqlConnection = null;
+		PreparedStatement sqlStatement = null;
+
+		try
+		{
+			sqlConnection = Utilities.getSQLConnection();
+
+			// prepare a SQL statement to be run on the database
+			final String sqlStatementString = "SELECT " + Utilities.DATABASE_TABLE_GAMES_COLUMN_BOARD + " FROM " + Utilities.DATABASE_TABLE_GAMES + " WHERE " + Utilities.DATABASE_TABLE_GAMES_COLUMN_ID + " = ?";
+			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+
+			// prevent SQL injection by inserting data this way
+			sqlStatement.setString(1, parameter_gameId);
+
+			// run the SQL statement and acquire any return information
+			final ResultSet sqlResult = sqlStatement.executeQuery();
+
+			if (sqlResult.next())
+			// game with specified id was found in the database, send the board's data to the client
 			{
-				sqlConnection = Utilities.getSQLConnection();
+				final String board = sqlResult.getString(Utilities.DATABASE_TABLE_GAMES_COLUMN_BOARD);
 
-				// prepare a SQL statement to be run on the database
-				final String sqlStatementString = "SELECT " + Utilities.DATABASE_TABLE_GAMES_COLUMN_BOARD + " FROM " + Utilities.DATABASE_TABLE_GAMES + " WHERE " + Utilities.DATABASE_TABLE_GAMES_COLUMN_ID + " = ?";
-				sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-
-				// prevent SQL injection by inserting data this way
-				sqlStatement.setString(1, id);
-
-				// run the SQL statement and acquire any return information
-				final ResultSet sqlResult = sqlStatement.executeQuery();
-
-				if (sqlResult.next())
-				// game with specified id was found in the database, send the board's data to the client
+				if (Utilities.verifyValidString(board))
+				// return the board's data
 				{
-					String board = sqlResult.getString(Utilities.DATABASE_TABLE_GAMES_COLUMN_BOARD);
-
-					if (board == null || board.isEmpty())
-					{
-						printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_GET_BOARD_DATA));
-					}
-					else
-					// return the board's data
-					{
-						printWriter.write(Utilities.makePostDataSuccess(board));
-					}
+					printWriter.write(Utilities.makePostDataSuccess(board));
 				}
 				else
-				// we could not find a game with specified id in the database. this should never happen
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_FIND_GAME_WITH_SPECIFIED_ID));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_GET_BOARD_DATA));
 				}
 			}
-			catch (final SQLException e)
+			else
+			// we could not find a game with specified id in the database. this should never happen
 			{
-				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_FIND_GAME_WITH_SPECIFIED_ID));
 			}
-			finally
-			{
-				Utilities.closeSQL(sqlConnection, sqlStatement);
-			}
+		}
+		catch (final SQLException e)
+		{
+			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+		}
+		finally
+		{
+			Utilities.closeSQL(sqlConnection, sqlStatement);
 		}
 	}
 
