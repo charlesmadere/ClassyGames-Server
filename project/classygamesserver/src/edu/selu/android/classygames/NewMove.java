@@ -102,7 +102,11 @@ public class NewMove extends HttpServlet
 					if (Utilities.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), parameter_userChallengedName))
 					{
 						// prepare a SQL statement to be run on the database
-						String sqlStatementString = "SELECT " +  + "";
+						String sqlStatementString = "SELECT " + DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE + " FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
+						sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+
+						// prevent SQL injection by inserting data this way
+						sqlStatement.setString(1, parameter_gameId);
 
 						// prepare a SQL statement to be run on the database
 						sqlStatementString = "SELECT * FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
