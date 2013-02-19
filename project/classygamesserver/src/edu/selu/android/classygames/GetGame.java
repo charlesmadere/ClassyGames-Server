@@ -26,6 +26,7 @@ public class GetGame extends HttpServlet
 	private Connection sqlConnection;
 	private PreparedStatement sqlStatement;
 	private PrintWriter printWriter;
+	private ResultSet sqlResult;
 
 	private String parameter_gameId;
 
@@ -88,7 +89,7 @@ public class GetGame extends HttpServlet
 			sqlStatement.setString(1, parameter_gameId);
 
 			// run the SQL statement and acquire any return information
-			final ResultSet sqlResult = sqlStatement.executeQuery();
+			sqlResult = sqlStatement.executeQuery();
 
 			if (sqlResult.next())
 			// game with specified id was found in the database, send the board's data to the client

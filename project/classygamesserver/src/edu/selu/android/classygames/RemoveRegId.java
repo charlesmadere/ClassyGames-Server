@@ -90,7 +90,7 @@ public class RemoveRegId extends HttpServlet
 	{
 		try
 		{
-			sqlConnection = Utilities.getSQLConnection();
+			sqlConnection = DatabaseUtilities.getSQLConnection();
 			Utilities.removeUserRegId(sqlConnection, userId.longValue());
 			printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_REMOVED_FROM_DATABASE));
 		}

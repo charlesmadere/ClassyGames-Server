@@ -31,6 +31,7 @@ public class GetGames extends HttpServlet
 	private Connection sqlConnection;
 	private PreparedStatement sqlStatement;
 	private PrintWriter printWriter;
+	private ResultSet sqlResult;
 
 	private String parameter_userId;
 
@@ -98,7 +99,7 @@ public class GetGames extends HttpServlet
 			sqlConnection = Utilities.getSQLConnection();
 
 			// prepare a SQL statement to be run on the MySQL database
-			final String sqlStatementString = "SELECT * FROM " + Utilities.DATABASE_TABLE_GAMES + " WHERE " + Utilities.DATABASE_TABLE_GAMES_COLUMN_FINISHED + " = ? AND (" + Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CREATOR + " = ? OR " + Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?)";
+			final String sqlStatementString = "SELECT * FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " = ? AND (" + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR + " = ? OR " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?)";
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
@@ -107,12 +108,12 @@ public class GetGames extends HttpServlet
 			sqlStatement.setLong(3, userId.longValue());
 
 			// run the SQL statement and acquire any return information
-			final ResultSet sqlResult = sqlStatement.executeQuery();
+			sqlResult = sqlStatement.executeQuery();
 
 			if (sqlResult.next())
 			// check to see that we got some SQL return data
 			{
-				createGamesListData(sqlResult);
+				createGamesListData();
 			}
 			else
 			// we did not get any SQL return data
@@ -138,9 +139,6 @@ public class GetGames extends HttpServlet
 	/**
 	 * Creates a big JSONObject that represents the user's games list.
 	 * 
-	 * @param sqlResult
-	 * A SQL database query that is sure to have data.
-	 * 
 	 * @throws JSONException
 	 * If something weird happened when creating JSON data then this exception
 	 * will be thrown.
@@ -149,7 +147,7 @@ public class GetGames extends HttpServlet
 	 * If something weird happens with the given SQL database query result then
 	 * this exception will be thrown.
 	 */
-	private void createGamesListData(final ResultSet sqlResult) throws JSONException, SQLException
+	private void createGamesListData() throws JSONException, SQLException
 	{
 		final JSONObject gamesList = new JSONObject();
 		final JSONArray turnYours = new JSONArray();
@@ -158,10 +156,11 @@ public class GetGames extends HttpServlet
 		do
 		// loop through all of the SQL return data
 		{
-			final String database_gameId = sqlResult.getString(Utilities.DATABASE_TABLE_GAMES_COLUMN_ID);
-			final Long database_userCreatorId = sqlResult.getLong(Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CREATOR);
-			final Long database_userChallengedId = sqlResult.getLong(Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CHALLENGED);
-			final Timestamp database_lastMove = sqlResult.getTimestamp(Utilities.DATABASE_TABLE_GAMES_COLUMN_LAST_MOVE);
+			final String database_gameId = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_ID);
+			final Long database_userCreatorId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR);
+			final Long database_userChallengedId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED);
+			final Byte database_gameType = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE);
+			final Timestamp database_lastMove = sqlResult.getTimestamp(DatbaaseUtilities.TABLE_GAMES_COLUMN_LAST_MOVE);
 
 			// initialize a JSONObject. All of the current game's data will be stored here. At the end of this
 			// loop iteration this JSONObject will be added to one of the above JSONArrays
@@ -170,18 +169,18 @@ public class GetGames extends HttpServlet
 			if (database_userCreatorId.longValue() == userId.longValue())
 			{
 				game.put(Utilities.POST_DATA_ID, database_userChallengedId.longValue());
-				game.put(Utilities.POST_DATA_NAME, Utilities.grabUsersName(sqlConnection, database_userChallengedId));
+				game.put(Utilities.POST_DATA_NAME, DatabaseUtilities.grabUsersName(sqlConnection, database_userChallengedId));
 			}
 			else
 			{
 				game.put(Utilities.POST_DATA_ID, database_userCreatorId.longValue());
-				game.put(Utilities.POST_DATA_NAME, Utilities.grabUsersName(sqlConnection, database_userCreatorId));
+				game.put(Utilities.POST_DATA_NAME, DatabaseUtilities.grabUsersName(sqlConnection, database_userCreatorId));
 			}
 
 			game.put(Utilities.POST_DATA_GAME_ID, database_gameId);
 			game.put(Utilities.POST_DATA_LAST_MOVE, database_lastMove.getTime() / 1000);
 
-			switch (sqlResult.getByte(Utilities.DATABASE_TABLE_GAMES_COLUMN_TURN))
+			switch (sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_TURN))
 			{
 				case Utilities.DATABASE_TABLE_GAMES_TURN_CREATOR:
 				// it's the creator's turn

@@ -34,6 +34,7 @@ public class NewMove extends HttpServlet
 	private Connection sqlConnection;
 	private PreparedStatement sqlStatement;
 	private PrintWriter printWriter;
+	private ResultSet sqlResult;
 
 	private String parameter_userChallengedId;
 	private String parameter_userChallengedName;
@@ -83,7 +84,6 @@ public class NewMove extends HttpServlet
 		parameter_userChallengedName = request.getParameter(Utilities.POST_DATA_NAME);
 		parameter_userCreatorId = request.getParameter(Utilities.POST_DATA_USER_CREATOR);
 		parameter_gameId = request.getParameter(Utilities.POST_DATA_GAME_ID);
-		parameter_gameType = request.getParameter(Utilities.POST_DATA_GAME_TYPE);
 		parameter_board = request.getParameter(Utilities.POST_DATA_BOARD);
 
 		if (Utilities.verifyValidStrings(parameter_userChallengedId, parameter_userChallengedName, parameter_userCreatorId, parameter_gameId, parameter_board))
@@ -95,15 +95,6 @@ public class NewMove extends HttpServlet
 			if (Utilities.verifyValidLongs(userChallengedId, userCreatorId))
 			// check for invalid inputs
 			{
-				if (Utilities.verifyValidString(parameter_gameType))
-				{
-					gameType = Byte.valueOf(parameter_gameType);
-				}
-				else
-				{
-					gameType = Byte.valueOf(Utilities.POST_DATA_GAME_TYPE_CHECKERS);
-				}
-
 				try
 				{
 					sqlConnection = Utilities.getSQLConnection();
@@ -111,27 +102,30 @@ public class NewMove extends HttpServlet
 					if (Utilities.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), parameter_userChallengedName))
 					{
 						// prepare a SQL statement to be run on the database
-						String sqlStatementString = "SELECT * FROM " + Utilities.DATABASE_TABLE_GAMES + " WHERE " + Utilities.DATABASE_TABLE_GAMES_COLUMN_ID + " = ?";
+						String sqlStatementString = "SELECT " +  + "";
+
+						// prepare a SQL statement to be run on the database
+						sqlStatementString = "SELECT * FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
 						sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 						// prevent SQL injection by inserting data this way
 						sqlStatement.setString(1, parameter_gameId);
 
 						// run the SQL statement and acquire any return information
-						final ResultSet sqlResult = sqlStatement.executeQuery();
+						sqlResult = sqlStatement.executeQuery();
 
 						if (sqlResult.next())
 						{
-							if (sqlResult.getByte(Utilities.DATABASE_TABLE_GAMES_COLUMN_FINISHED) == Utilities.DATABASE_TABLE_GAMES_FINISHED_FALSE)
+							if (sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED) == DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE)
 							// make sure that the game has not been finished
 							{
-								final long database_userChallengedId = sqlResult.getLong(Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CHALLENGED);
-								final long database_userCreatorId = sqlResult.getLong(Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CREATOR);
-								final byte database_turn = sqlResult.getByte(Utilities.DATABASE_TABLE_GAMES_COLUMN_TURN);
+								final long database_userChallengedId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED);
+								final long database_userCreatorId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR);
+								final byte database_turn = sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_TURN);
 
-								if ((userCreatorId.longValue() == database_userChallengedId && database_turn == Utilities.DATABASE_TABLE_GAMES_TURN_CHALLENGED) || (userCreatorId.longValue() == database_userCreatorId && database_turn == Utilities.DATABASE_TABLE_GAMES_TURN_CREATOR))
+								if ((userCreatorId.longValue() == database_userChallengedId && database_turn == DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED) || (userCreatorId.longValue() == database_userCreatorId && database_turn == DatabaseUtilities.TABLE_GAMES_TURN_CREATOR))
 								{
-									final String database_oldBoard = sqlResult.getString(Utilities.DATABASE_TABLE_GAMES_COLUMN_BOARD);
+									final String database_oldBoard = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD);
 									board = GameUtilities.newGame(database_oldBoard, gameType.byteValue());
 									final JSONObject oldBoardJSON = new JSONObject(database_oldBoard);
 									final Byte boardValidationResult = Byte.valueOf(board.checkValidity(oldBoardJSON));
@@ -143,29 +137,29 @@ public class NewMove extends HttpServlet
 										final String newBoardJSONString = newBoardJSON.toString();
 
 										// prepare a SQL statement to be run on the database
-										sqlStatementString = "UPDATE " + Utilities.DATABASE_TABLE_GAMES + " SET " + Utilities.DATABASE_TABLE_GAMES_COLUMN_BOARD + " = ?, " + Utilities.DATABASE_TABLE_GAMES_COLUMN_TURN + " = ?, " + Utilities.DATABASE_TABLE_GAMES_COLUMN_FINISHED + " = ?, " + Utilities.DATABASE_TABLE_GAMES_COLUMN_LAST_MOVE + " = NOW() WHERE " + Utilities.DATABASE_TABLE_GAMES_COLUMN_ID + " = ?";
+										sqlStatementString = "UPDATE " + DatabaseUtilities.TABLE_GAMES + " SET " + DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD + " = ?, " + Utilities.DATABASE_TABLE_GAMES_COLUMN_TURN + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_LAST_MOVE + " = NOW() WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
 										sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 										// prevent SQL injection by inserting data this way
 										sqlStatement.setString(1, newBoardJSONString);
 
-										if (database_turn == Utilities.DATABASE_TABLE_GAMES_TURN_CHALLENGED)
+										if (database_turn == DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED)
 										{
-											sqlStatement.setByte(2, Utilities.DATABASE_TABLE_GAMES_TURN_CREATOR);
+											sqlStatement.setByte(2, DatabaseUtilities.TABLE_GAMES_TURN_CREATOR);
 										}
-										else if (database_turn == Utilities.DATABASE_TABLE_GAMES_TURN_CREATOR)
+										else if (database_turn == DatabaseUtilities.TABLE_GAMES_TURN_CREATOR)
 										{
-											sqlStatement.setByte(2, Utilities.DATABASE_TABLE_GAMES_TURN_CHALLENGED);
+											sqlStatement.setByte(2, DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED);
 										}
 
 										if (boardValidationResult.byteValue() == Utilities.BOARD_WIN)
 										{
-											sqlStatement.setByte(3, Utilities.DATABASE_TABLE_GAMES_FINISHED_TRUE);
+											sqlStatement.setByte(3, DatabaseUtilities.TABLE_GAMES_FINISHED_TRUE);
 											GCMUtilities.sendMessages(sqlConnection, parameter_gameId, userCreatorId, userChallengedId, boardValidationResult, parameter_userChallengedName);
 										}
 										else if (boardValidationResult.byteValue() == Utilities.BOARD_NEW_MOVE)
 										{
-											sqlStatement.setByte(3, Utilities.DATABASE_TABLE_GAMES_FINISHED_FALSE);
+											sqlStatement.setByte(3, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
 											GCMUtilities.sendMessage(sqlConnection, parameter_gameId, userCreatorId, userChallengedId, boardValidationResult);
 										}
 

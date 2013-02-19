@@ -200,7 +200,7 @@ public class NewGame extends HttpServlet
 					// modify the runStatus variable
 					{
 						// prepare a SQL statement to be run on the database
-						String sqlStatementString = "SELECT " + Utilities.DATABASE_TABLE_GAMES_COLUMN_FINISHED + " FROM " + Utilities.DATABASE_TABLE_GAMES + " WHERE " + Utilities.DATABASE_TABLE_GAMES_COLUMN_ID + " = ?";
+						String sqlStatementString = "SELECT " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
 						sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 						// prevent SQL injection by inserting data this way
@@ -212,23 +212,24 @@ public class NewGame extends HttpServlet
 						if (sqlResult.next())
 						// the digest we created to use as an ID already exists in the games table
 						{
-							if (sqlResult.getByte(Utilities.DATABASE_TABLE_GAMES_COLUMN_FINISHED) == Utilities.DATABASE_TABLE_GAMES_FINISHED_TRUE)
+							if (sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED) == DatabaseUtilities.TABLE_GAMES_FINISHED_TRUE)
 							// Game with the digest we created already exists, AND has been finished. Because of this, we can
 							// safely replace that game's data with our new game's data
 							{
 								Utilities.closeSQLStatement(sqlStatement);
 
 								// prepare a SQL statement to be run on the database
-								sqlStatementString = "UPDATE " + Utilities.DATABASE_TABLE_GAMES + " SET " + Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CREATOR + " = ?, " + Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?, " + Utilities.DATABASE_TABLE_GAMES_COLUMN_BOARD + " = ?, " + Utilities.DATABASE_TABLE_GAMES_COLUMN_TURN + " = ?, " + Utilities.DATABASE_TABLE_GAMES_COLUMN_FINISHED + " = ? WHERE " + Utilities.DATABASE_TABLE_GAMES_COLUMN_ID + " = ?";
+								sqlStatementString = "UPDATE " + DatabaseUtilities.TABLE_GAMES + " SET " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_TURN + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " = ? WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
 								sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 								// prevent SQL injection by inserting data this way
 								sqlStatement.setLong(1, userCreatorId.longValue());
 								sqlStatement.setLong(2, userChallengedId.longValue());
 								sqlStatement.setString(3, boardJSONString);
-								sqlStatement.setByte(4, Utilities.DATABASE_TABLE_GAMES_TURN_CHALLENGED);
-								sqlStatement.setByte(5, Utilities.DATABASE_TABLE_GAMES_FINISHED_FALSE);
-								sqlStatement.setString(6, digest);
+								sqlStatement.setByte(4, DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED);
+								sqlStatement.setByte(5, gameType.byteValue());
+								sqlStatement.setByte(6, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
+								sqlStatement.setString(7, digest);
 
 								// run the SQL statement
 								sqlStatement.executeUpdate();
