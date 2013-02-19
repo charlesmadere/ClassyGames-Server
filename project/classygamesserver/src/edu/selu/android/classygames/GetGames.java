@@ -7,16 +7,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import edu.selu.android.classygames.utilities.Utilities;
 
@@ -120,6 +118,10 @@ public class GetGames extends HttpServlet
 				printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_NO_ACTIVE_GAMES));
 			}
 		}
+		catch (final JSONException e)
+		{
+			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
+		}
 		catch (final SQLException e)
 		{
 			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
@@ -131,74 +133,78 @@ public class GetGames extends HttpServlet
 	}
 
 
-	private void createReturnGameData(final ResultSet sqlResult) throws SQLException
+	private void createReturnGameData(final ResultSet sqlResult) throws JSONException, SQLException
 	{
 		// TODO
 		// convert this json making code into the org.json way of doing JSON
+		final JSONObject gameData = new JSONObject();
+		final JSONObject turnYours = new JSONObject();
+		final JSONObject turnTheirs = new JSONObject();
 
-		final Map<String, Object> jsonData = new LinkedHashMap<String, Object>();
-		final List<Map<String, Object>> turnYours = new LinkedList<Map<String, Object>>();
-		final List<Map<String, Object>> turnTheirs = new LinkedList<Map<String, Object>>();
 
-		do
-		// loop through all of the SQL return data
-		{
-			final String database_gameId = sqlResult.getString(Utilities.DATABASE_TABLE_GAMES_COLUMN_ID);
-			final Long database_userCreatorId = sqlResult.getLong(Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CREATOR);
-			final Long database_userChallengedId = sqlResult.getLong(Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CHALLENGED);
-			final Timestamp database_lastMove = sqlResult.getTimestamp(Utilities.DATABASE_TABLE_GAMES_COLUMN_LAST_MOVE);
+//		final Map<String, Object> jsonData = new LinkedHashMap<String, Object>();
+//		final List<Map<String, Object>> turnYours = new LinkedList<Map<String, Object>>();
+//		final List<Map<String, Object>> turnTheirs = new LinkedList<Map<String, Object>>();
+//
+//		do
+//		// loop through all of the SQL return data
+//		{
+//			final String database_gameId = sqlResult.getString(Utilities.DATABASE_TABLE_GAMES_COLUMN_ID);
+//			final Long database_userCreatorId = sqlResult.getLong(Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CREATOR);
+//			final Long database_userChallengedId = sqlResult.getLong(Utilities.DATABASE_TABLE_GAMES_COLUMN_USER_CHALLENGED);
+//			final Timestamp database_lastMove = sqlResult.getTimestamp(Utilities.DATABASE_TABLE_GAMES_COLUMN_LAST_MOVE);
+//
+//			// initialize a JSONObject. All of the current game's data will be stored here. At the end of this
+//			// loop iteration this JSONObject will be added to one of the above JSONArrays
+//			final Map<String, Object> game = new LinkedHashMap<String, Object>();
+//
+//			if (database_userCreatorId.longValue() == userId.longValue())
+//			{
+//				game.put(Utilities.POST_DATA_ID, database_userChallengedId.longValue());
+//				game.put(Utilities.POST_DATA_NAME, Utilities.grabUsersName(sqlConnection, database_userChallengedId));
+//			}
+//			else
+//			{
+//				game.put(Utilities.POST_DATA_ID, database_userCreatorId.longValue());
+//				game.put(Utilities.POST_DATA_NAME, Utilities.grabUsersName(sqlConnection, database_userCreatorId));
+//			}
+//
+//			game.put(Utilities.POST_DATA_GAME_ID, database_gameId);
+//			game.put(Utilities.POST_DATA_LAST_MOVE, database_lastMove.getTime() / 1000);
+//
+//			switch (sqlResult.getByte(Utilities.DATABASE_TABLE_GAMES_COLUMN_TURN))
+//			{
+//				case Utilities.DATABASE_TABLE_GAMES_TURN_CREATOR:
+//				// it's the creator's turn
+//					if (database_userCreatorId.longValue() == userId.longValue())
+//					{
+//						turnYours.add(game);
+//					}
+//					else
+//					{
+//						turnTheirs.add(game);
+//					}
+//					break;
+//
+//				case Utilities.DATABASE_TABLE_GAMES_TURN_CHALLENGED:
+//				// it's the challenger's turn
+//					if (database_userChallengedId.longValue() == userId.longValue())
+//					{
+//						turnYours.add(game);
+//					}
+//					else
+//					{
+//						turnTheirs.add(game);
+//					}
+//					break;
+//			}
+//		}
+//		while (sqlResult.next());
+//
+//		jsonData.put(Utilities.POST_DATA_TURN_YOURS, turnYours);
+//		jsonData.put(Utilities.POST_DATA_TURN_THEIRS, turnTheirs);
 
-			// initialize a JSONObject. All of the current game's data will be stored here. At the end of this
-			// loop iteration this JSONObject will be added to one of the above JSONArrays
-			final Map<String, Object> game = new LinkedHashMap<String, Object>();
-
-			if (database_userCreatorId.longValue() == userId.longValue())
-			{
-				game.put(Utilities.POST_DATA_ID, database_userChallengedId.longValue());
-				game.put(Utilities.POST_DATA_NAME, Utilities.grabUsersName(sqlConnection, database_userChallengedId));
-			}
-			else
-			{
-				game.put(Utilities.POST_DATA_ID, database_userCreatorId.longValue());
-				game.put(Utilities.POST_DATA_NAME, Utilities.grabUsersName(sqlConnection, database_userCreatorId));
-			}
-
-			game.put(Utilities.POST_DATA_GAME_ID, database_gameId);
-			game.put(Utilities.POST_DATA_LAST_MOVE, database_lastMove.getTime() / 1000);
-
-			switch (sqlResult.getByte(Utilities.DATABASE_TABLE_GAMES_COLUMN_TURN))
-			{
-				case Utilities.DATABASE_TABLE_GAMES_TURN_CREATOR:
-				// it's the creator's turn
-					if (database_userCreatorId.longValue() == userId.longValue())
-					{
-						turnYours.add(game);
-					}
-					else
-					{
-						turnTheirs.add(game);
-					}
-					break;
-
-				case Utilities.DATABASE_TABLE_GAMES_TURN_CHALLENGED:
-				// it's the challenger's turn
-					if (database_userChallengedId.longValue() == userId.longValue())
-					{
-						turnYours.add(game);
-					}
-					else
-					{
-						turnTheirs.add(game);
-					}
-					break;
-			}
-		}
-		while (sqlResult.next());
-
-		jsonData.put(Utilities.POST_DATA_TURN_YOURS, turnYours);
-		jsonData.put(Utilities.POST_DATA_TURN_THEIRS, turnTheirs);
-
-		printWriter.write(Utilities.makePostDataSuccess(jsonData));
+		printWriter.write(Utilities.makePostDataSuccess(gameData));
 	}
 
 
