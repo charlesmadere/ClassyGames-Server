@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import edu.selu.android.classygames.utilities.DatabaseUtilities;
 import edu.selu.android.classygames.utilities.Utilities;
 
 
@@ -97,7 +98,7 @@ public class NewRegId extends HttpServlet
 	{
 		try
 		{
-			sqlConnection = Utilities.getSQLConnection();
+			sqlConnection = DatabaseUtilities.getSQLConnection();
 
 			// prepare a SQL statement to be run on the database
 			String sqlStatementString = "SELECT * FROM " + DatabaseUtilities.TABLE_USERS + " WHERE " + DatabaseUtilities.TABLE_USERS_COLUMN_ID + " = ?";
@@ -112,7 +113,7 @@ public class NewRegId extends HttpServlet
 			if (sqlResult.next())
 			// the id already exists in the table therefore it's data needs to be updated
 			{
-				Utilities.closeSQLStatement(sqlStatement);
+				DatabaseUtilities.closeSQLStatement(sqlStatement);
 
 				// prepare a SQL statement to be run on the database
 				sqlStatementString = "UPDATE " + DatabaseUtilities.TABLE_USERS + " SET " + DatabaseUtilities.TABLE_USERS_COLUMN_NAME + " = ?, " + DatabaseUtilities.TABLE_USERS_COLUMN_REG_ID + " = ? WHERE " + DatabaseUtilities.TABLE_USERS_COLUMN_ID + " = ?";
@@ -126,7 +127,7 @@ public class NewRegId extends HttpServlet
 			else
 			// id does not already exist in the table. let's insert it
 			{
-				Utilities.closeSQLStatement(sqlStatement);
+				DatabaseUtilities.closeSQLStatement(sqlStatement);
 
 				// prepare a SQL statement to be run on the database
 				sqlStatementString = "INSERT INTO " + DatabaseUtilities.TABLE_USERS + " " + DatabaseUtilities.TABLE_USERS_FORMAT + " " + DatabaseUtilities.TABLE_USERS_VALUES;
@@ -149,7 +150,7 @@ public class NewRegId extends HttpServlet
 		}
 		finally
 		{
-			Utilities.closeSQL(sqlConnection, sqlStatement);
+			DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
 		}
 	}
 

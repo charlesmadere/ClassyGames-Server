@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import edu.selu.android.classygames.utilities.DatabaseUtilities;
 import edu.selu.android.classygames.utilities.Utilities;
 
 
@@ -79,10 +80,10 @@ public class GetGame extends HttpServlet
 	{
 		try
 		{
-			sqlConnection = Utilities.getSQLConnection();
+			sqlConnection = DatabaseUtilities.getSQLConnection();
 
 			// prepare a SQL statement to be run on the database
-			final String sqlStatementString = "SELECT " + Utilities.DATABASE_TABLE_GAMES_COLUMN_BOARD + " FROM " + Utilities.DATABASE_TABLE_GAMES + " WHERE " + Utilities.DATABASE_TABLE_GAMES_COLUMN_ID + " = ?";
+			final String sqlStatementString = "SELECT " + DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD + " FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
@@ -94,7 +95,7 @@ public class GetGame extends HttpServlet
 			if (sqlResult.next())
 			// game with specified id was found in the database, send the board's data to the client
 			{
-				final String board = sqlResult.getString(Utilities.DATABASE_TABLE_GAMES_COLUMN_BOARD);
+				final String board = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD);
 
 				if (Utilities.verifyValidString(board))
 				// return the board's data
@@ -118,7 +119,7 @@ public class GetGame extends HttpServlet
 		}
 		finally
 		{
-			Utilities.closeSQL(sqlConnection, sqlStatement);
+			DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
 		}
 	}
 

@@ -1,6 +1,13 @@
 package edu.selu.android.classygames.utilities;
 
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+
 public class DatabaseUtilities
 {
 
@@ -102,7 +109,7 @@ public class DatabaseUtilities
 		try
 		{
 			// prepare a SQL statement to be run on the database
-			String sqlStatementString = "SELECT * FROM " + DATABASE_TABLE_USERS + " WHERE " + DATABASE_TABLE_USERS_COLUMN_ID + " = ?";
+			String sqlStatementString = "SELECT * FROM " + TABLE_USERS + " WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
@@ -120,7 +127,7 @@ public class DatabaseUtilities
 			// user does not exist in the database. we need to put them in there
 			{
 				// prepare a SQL statement to be run on the database
-				sqlStatementString = "INSERT INTO " + DATABASE_TABLE_USERS + " (" + DATABASE_TABLE_USERS_COLUMN_ID + ", " + DATABASE_TABLE_USERS_COLUMN_NAME + ") VALUES (?, ?)";
+				sqlStatementString = "INSERT INTO " + TABLE_USERS + " (" + TABLE_USERS_COLUMN_ID + ", " + TABLE_USERS_COLUMN_NAME + ") VALUES (?, ?)";
 				sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 				// prevent SQL injection by inserting data this way
@@ -165,7 +172,7 @@ public class DatabaseUtilities
 		try
 		{
 			// prepare a SQL statement to be run on the MySQL database
-			final String sqlStatementString = "SELECT " + Utilities.DATABASE_TABLE_USERS_COLUMN_NAME + " FROM " + Utilities.DATABASE_TABLE_USERS + " WHERE " + Utilities.DATABASE_TABLE_USERS_COLUMN_ID + " = ?";
+			final String sqlStatementString = "SELECT " + TABLE_USERS_COLUMN_NAME + " FROM " + TABLE_USERS + " WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
@@ -178,7 +185,7 @@ public class DatabaseUtilities
 			// check to see that we got some SQL return data
 			{
 				// grab the user's name from the SQL query
-				username = sqlResult.getString(Utilities.DATABASE_TABLE_USERS_COLUMN_NAME);
+				username = sqlResult.getString(TABLE_USERS_COLUMN_NAME);
 			}
 			else
 			{
@@ -191,10 +198,60 @@ public class DatabaseUtilities
 		}
 		finally
 		{
-			Utilities.closeSQLStatement(sqlStatement);
+			closeSQLStatement(sqlStatement);
 		}
 
 		return username;
+	}
+
+
+	/**
+	 * Finds and then returns a user's reg_id. 
+	 * 
+	 * @param sqlConnection
+	 * An existing connection to the database. This method will make no attempt to either
+	 * open or close the connection.
+	 * 
+	 * @param user_id
+	 * ID of the user that you want to find a reg_id for.
+	 * 
+	 * @return
+	 * Returns the reg_id of the user that you want as a String. If the user could not be
+	 * found, null is returned.
+	 */
+	public static String grabUsersRegId(final Connection sqlConnection, final long user_id)
+	{
+		PreparedStatement sqlStatement = null;
+		String reg_id = null;
+
+		try
+		{
+			// prepare a SQL statement to be run on the database
+			final String sqlStatementString = "SELECT " + TABLE_USERS_COLUMN_REG_ID + " FROM " + TABLE_USERS + " WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
+			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+
+			// prevent SQL injection by inserting data this way
+			sqlStatement.setLong(1, user_id);
+
+			// run the SQL statement and acquire any return information
+			final ResultSet sqlResult = sqlStatement.executeQuery();
+
+			if (sqlResult.next())
+			// user with specified id was found in the database
+			{
+				reg_id = sqlResult.getString(DatabaseUtilities.TABLE_USERS_COLUMN_REG_ID);
+			}
+		}
+		catch (final SQLException e)
+		{
+
+		}
+		finally
+		{
+			closeSQLStatement(sqlStatement);
+		}
+
+		return reg_id;
 	}
 
 
@@ -235,7 +292,7 @@ public class DatabaseUtilities
 		try
 		{
 			// prepare a SQL statement to be run on the database
-			final String sqlStatementString = "UPDATE " + Utilities.DATABASE_TABLE_USERS + " SET " + Utilities.DATABASE_TABLE_USERS_COLUMN_REG_ID + " = null WHERE " + Utilities.DATABASE_TABLE_USERS_COLUMN_ID + " = ?";
+			final String sqlStatementString = "UPDATE " + TABLE_USERS + " SET " + TABLE_USERS_COLUMN_REG_ID + " = null WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
@@ -262,7 +319,7 @@ public class DatabaseUtilities
 		try
 		{
 			// prepare a SQL statement to be run on the database
-			final String sqlStatementString = "UPDATE " + Utilities.DATABASE_TABLE_USERS + " SET " + Utilities.DATABASE_TABLE_USERS_COLUMN_REG_ID + " = ? WHERE " + Utilities.DATABASE_TABLE_USERS_COLUMN_ID + " = ?";
+			final String sqlStatementString = "UPDATE " + TABLE_USERS + " SET " + TABLE_USERS_COLUMN_REG_ID + " = ? WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting user data this way

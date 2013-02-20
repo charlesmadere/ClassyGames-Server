@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.selu.android.classygames.games.GenericBoard;
+import edu.selu.android.classygames.utilities.DatabaseUtilities;
 import edu.selu.android.classygames.utilities.GCMUtilities;
 import edu.selu.android.classygames.utilities.GameUtilities;
 import edu.selu.android.classygames.utilities.Utilities;
@@ -144,9 +145,9 @@ public class NewGame extends HttpServlet
 	{
 		try
 		{
-			sqlConnection = Utilities.getSQLConnection();
+			sqlConnection = DatabaseUtilities.getSQLConnection();
 
-			if (Utilities.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), parameter_userChallengedName))
+			if (DatabaseUtilities.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), parameter_userChallengedName))
 			{
 				board.flipTeams();
 				final JSONObject boardJSON = board.makeJSON();
@@ -216,7 +217,7 @@ public class NewGame extends HttpServlet
 							// Game with the digest we created already exists, AND has been finished. Because of this, we can
 							// safely replace that game's data with our new game's data
 							{
-								Utilities.closeSQLStatement(sqlStatement);
+								DatabaseUtilities.closeSQLStatement(sqlStatement);
 
 								// prepare a SQL statement to be run on the database
 								sqlStatementString = "UPDATE " + DatabaseUtilities.TABLE_GAMES + " SET " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_TURN + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " = ? WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
@@ -241,10 +242,10 @@ public class NewGame extends HttpServlet
 						// the digest that we created to use as an ID DOES NOT already exist in the games table. We we can now
 						// just simply insert this new game's data into the table
 						{
-							Utilities.closeSQLStatement(sqlStatement);
+							DatabaseUtilities.closeSQLStatement(sqlStatement);
 
 							// prepare a SQL statement to be run on the database
-							sqlStatementString = "INSERT INTO " + Utilities.DATABASE_TABLE_GAMES + " " + Utilities.DATABASE_TABLE_GAMES_FORMAT + " " + Utilities.DATABASE_TABLE_GAMES_VALUES;
+							sqlStatementString = "INSERT INTO " + DatabaseUtilities.TABLE_GAMES + " " + DatabaseUtilities.TABLE_GAMES_FORMAT + " " + DatabaseUtilities.TABLE_GAMES_VALUES;
 							sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 							// prevent SQL injection by inserting data this way
@@ -252,8 +253,8 @@ public class NewGame extends HttpServlet
 							sqlStatement.setLong(2, userCreatorId.longValue());
 							sqlStatement.setLong(3, userChallengedId.longValue());
 							sqlStatement.setString(4, boardJSONString);
-							sqlStatement.setByte(5, Utilities.DATABASE_TABLE_GAMES_TURN_CHALLENGED);
-							sqlStatement.setByte(6, Utilities.DATABASE_TABLE_GAMES_FINISHED_FALSE);
+							sqlStatement.setByte(5, DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED);
+							sqlStatement.setByte(6, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
 
 							// run the SQL statement
 							sqlStatement.executeUpdate();
@@ -275,7 +276,7 @@ public class NewGame extends HttpServlet
 						break;
 
 					default:
-						GCMUtilities.sendMessage(sqlConnection, digest, userCreatorId, userChallengedId, Utilities.BOARD_NEW_GAME);
+						GCMUtilities.sendMessage(sqlConnection, digest, userCreatorId, userChallengedId, gameType, Byte.valueOf(Utilities.BOARD_NEW_GAME));
 						printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_GAME_ADDED_TO_DATABASE));
 						break;
 				}
@@ -291,7 +292,7 @@ public class NewGame extends HttpServlet
 		}
 		finally
 		{
-			Utilities.closeSQL(sqlConnection, sqlStatement);
+			DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
 		}
 	}
 

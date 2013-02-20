@@ -1,11 +1,6 @@
 package edu.selu.android.classygames.utilities;
 
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Random;
 
 import org.json.JSONException;
@@ -32,26 +27,26 @@ public class Utilities
 	public final static String CONTENT_TYPE_HTML = MIMETYPE_HTML + "; " + CHARSET;
 	public final static String CONTENT_TYPE_JSON = MIMETYPE_JSON + "; " + CHARSET;
 
-	public final static String POST_DATA_BOARD = DATABASE_TABLE_GAMES_COLUMN_BOARD;
-	public final static String POST_DATA_FINISHED = DATABASE_TABLE_GAMES_COLUMN_FINISHED;
-	public final static String POST_DATA_ID = DATABASE_TABLE_USERS_COLUMN_ID;
+	public final static String POST_DATA_BOARD = DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD;
+	public final static String POST_DATA_FINISHED = DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED;
+	public final static String POST_DATA_ID = DatabaseUtilities.TABLE_USERS_COLUMN_ID;
 	public final static String POST_DATA_GAME_ID = "game_id";
-	public final static String POST_DATA_GAME_TYPE = "game_type";
-	public final static byte POST_DATA_GAME_TYPE_CHECKERS = 16;
-	public final static byte POST_DATA_GAME_TYPE_CHESS = 32;
-	public final static String POST_DATA_LAST_MOVE = DATABASE_TABLE_GAMES_COLUMN_LAST_MOVE;
-	public final static String POST_DATA_NAME = DATABASE_TABLE_USERS_COLUMN_NAME;
-	public final static String POST_DATA_REG_ID = DATABASE_TABLE_USERS_COLUMN_REG_ID;
-	public final static String POST_DATA_TURN = DATABASE_TABLE_GAMES_COLUMN_TURN;
+	public final static String POST_DATA_GAME_TYPE = DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE;
+	public final static byte POST_DATA_GAME_TYPE_CHECKERS = 1;
+	public final static byte POST_DATA_GAME_TYPE_CHESS = 2;
+	public final static String POST_DATA_LAST_MOVE = DatabaseUtilities.TABLE_GAMES_COLUMN_LAST_MOVE;
+	public final static String POST_DATA_MESSAGE_TYPE = "message_type";
+	public final static byte POST_DATA_MESSAGE_TYPE_NEW_GAME = 1;
+	public final static byte POST_DATA_MESSAGE_TYPE_NEW_MOVE = 2;
+	public final static byte POST_DATA_MESSAGE_TYPE_GAME_OVER_LOSE = 7;
+	public final static byte POST_DATA_MESSAGE_TYPE_GAME_OVER_WIN = 15;
+	public final static String POST_DATA_NAME = DatabaseUtilities.TABLE_USERS_COLUMN_NAME;
+	public final static String POST_DATA_REG_ID = DatabaseUtilities.TABLE_USERS_COLUMN_REG_ID;
+	public final static String POST_DATA_TURN = DatabaseUtilities.TABLE_GAMES_COLUMN_TURN;
 	public final static String POST_DATA_TURN_THEIRS = "turn_theirs";
 	public final static String POST_DATA_TURN_YOURS = "turn_yours";
-	public final static String POST_DATA_TYPE = "type";
-	public final static byte POST_DATA_TYPE_NEW_GAME = 1;
-	public final static byte POST_DATA_TYPE_NEW_MOVE = 2;
-	public final static byte POST_DATA_TYPE_GAME_OVER_LOSE = 7;
-	public final static byte POST_DATA_TYPE_GAME_OVER_WIN = 15;
-	public final static String POST_DATA_USER_CHALLENGED = DATABASE_TABLE_GAMES_COLUMN_USER_CHALLENGED;
-	public final static String POST_DATA_USER_CREATOR = DATABASE_TABLE_GAMES_COLUMN_USER_CREATOR;
+	public final static String POST_DATA_USER_CHALLENGED = DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED;
+	public final static String POST_DATA_USER_CREATOR = DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR;
 
 	public final static String POST_ERROR_BOARD_INVALID = "Invalid board!";
 	public final static String POST_ERROR_COULD_NOT_CREATE_GAME_ID = "Was unable to create a Game ID.";
@@ -77,10 +72,10 @@ public class Utilities
 	public final static String POST_SUCCESS_USER_REMOVED_FROM_DATABASE = "You've been successfully unregistered from " + APP_NAME + ".";
 
 	public final static byte BOARD_INVALID = -1;
-	public final static byte BOARD_NEW_GAME = POST_DATA_TYPE_NEW_GAME;
-	public final static byte BOARD_NEW_MOVE = POST_DATA_TYPE_NEW_MOVE;
-	public final static byte BOARD_LOSE = POST_DATA_TYPE_GAME_OVER_LOSE;
-	public final static byte BOARD_WIN = POST_DATA_TYPE_GAME_OVER_WIN;
+	public final static byte BOARD_NEW_GAME = POST_DATA_MESSAGE_TYPE_NEW_GAME;
+	public final static byte BOARD_NEW_MOVE = POST_DATA_MESSAGE_TYPE_NEW_MOVE;
+	public final static byte BOARD_LOSE = POST_DATA_MESSAGE_TYPE_GAME_OVER_LOSE;
+	public final static byte BOARD_WIN = POST_DATA_MESSAGE_TYPE_GAME_OVER_WIN;
 
 
 

@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import edu.selu.android.classygames.utilities.DatabaseUtilities;
 import edu.selu.android.classygames.utilities.Utilities;
 
 
@@ -91,7 +92,7 @@ public class RemoveRegId extends HttpServlet
 		try
 		{
 			sqlConnection = DatabaseUtilities.getSQLConnection();
-			Utilities.removeUserRegId(sqlConnection, userId.longValue());
+			DatabaseUtilities.removeUserRegId(sqlConnection, userId.longValue());
 			printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_REMOVED_FROM_DATABASE));
 		}
 		catch (final SQLException e)
@@ -100,7 +101,7 @@ public class RemoveRegId extends HttpServlet
 		}
 		finally
 		{
-			Utilities.closeSQLConnection(sqlConnection);
+			DatabaseUtilities.closeSQLConnection(sqlConnection);
 		}
 	}
 

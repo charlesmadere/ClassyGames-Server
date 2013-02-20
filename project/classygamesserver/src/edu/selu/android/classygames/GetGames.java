@@ -18,6 +18,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.selu.android.classygames.utilities.DatabaseUtilities;
 import edu.selu.android.classygames.utilities.Utilities;
 
 
@@ -96,14 +97,14 @@ public class GetGames extends HttpServlet
 	{
 		try
 		{
-			sqlConnection = Utilities.getSQLConnection();
+			sqlConnection = DatabaseUtilities.getSQLConnection();
 
 			// prepare a SQL statement to be run on the MySQL database
 			final String sqlStatementString = "SELECT * FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " = ? AND (" + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR + " = ? OR " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?)";
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
-			sqlStatement.setByte(1, Utilities.DATABASE_TABLE_GAMES_FINISHED_FALSE);
+			sqlStatement.setByte(1, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
 			sqlStatement.setLong(2, userId.longValue());
 			sqlStatement.setLong(3, userId.longValue());
 
@@ -131,7 +132,7 @@ public class GetGames extends HttpServlet
 		}
 		finally
 		{
-			Utilities.closeSQL(sqlConnection, sqlStatement);
+			DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
 		}
 	}
 
@@ -157,34 +158,35 @@ public class GetGames extends HttpServlet
 		// loop through all of the SQL return data
 		{
 			final String database_gameId = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_ID);
-			final Long database_userCreatorId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR);
-			final Long database_userChallengedId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED);
-			final Byte database_gameType = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE);
-			final Timestamp database_lastMove = sqlResult.getTimestamp(DatbaaseUtilities.TABLE_GAMES_COLUMN_LAST_MOVE);
+			final long database_userCreatorId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR);
+			final long database_userChallengedId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED);
+			final byte database_gameType = sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE);
+			final Timestamp database_lastMove = sqlResult.getTimestamp(DatabaseUtilities.TABLE_GAMES_COLUMN_LAST_MOVE);
 
 			// initialize a JSONObject. All of the current game's data will be stored here. At the end of this
 			// loop iteration this JSONObject will be added to one of the above JSONArrays
 			final JSONObject game = new JSONObject();
 
-			if (database_userCreatorId.longValue() == userId.longValue())
+			if (database_userCreatorId == userId.longValue())
 			{
-				game.put(Utilities.POST_DATA_ID, database_userChallengedId.longValue());
+				game.put(Utilities.POST_DATA_ID, database_userChallengedId);
 				game.put(Utilities.POST_DATA_NAME, DatabaseUtilities.grabUsersName(sqlConnection, database_userChallengedId));
 			}
 			else
 			{
-				game.put(Utilities.POST_DATA_ID, database_userCreatorId.longValue());
+				game.put(Utilities.POST_DATA_ID, database_userCreatorId);
 				game.put(Utilities.POST_DATA_NAME, DatabaseUtilities.grabUsersName(sqlConnection, database_userCreatorId));
 			}
 
 			game.put(Utilities.POST_DATA_GAME_ID, database_gameId);
+			game.put(Utilities.POST_DATA_GAME_TYPE, database_gameType);
 			game.put(Utilities.POST_DATA_LAST_MOVE, database_lastMove.getTime() / 1000);
 
 			switch (sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_TURN))
 			{
-				case Utilities.DATABASE_TABLE_GAMES_TURN_CREATOR:
+				case DatabaseUtilities.TABLE_GAMES_TURN_CREATOR:
 				// it's the creator's turn
-					if (database_userCreatorId.longValue() == userId.longValue())
+					if (database_userCreatorId == userId.longValue())
 					{
 						turnYours.put(game);
 					}
@@ -194,9 +196,9 @@ public class GetGames extends HttpServlet
 					}
 					break;
 
-				case Utilities.DATABASE_TABLE_GAMES_TURN_CHALLENGED:
+				case DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED:
 				// it's the challenger's turn
-					if (database_userChallengedId.longValue() == userId.longValue())
+					if (database_userChallengedId == userId.longValue())
 					{
 						turnYours.put(game);
 					}
