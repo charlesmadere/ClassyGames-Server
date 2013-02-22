@@ -7,6 +7,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
+/**
+ * Class filled with a bunch of miscellaneous utility methods and constants.
+ */
 public class Utilities
 {
 
