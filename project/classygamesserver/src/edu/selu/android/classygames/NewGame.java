@@ -99,7 +99,7 @@ public class NewGame extends HttpServlet
 			userCreatorId = Long.valueOf(parameter_userCreatorId);
 
 			if (Utilities.verifyValidLongs(userChallengedId, userCreatorId))
-			// check for invalid inputs
+			// check inputs for validity
 			{
 				if (Utilities.verifyValidString(parameter_gameType))
 				// check to see if we were given a gameType parameter
@@ -254,7 +254,8 @@ public class NewGame extends HttpServlet
 							sqlStatement.setLong(3, userChallengedId.longValue());
 							sqlStatement.setString(4, boardJSONString);
 							sqlStatement.setByte(5, DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED);
-							sqlStatement.setByte(6, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
+							sqlStatement.setByte(6, gameType.byteValue());
+							sqlStatement.setByte(7, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
 
 							// run the SQL statement
 							sqlStatement.executeUpdate();

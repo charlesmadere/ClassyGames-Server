@@ -87,13 +87,13 @@ public class NewMove extends HttpServlet
 		parameter_board = request.getParameter(Utilities.POST_DATA_BOARD);
 
 		if (Utilities.verifyValidStrings(parameter_userChallengedId, parameter_userChallengedName, parameter_userCreatorId, parameter_gameId, parameter_board))
-		// check for invalid inputs
+		// check inputs for validity
 		{
 			userChallengedId = Long.valueOf(parameter_userChallengedId);
 			userCreatorId = Long.valueOf(parameter_userChallengedName);
 
 			if (Utilities.verifyValidLongs(userChallengedId, userCreatorId))
-			// check for invalid inputs
+			// check inputs for validity
 			{
 				try
 				{

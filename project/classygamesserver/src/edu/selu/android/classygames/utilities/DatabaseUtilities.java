@@ -39,7 +39,7 @@ public class DatabaseUtilities
 
 
 	/**
-	 * it's best to release SQL resources in reverse order of their creation
+	 * It's best to release SQL resources in reverse order of their creation.
 	 * https://dev.mysql.com/doc/refman/5.0/en/connector-j-usagenotes-statements.html#connector-j-examples-execute-select
 	 */
 	public static void closeSQL(Connection sqlConnection, PreparedStatement sqlStatement)
