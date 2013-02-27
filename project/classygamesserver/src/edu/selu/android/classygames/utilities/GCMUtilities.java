@@ -79,11 +79,11 @@ public class GCMUtilities
 				{
 					final String canonicalRegId = result.getCanonicalRegistrationId();
 
-					if (Utilities.verifyValidString(regId))
+					if (Utilities.verifyValidString(canonicalRegId))
 					// same device has more than one registration ID: update database. Replace
 					// the existing regId with this new one
 					{
-						DatabaseUtilities.updateUserRegId(sqlConnection, regId, userIdOfReceiver.longValue());
+						DatabaseUtilities.updateUserRegId(sqlConnection, canonicalRegId, userIdOfReceiver.longValue());
 					}
 				}
 				else
