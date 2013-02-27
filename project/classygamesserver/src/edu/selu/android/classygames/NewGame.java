@@ -191,7 +191,7 @@ public class NewGame extends HttpServlet
 						runStatus = RUN_STATUS_UNSUPPORTED_ENCODING;
 					}
 
-					if (runStatus != RUN_STATUS_NO_ERROR || digest == null || digest.isEmpty())
+					if (runStatus != RUN_STATUS_NO_ERROR || !Utilities.verifyValidString(digest))
 					// check to see if we encountered any of the exceptions above or if our digest is broken
 					{
 						continueToRun = false;

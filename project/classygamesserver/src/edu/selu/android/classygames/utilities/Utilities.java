@@ -83,6 +83,14 @@ public class Utilities
 
 
 
+	/**
+	 * If a Random object does not already exist, this method will create one
+	 * and then return that newly created object. The Random object will be
+	 * seeded with the System time (System.currentTimeMillis()).
+	 * 
+	 * @return
+	 * Returns a ready-to-use Random object.
+	 */
 	public static Random getRandom()
 	{
 		if (random == null)

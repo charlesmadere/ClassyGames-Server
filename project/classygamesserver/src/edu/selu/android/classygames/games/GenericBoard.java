@@ -5,6 +5,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.selu.android.classygames.utilities.Utilities;
+
 
 /**
  * A generic Board class. All games need to have their own Board class that
@@ -14,10 +16,10 @@ public abstract class GenericBoard
 {
 
 
-	protected final static byte BOARD_INVALID = -1;
-	protected final static byte BOARD_NEW_GAME = 1;
-	protected final static byte BOARD_NEW_MOVE = 2;
-	protected final static byte BOARD_WIN = 3;
+	protected final static byte BOARD_INVALID = Utilities.BOARD_INVALID;
+	protected final static byte BOARD_NEW_GAME = Utilities.BOARD_NEW_GAME;
+	protected final static byte BOARD_NEW_MOVE = Utilities.BOARD_NEW_MOVE;
+	protected final static byte BOARD_WIN = Utilities.BOARD_WIN;
 
 
 

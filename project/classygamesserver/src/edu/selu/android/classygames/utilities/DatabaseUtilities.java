@@ -39,17 +39,34 @@ public class DatabaseUtilities
 
 
 	/**
-	 * It's best to release SQL resources in reverse order of their creation.
+	 * Releases SQL resources. It's best to release SQL resources in reverse
+	 * order of their creation. This method <strong>must be used</strong> when
+	 * dealing with SQL stuff.
 	 * https://dev.mysql.com/doc/refman/5.0/en/connector-j-usagenotes-statements.html#connector-j-examples-execute-select
+	 * 
+	 * @parameter sqlConnection
+	 * A SQL Connection object. It's okay if this object is null or if it was
+	 * never given an actual connection to a SQL database.
+	 * 
+	 * @parameter sqlStatement
+	 * A SQL PreparedStatement object. It's okay if this object is null or if
+	 * it was never given an actual SQL statement / query to run.
 	 */
-	public static void closeSQL(Connection sqlConnection, PreparedStatement sqlStatement)
+	public static void closeSQL(final Connection sqlConnection, final PreparedStatement sqlStatement)
 	{
 		closeSQLStatement(sqlStatement);
 		closeSQLConnection(sqlConnection);
 	}
 
 
-	public static void closeSQLConnection(Connection sqlConnection)
+	/**
+	 * Releases a SQL Connection resource.
+	 * 
+	 * @parameter sqlConnection
+	 * A SQL Connection object. It's okay if this object is null or if it was
+	 * never given an actual connection to a SQL database.
+	 */
+	public static void closeSQLConnection(final Connection sqlConnection)
 	{
 		if (sqlConnection != null)
 		{
@@ -65,7 +82,14 @@ public class DatabaseUtilities
 	}
 
 
-	public static void closeSQLStatement(PreparedStatement sqlStatement)
+	/**
+	 * Releases a SQL PreparedStatement resource.
+	 * 
+	 * @parameter sqlStatement
+	 * A SQL PreparedStatement object. It's okay if this object is null or if
+	 * it was never given an actual SQL statement / query to run.
+	 */
+	public static void closeSQLStatement(final PreparedStatement sqlStatement)
 	{
 		if (sqlStatement != null)
 		{
@@ -82,13 +106,15 @@ public class DatabaseUtilities
 
 
 	/**
-	 * Ensures that a given user exists in the database. If the user already exists in the
-	 * database then this method doesn't do very much. If the user does not already exist in the
-	 * database, then this method will insert them into it.
+	 * Ensures that a given user exists in the database. If the user already
+	 * exists in the database then this method doesn't do very much. If the
+	 * user does not already exist in the database, then this method will
+	 * insert them into it.
 	 * 
 	 * @param sqlConnection
-	 * An <strong>already valid</strong> connection to the database. This connection will not be
-	 * closed after we are finished performing operations here.
+	 * An <strong>already valid</strong> connection to the database. This
+	 * connection will not be closed after we are finished performing
+	 * operations here.
 	 * 
 	 * @param user_id
 	 * The ID of the user as a long. This is the user's Facebook ID.
@@ -97,9 +123,10 @@ public class DatabaseUtilities
 	 * The name of the user as a String.
 	 * 
 	 * @return
-	 * True if we were able to successfully insert this new user into the database OR if the user
-	 * already exists in the database. False if the user did not exist in the database and we were
-	 * unable to insert him into it.
+	 * True if we were able to successfully insert this new user into the
+	 * database OR if the user already exists in the database. False if the
+	 * user did not exist in the database and we were unable to insert him
+	 * into it.
 	 */
 	public static boolean ensureUserExistsInDatabase(final Connection sqlConnection, final long user_id, final String user_name)
 	{
@@ -155,8 +182,8 @@ public class DatabaseUtilities
 	 * Query the database for a user who's ID matches the input's.
 	 * 
 	 * @param sqlConnection
-	 * Your existing database Connection object. Must already be connected, as this method makes no attempt
-	 * at doing so.
+	 * Your existing database Connection object. Must already be connected, as
+	 * this method makes no attempt at doing so.
 	 * 
 	 * @param user
 	 * The ID of the user you're searching for as a long.
@@ -209,15 +236,15 @@ public class DatabaseUtilities
 	 * Finds and then returns a user's reg_id. 
 	 * 
 	 * @param sqlConnection
-	 * An existing connection to the database. This method will make no attempt to either
-	 * open or close the connection.
+	 * An existing connection to the database. This method will make no attempt
+	 * to either open or close the connection.
 	 * 
 	 * @param user_id
 	 * ID of the user that you want to find a reg_id for.
 	 * 
 	 * @return
-	 * Returns the reg_id of the user that you want as a String. If the user could not be
-	 * found, null is returned.
+	 * Returns the reg_id of the user that you want as a String. If the user
+	 * could not be found, null is returned.
 	 */
 	public static String grabUsersRegId(final Connection sqlConnection, final long user_id)
 	{
@@ -255,20 +282,27 @@ public class DatabaseUtilities
 	}
 
 
+	/**
+	 * Establishes a connection to the SQL database and returns that newly made
+	 * connection. I followed this guide to understand how to connect to the
+	 * MySQL database that is created when making a new Amazon Elastic
+	 * Beanstalk application:
+	 * http://docs.amazonwebservices.com/elasticbeanstalk/latest/dg/create_deploy_Java.rds.html
+	 * A MySQL JDBC Driver is required for this MySQL connection to actually
+	 * work. You can download that driver from here:
+	 * https://dev.mysql.com/downloads/connector/j/
+	 * 
+	 * @return
+	 * Returns a newly made connection to the SQL database.
+	 * 
+	 * @throws SQLException
+	 * If a connection to the SQL database could not be created then a
+	 * SQLException will be thrown.
+	 */
 	public static Connection getSQLConnection() throws SQLException
-	// I followed this guide to understand how to connect to the MySQL database that is created when
-	// making a new Amazon Elastic Beanstalk application
-	// http://docs.amazonwebservices.com/elasticbeanstalk/latest/dg/create_deploy_Java.rds.html
 	{
-		try
-		{
-			// ensure that the MySQL JDBC Driver has been loaded
-			Class.forName("com.mysql.jdbc.Driver").newInstance();
-		}
-		catch (final Exception e)
-		{
-
-		}
+		// ensure that the MySQL JDBC Driver has been loaded
+		Class.forName("com.mysql.jdbc.Driver").newInstance();
 
 		// acquire database credentials from Amazon Web Services
 		final String hostname = System.getProperty("RDS_HOSTNAME");
@@ -285,6 +319,17 @@ public class DatabaseUtilities
 	}
 
 
+	/**
+	 * Removes a given user's regId from the database. This just replaces the
+	 * currently existing regId value with null.
+	 * 
+	 * @param sqlConnection
+	 * An existing connection to the database. This method will make no attempt
+	 * to either open or close the connection.
+	 * 
+	 * @param userId
+	 * The user ID of the user who's regId needs to be removed.
+	 */
 	public static void removeUserRegId(final Connection sqlConnection, final long userId)
 	{
 		PreparedStatement sqlStatement = null;
@@ -312,6 +357,21 @@ public class DatabaseUtilities
 	}
 
 
+	/**
+	 * Updates a given user's regId in the database. This just replaces the
+	 * currently existing regId value with the regId value that you specify
+	 * here.
+	 * 
+	 * @param sqlConnection
+	 * An existing connection to the database. This method will make no attempt
+	 * to either open or close the connection.
+	 * 
+	 * @param userRegId
+	 * The given user's new regId.
+	 * 
+	 * @param userId
+	 * The user ID of the user's who's regId needs to be updated.
+	 */
 	public static void updateUserRegId(final Connection sqlConnection, final String userRegId, final long userId)
 	{
 		PreparedStatement sqlStatement = null;
@@ -325,6 +385,9 @@ public class DatabaseUtilities
 			// prevent SQL injection by inserting user data this way
 			sqlStatement.setString(1, userRegId);
 			sqlStatement.setLong(2, userId);
+
+			// run the SQL statement
+			sqlStatement.executeUpdate();
 		} 
 		catch (final SQLException e)
 		{
