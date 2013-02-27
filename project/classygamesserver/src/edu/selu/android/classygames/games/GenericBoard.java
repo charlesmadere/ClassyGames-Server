@@ -81,7 +81,6 @@ public abstract class GenericBoard
 		this.lengthHorizontal = lengthHorizontal;
 		this.lengthVertical = lengthVertical;
 
-		initializePositions();
 		reset();
 	}
 
@@ -109,7 +108,6 @@ public abstract class GenericBoard
 		this.lengthVertical = lengthVertical;
 		this.boardJSON = boardJSON;
 
-		initializePositions();
 		reset();
 	}
 
@@ -235,8 +233,8 @@ public abstract class GenericBoard
 	private void initializeBoardFromJSON() throws JSONException
 	{
 		final JSONArray teams = boardJSON.getJSONObject("board").getJSONArray("teams");
-		initializeTeamFromJSON(teams.getJSONArray(0), GenericPiece.TEAM_PLAYER);
-		initializeTeamFromJSON(teams.getJSONArray(1), GenericPiece.TEAM_OPPONENT);
+		initializeTeamFromJSON(teams.getJSONArray(0), GenericPiece.TEAM_OPPONENT);
+		initializeTeamFromJSON(teams.getJSONArray(1), GenericPiece.TEAM_PLAYER);
 	}
 
 
