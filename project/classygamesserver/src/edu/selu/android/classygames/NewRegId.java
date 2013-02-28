@@ -17,9 +17,6 @@ import edu.selu.android.classygames.utilities.DatabaseUtilities;
 import edu.selu.android.classygames.utilities.Utilities;
 
 
-/**
- * Servlet implementation class NewRegId
- */
 public class NewRegId extends HttpServlet
 {
 
@@ -80,7 +77,22 @@ public class NewRegId extends HttpServlet
 			if (Utilities.verifyValidLong(userId))
 			// check inputs for validity
 			{
-				newRegId();
+				try
+				{
+					newRegId();
+				}
+				catch (final SQLException e)
+				{
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+				}
+				catch (final Exception e)
+				{
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
+				}
+				finally
+				{
+					DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
+				}
 			}
 			else
 			{
@@ -94,68 +106,64 @@ public class NewRegId extends HttpServlet
 	}
 
 
-	private void newRegId()
+	/**
+	 * Runs the meat of this servlet's code.
+	 * 
+	 * @throws SQLException
+	 * If at some point there is some kind of connection error or query problem
+	 * with the SQL database then this Exception will be thrown.
+	 * 
+	 * @throws Exception
+	 * If the JDBC driver could not be loaded then this Exception will be
+	 * thrown.
+	 */
+	private void newRegId() throws SQLException, Exception
 	{
-		try
+		sqlConnection = DatabaseUtilities.getSQLConnection();
+
+		// prepare a SQL statement to be run on the database
+		String sqlStatementString = "SELECT * FROM " + DatabaseUtilities.TABLE_USERS + " WHERE " + DatabaseUtilities.TABLE_USERS_COLUMN_ID + " = ?";
+		sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+
+		// prevent SQL injection by inserting data this way
+		sqlStatement.setLong(1, userId.longValue());
+
+		// run the SQL statement and acquire any return information
+		final ResultSet sqlResult = sqlStatement.executeQuery();
+
+		if (sqlResult.next())
+		// the id already exists in the table therefore it's data needs to be updated
 		{
-			sqlConnection = DatabaseUtilities.getSQLConnection();
+			DatabaseUtilities.closeSQLStatement(sqlStatement);
 
 			// prepare a SQL statement to be run on the database
-			String sqlStatementString = "SELECT * FROM " + DatabaseUtilities.TABLE_USERS + " WHERE " + DatabaseUtilities.TABLE_USERS_COLUMN_ID + " = ?";
+			sqlStatementString = "UPDATE " + DatabaseUtilities.TABLE_USERS + " SET " + DatabaseUtilities.TABLE_USERS_COLUMN_NAME + " = ?, " + DatabaseUtilities.TABLE_USERS_COLUMN_REG_ID + " = ? WHERE " + DatabaseUtilities.TABLE_USERS_COLUMN_ID + " = ?";
+			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+
+			// prevent SQL injection by inserting data this way
+			sqlStatement.setString(1, parameter_userName);
+			sqlStatement.setString(2, parameter_userRegId);
+			sqlStatement.setLong(3, userId.longValue());
+		}
+		else
+		// id does not already exist in the table. let's insert it
+		{
+			DatabaseUtilities.closeSQLStatement(sqlStatement);
+
+			// prepare a SQL statement to be run on the database
+			sqlStatementString = "INSERT INTO " + DatabaseUtilities.TABLE_USERS + " " + DatabaseUtilities.TABLE_USERS_FORMAT + " " + DatabaseUtilities.TABLE_USERS_VALUES;
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
 			sqlStatement.setLong(1, userId.longValue());
-
-			// run the SQL statement and acquire any return information
-			final ResultSet sqlResult = sqlStatement.executeQuery();
-
-			if (sqlResult.next())
-			// the id already exists in the table therefore it's data needs to be updated
-			{
-				DatabaseUtilities.closeSQLStatement(sqlStatement);
-
-				// prepare a SQL statement to be run on the database
-				sqlStatementString = "UPDATE " + DatabaseUtilities.TABLE_USERS + " SET " + DatabaseUtilities.TABLE_USERS_COLUMN_NAME + " = ?, " + DatabaseUtilities.TABLE_USERS_COLUMN_REG_ID + " = ? WHERE " + DatabaseUtilities.TABLE_USERS_COLUMN_ID + " = ?";
-				sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-
-				// prevent SQL injection by inserting data this way
-				sqlStatement.setString(1, parameter_userName);
-				sqlStatement.setString(2, parameter_userRegId);
-				sqlStatement.setLong(3, userId.longValue());
-			}
-			else
-			// id does not already exist in the table. let's insert it
-			{
-				DatabaseUtilities.closeSQLStatement(sqlStatement);
-
-				// prepare a SQL statement to be run on the database
-				sqlStatementString = "INSERT INTO " + DatabaseUtilities.TABLE_USERS + " " + DatabaseUtilities.TABLE_USERS_FORMAT + " " + DatabaseUtilities.TABLE_USERS_VALUES;
-				sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-
-				// prevent SQL injection by inserting data this way
-				sqlStatement.setLong(1, userId.longValue());
-				sqlStatement.setString(2, parameter_userName);
-				sqlStatement.setString(3, parameter_userRegId);
-			}
-
-			// run the SQL statement
-			sqlStatement.executeUpdate();
-
-			printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_ADDED_TO_DATABASE));
+			sqlStatement.setString(2, parameter_userName);
+			sqlStatement.setString(3, parameter_userRegId);
 		}
-		catch (final SQLException e)
-		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
-		}
-		catch (final Exception e)
-		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
-		}
-		finally
-		{
-			DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
-		}
+
+		// run the SQL statement
+		sqlStatement.executeUpdate();
+
+		printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_ADDED_TO_DATABASE));
 	}
 
 

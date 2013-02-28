@@ -79,7 +79,26 @@ public class GetGames extends HttpServlet
 			if (Utilities.verifyValidLong(userId))
 			// check inputs for validity
 			{
-				getGames();
+				try
+				{
+					getGames();
+				}
+				catch (final JSONException e)
+				{
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
+				}
+				catch (final SQLException e)
+				{
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+				}
+				catch (final Exception e)
+				{
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
+				}
+				finally
+				{
+					DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
+				}
 			}
 			else
 			{
@@ -93,50 +112,46 @@ public class GetGames extends HttpServlet
 	}
 
 
-	private void getGames()
+	/**
+	 * Runs the meat of this servlet's code.
+	 * 
+	 * @throws JSONException
+	 * If at some point the JSON data that this method tries to create has an
+	 * issue then this Exception will be thrown.
+	 * 
+	 * @throws SQLException
+	 * If at some point there is some kind of connection error or query problem
+	 * with the SQL database then this Exception will be thrown.
+	 * 
+	 * @throws Exception
+	 * If the JDBC driver could not be loaded then this Exception will be
+	 * thrown.
+	 */
+	private void getGames() throws JSONException, SQLException, Exception
 	{
-		try
-		{
-			sqlConnection = DatabaseUtilities.getSQLConnection();
+		sqlConnection = DatabaseUtilities.getSQLConnection();
 
-			// prepare a SQL statement to be run on the MySQL database
-			final String sqlStatementString = "SELECT * FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " = ? AND (" + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR + " = ? OR " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?)";
-			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+		// prepare a SQL statement to be run on the MySQL database
+		final String sqlStatementString = "SELECT * FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " = ? AND (" + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR + " = ? OR " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?)";
+		sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
-			// prevent SQL injection by inserting data this way
-			sqlStatement.setByte(1, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
-			sqlStatement.setLong(2, userId.longValue());
-			sqlStatement.setLong(3, userId.longValue());
+		// prevent SQL injection by inserting data this way
+		sqlStatement.setByte(1, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
+		sqlStatement.setLong(2, userId.longValue());
+		sqlStatement.setLong(3, userId.longValue());
 
-			// run the SQL statement and acquire any return information
-			sqlResult = sqlStatement.executeQuery();
+		// run the SQL statement and acquire any return information
+		sqlResult = sqlStatement.executeQuery();
 
-			if (sqlResult.next())
-			// check to see that we got some SQL return data
-			{
-				createGamesListData();
-			}
-			else
-			// we did not get any SQL return data
-			{
-				printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_NO_ACTIVE_GAMES));
-			}
-		}
-		catch (final JSONException e)
+		if (sqlResult.next())
+		// check to see that we got some SQL return data
 		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
+			createGamesListData();
 		}
-		catch (final SQLException e)
+		else
+		// we did not get any SQL return data
 		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
-		}
-		catch (final Exception e)
-		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
-		}
-		finally
-		{
-			DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
+			printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_NO_ACTIVE_GAMES));
 		}
 	}
 
@@ -167,8 +182,9 @@ public class GetGames extends HttpServlet
 			final byte database_gameType = sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE);
 			final Timestamp database_lastMove = sqlResult.getTimestamp(DatabaseUtilities.TABLE_GAMES_COLUMN_LAST_MOVE);
 
-			// initialize a JSONObject. All of the current game's data will be stored here. At the end of this
-			// loop iteration this JSONObject will be added to one of the above JSONArrays
+			// Initialize a JSONObject. All of the current game's data will be
+			// stored here. At the end of this loop iteration this JSONObject
+			// will be added to one of the above JSONArrays.
 			final JSONObject game = new JSONObject();
 
 			if (database_userCreatorId == userId.longValue())

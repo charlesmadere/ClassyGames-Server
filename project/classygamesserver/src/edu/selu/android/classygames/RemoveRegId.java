@@ -15,9 +15,6 @@ import edu.selu.android.classygames.utilities.DatabaseUtilities;
 import edu.selu.android.classygames.utilities.Utilities;
 
 
-/**
- * Servlet implementation class RemoveRegId
- */
 public class RemoveRegId extends HttpServlet
 {
 
@@ -73,7 +70,22 @@ public class RemoveRegId extends HttpServlet
 			if (Utilities.verifyValidLong(userId))
 			// check inputs for validity
 			{
-				removeRegId();
+				try
+				{
+					removeRegId();
+				}
+				catch (final SQLException e)
+				{
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+				}
+				catch (final Exception e)
+				{
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
+				}
+				finally
+				{
+					DatabaseUtilities.closeSQLConnection(sqlConnection);
+				}
 			}
 			else
 			{
@@ -87,26 +99,22 @@ public class RemoveRegId extends HttpServlet
 	}
 
 
-	private void removeRegId()
+	/**
+	 * Runs the meat of this servlet's code.
+	 * 
+	 * @throws SQLException
+	 * If at some point there is some kind of connection error or query problem
+	 * with the SQL database then this Exception will be thrown.
+	 * 
+	 * @throws Exception
+	 * If the JDBC driver could not be loaded then this Exception will be
+	 * thrown.
+	 */
+	private void removeRegId() throws SQLException, Exception
 	{
-		try
-		{
-			sqlConnection = DatabaseUtilities.getSQLConnection();
-			DatabaseUtilities.removeUserRegId(sqlConnection, userId.longValue());
-			printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_REMOVED_FROM_DATABASE));
-		}
-		catch (final SQLException e)
-		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
-		}
-		catch (final Exception e)
-		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
-		}
-		finally
-		{
-			DatabaseUtilities.closeSQLConnection(sqlConnection);
-		}
+		sqlConnection = DatabaseUtilities.getSQLConnection();
+		DatabaseUtilities.removeUserRegId(sqlConnection, userId.longValue());
+		printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_REMOVED_FROM_DATABASE));
 	}
 
 

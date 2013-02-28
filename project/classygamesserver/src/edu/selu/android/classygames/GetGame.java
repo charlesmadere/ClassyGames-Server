@@ -67,7 +67,22 @@ public class GetGame extends HttpServlet
 		if (Utilities.verifyValidString(parameter_gameId))
 		// check inputs for validity
 		{
-			getGame();
+			try
+			{
+				getGame();
+			}
+			catch (final SQLException e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+			}
+			catch (final Exception e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
+			}
+			finally
+			{
+				DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
+			}
 		}
 		else
 		{
@@ -76,54 +91,52 @@ public class GetGame extends HttpServlet
 	}
 
 
-	private void getGame()
+	/**
+	 * Runs the meat of this servlet's code.
+	 * 
+	 * @throws SQLException
+	 * If at some point there is some kind of connection error or query problem
+	 * with the SQL database then this Exception will be thrown.
+	 * 
+	 * @throws Exception
+	 * If the JDBC driver could not be loaded then this Exception will be
+	 * thrown.
+	 */
+	private void getGame() throws SQLException, Exception
 	{
-		try
+		sqlConnection = DatabaseUtilities.getSQLConnection();
+
+		// prepare a SQL statement to be run on the database
+		final String sqlStatementString = "SELECT " + DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD + " FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
+		sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+
+		// prevent SQL injection by inserting data this way
+		sqlStatement.setString(1, parameter_gameId);
+
+		// run the SQL statement and acquire any return information
+		sqlResult = sqlStatement.executeQuery();
+
+		if (sqlResult.next())
+		// game with specified id was found in the database, send the board's
+		// data to the client
 		{
-			sqlConnection = DatabaseUtilities.getSQLConnection();
+			final String board = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD);
 
-			// prepare a SQL statement to be run on the database
-			final String sqlStatementString = "SELECT " + DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD + " FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
-			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-
-			// prevent SQL injection by inserting data this way
-			sqlStatement.setString(1, parameter_gameId);
-
-			// run the SQL statement and acquire any return information
-			sqlResult = sqlStatement.executeQuery();
-
-			if (sqlResult.next())
-			// game with specified id was found in the database, send the board's data to the client
+			if (Utilities.verifyValidString(board))
+			// return the board's data
 			{
-				final String board = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD);
-
-				if (Utilities.verifyValidString(board))
-				// return the board's data
-				{
-					printWriter.write(Utilities.makePostDataSuccess(board));
-				}
-				else
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_GET_BOARD_DATA));
-				}
+				printWriter.write(Utilities.makePostDataSuccess(board));
 			}
 			else
-			// we could not find a game with specified id in the database. this should never happen
 			{
-				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_FIND_GAME_WITH_SPECIFIED_ID));
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_GET_BOARD_DATA));
 			}
 		}
-		catch (final SQLException e)
+		else
+		// We could not find a game with specified id in the database. This
+		// should never happen.
 		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
-		}
-		catch (final Exception e)
-		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
-		}
-		finally
-		{
-			DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
+			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_FIND_GAME_WITH_SPECIFIED_ID));
 		}
 	}
 
