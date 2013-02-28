@@ -223,6 +223,10 @@ public class NewMove extends HttpServlet
 				{
 					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
 				}
+				catch (final Exception e)
+				{
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
+				}
 				finally
 				{
 					DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);

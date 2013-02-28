@@ -62,6 +62,7 @@ public class Utilities
 	public final static String POST_ERROR_DATABASE_COULD_NOT_GET_BOARD_DATA = "Was unable to acquire board data from the database.";
 	public final static String POST_ERROR_DATABASE_COULD_NOT_GET_GAMES = "Was unable to acquire a list of games from the database";
 	public final static String POST_ERROR_DATABASE_COULD_NOT_LOAD = "Database DriverManager could not be loaded.";
+	public final static String POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD = "JDBC Driver could not be loaded.";
 	public final static String POST_ERROR_JSON_EXCEPTION = "JSONException error!";
 	public final static String POST_ERROR_GAME_IS_ALREADY_OVER = "Attempted to add a new move to a game that has already been completed!";
 	public final static String POST_ERROR_GENERIC = "POST data received but an error occurred.";

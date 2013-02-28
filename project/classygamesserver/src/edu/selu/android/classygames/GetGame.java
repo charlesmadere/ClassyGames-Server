@@ -117,6 +117,10 @@ public class GetGame extends HttpServlet
 		{
 			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
 		}
+		catch (final Exception e)
+		{
+			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
+		}
 		finally
 		{
 			DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);

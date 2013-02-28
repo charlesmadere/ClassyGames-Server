@@ -51,7 +51,6 @@ public class NewGame extends HttpServlet
 
 	private Long userChallengedId;
 	private Long userCreatorId;
-
 	private Byte gameType;
 
 	private GenericBoard board;
@@ -290,6 +289,10 @@ public class NewGame extends HttpServlet
 		catch (final SQLException e)
 		{
 			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+		}
+		catch (final Exception e)
+		{
+			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
 		}
 		finally
 		{

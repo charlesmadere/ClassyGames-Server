@@ -298,8 +298,12 @@ public class DatabaseUtilities
 	 * @throws SQLException
 	 * If a connection to the SQL database could not be created then a
 	 * SQLException will be thrown.
+	 * 
+	 * @throws Exception
+	 * If, when trying to load the MySQL JDBC driver there is an error, then
+	 * an Exception will be thrown.
 	 */
-	public static Connection getSQLConnection() throws SQLException
+	public static Connection getSQLConnection() throws SQLException, Exception
 	{
 		// ensure that the MySQL JDBC Driver has been loaded
 		Class.forName("com.mysql.jdbc.Driver").newInstance();
