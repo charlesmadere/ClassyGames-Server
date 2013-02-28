@@ -62,6 +62,8 @@ public class Utilities
 	public final static String POST_ERROR_DATABASE_COULD_NOT_GET_BOARD_DATA = "Was unable to acquire board data from the database.";
 	public final static String POST_ERROR_DATABASE_COULD_NOT_GET_GAMES = "Was unable to acquire a list of games from the database";
 	public final static String POST_ERROR_DATABASE_COULD_NOT_LOAD = "Database DriverManager could not be loaded.";
+	public final static String POST_ERROR_DIGEST_HAD_IMPROPER_ENCODING = "Game's ID could not be created as the digest encoding (" + UTF8 + ") is unsupported.";
+	public final static String POST_ERROR_DIGEST_HAD_UNSUPPORTED_ALGORITHM = "Game's ID could not be created as the digest algorithm (" + MESSAGE_DIGEST_ALGORITHM + ") is unsupported.";
 	public final static String POST_ERROR_GAME_IS_ALREADY_OVER = "Attempted to add a new move to a game that has already been completed!";
 	public final static String POST_ERROR_GCM_FAILED_TO_SEND = "Google Cloud Message failed to send.";
 	public final static String POST_ERROR_GENERIC = "POST data received but an error occurred.";
@@ -126,16 +128,32 @@ public class Utilities
 		try
 		{
 			final JSONObject result = new JSONObject();
-	
+
 			if (hasError)
 			{
-				result.put("error", data);
+				try
+				{
+					final JSONObject dataJSON = (JSONObject) data;
+					result.put("error", dataJSON);
+				}
+				catch (final ClassCastException e)
+				{
+					result.put("error", data);
+				}
 			}
 			else
 			{
-				result.put("success", data);
+				try
+				{
+					final JSONObject dataJSON = (JSONObject) data;
+					result.put("success", dataJSON);
+				}
+				catch (final ClassCastException e)
+				{
+					result.put("success", data);
+				}
 			}
-	
+
 			final JSONObject output = new JSONObject();
 			output.put("result", result);
 			outputString = output.toString();
@@ -152,15 +170,15 @@ public class Utilities
 	/**
 	 * Makes a message to write out using the PrintWriter.
 	 * 
-	 * @param data
-	 * The data to include in the output message.
+	 * @param message
+	 * The message to send out.
 	 * 
 	 * @return
 	 * Output message that should be written out using the PrintWriter.
 	 */
-	public static String makePostDataError(final Object data)
+	public static String makePostDataError(final String message)
 	{
-		return makePostData(data, true);
+		return makePostData(message, true);
 	}
 
 

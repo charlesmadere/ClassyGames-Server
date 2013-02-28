@@ -24,44 +24,65 @@ API Documentation
 -----------------
 This is an attempt to document exactly how to make API calls against the Classy Games server code. All of the below endpoints **require** HTTP POST requests in order for them to gather data, **not HTTP GET**! All of these endpoints will respond to your input with a `UTF-8` encoded JSON String (`application/json; charset=UTF-8`) as output.
 
-+ **GetGame** Outputs the state of the game board as a JSON String.
++ ### GetGame ###
+    + Outputs the state of the game board as a JSON String. Is used to acquire the board data for a specific game.
+
     + *Input*
-        + Hello, World!
+        + **`id`** a String that closely resembles a `SHA-256` hash.
+
     + *Output*
         + Hello, World!
 
-+ **GetGames** Outputs a list of games that the given user has. This output will only contain in progress games.
++ ### GetGames ###
+    + Outputs a list of games that the given user has. This output will only contain in progress games.
+
     + *Input*
-        + Hello, World!
+        + **`id`** a String, that represents the current user's Facebook id. As a numeral this would be a `long`.
+
     + *Output*
         + Hello, World!
 
-+ **NewGame** Creates a new game of the specified game type with the specified user.
++ ### NewGame ###
+    + Creates a new game of the specified game type with the specified user.
+
     + *Input*
         + Hello, World!
+
     + *Output*
         + Hello, World!
 
-+ **NewMove** Creates a new move in an already existing game.
++ ### NewMove ###
+    + Creates a new move in an already existing game.
+
     + *Input*
         + Hello, World!
+
     + *Output*
         + Hello, World!
 
-+ **NewRegId** Registers a user with the server. This is needed primarily for push (GCM - Google Cloud Messaging) notifications.
++ ### NewRegId ###
+    + Registers a user with the server. This is needed primarily for push (GCM - Google Cloud Messaging) notifications.
+
     + *Input*
         + Hello, World!
+
     + *Output*
         + Hello, World!
 
-+ **RemoveRegId** Removes a user's device ID from the server. The user will no longer be able to receive push (GCM - Google Cloud Messaging) notifications until they register again. This does not remove a user's data from the database entirely however.
++ ### RemoveRegId ###
+    + Removes a user's device ID from the server. The user will no longer be able to receive push (GCM - Google Cloud Messaging) notifications until they register again. This does not remove a user's data from the database entirely however.
+
     + *Input*
         + Hello, World!
+
     + *Output*
         + Hello, World!
 
-+ **SkipMove** Allows someone to pass. The given game will then switch to the other user's turn.
++ ### SkipMove ###
+    + Allows someone to pass. The given game will then switch to the other user's turn.
+
     + *Input*
         + Hello, World!
+
     + *Output*
         + Hello, World!
