@@ -80,7 +80,7 @@ public class NewMove extends HttpServlet
 		// check inputs for validity
 		{
 			userChallengedId = Long.valueOf(parameter_userChallengedId);
-			userCreatorId = Long.valueOf(parameter_userChallengedName);
+			userCreatorId = Long.valueOf(parameter_userCreatorId);
 
 			if (Utilities.verifyValidLongs(userChallengedId, userCreatorId))
 			// check inputs for validity
