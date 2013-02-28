@@ -112,7 +112,7 @@ public class NewRegId extends HttpServlet
 	 */
 	private void newRegId() throws SQLException, Exception
 	{
-		sqlConnection = DatabaseUtilities.getSQLConnection();
+		sqlConnection = DatabaseUtilities.acquireSQLConnection();
 
 		// prepare a SQL statement to be run on the database
 		String sqlStatementString = "SELECT * FROM " + DatabaseUtilities.TABLE_USERS + " WHERE " + DatabaseUtilities.TABLE_USERS_COLUMN_ID + " = ?";

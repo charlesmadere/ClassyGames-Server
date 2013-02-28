@@ -122,7 +122,7 @@ public class GetGames extends HttpServlet
 	 */
 	private void getGames() throws JSONException, SQLException, Exception
 	{
-		sqlConnection = DatabaseUtilities.getSQLConnection();
+		sqlConnection = DatabaseUtilities.acquireSQLConnection();
 
 		// prepare a SQL statement to be run on the MySQL database
 		final String sqlStatementString = "SELECT * FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " = ? AND (" + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR + " = ? OR " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?)";

@@ -83,7 +83,7 @@ public class GCMUtilities
 					// same device has more than one registration ID: update database. Replace
 					// the existing regId with this new one
 					{
-						DatabaseUtilities.updateUserRegId(sqlConnection, canonicalRegId, userIdOfReceiver.longValue());
+						DatabaseUtilities.updateUserRegId(sqlConnection, userIdOfReceiver.longValue(), canonicalRegId);
 					}
 				}
 				else

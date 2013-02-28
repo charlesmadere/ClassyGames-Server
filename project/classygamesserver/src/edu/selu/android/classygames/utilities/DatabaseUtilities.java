@@ -39,6 +39,47 @@ public class DatabaseUtilities
 
 
 	/**
+	 * Establishes a connection to the SQL database and returns that newly made
+	 * connection. I followed this guide to understand how to connect to the
+	 * MySQL database that is created when making a new Amazon Elastic
+	 * Beanstalk application:
+	 * http://docs.amazonwebservices.com/elasticbeanstalk/latest/dg/create_deploy_Java.rds.html
+	 * A MySQL JDBC Driver is required for this MySQL connection to actually
+	 * work. You can download that driver from here:
+	 * https://dev.mysql.com/downloads/connector/j/
+	 * 
+	 * @return
+	 * Returns a newly made connection to the SQL database.
+	 * 
+	 * @throws SQLException
+	 * If a connection to the SQL database could not be created then a
+	 * SQLException will be thrown.
+	 * 
+	 * @throws Exception
+	 * If, when trying to load the MySQL JDBC driver there is an error, then
+	 * an Exception will be thrown.
+	 */
+	public static Connection acquireSQLConnection() throws SQLException, Exception
+	{
+		// ensure that the MySQL JDBC Driver has been loaded
+		Class.forName("com.mysql.jdbc.Driver").newInstance();
+
+		// acquire database credentials from Amazon Web Services
+		final String hostname = System.getProperty("RDS_HOSTNAME");
+		final String port = System.getProperty("RDS_PORT");
+		final String dbName = System.getProperty("RDS_DB_NAME");
+		final String username = System.getProperty("RDS_USERNAME");
+		final String password = System.getProperty("RDS_PASSWORD");
+
+		// create the connection string
+		final String connectionString = "jdbc:mysql://" + hostname + ":" + port + "/" + dbName + "?user=" + username + "&password=" + password;
+
+		// return a new connection to the database
+		return DriverManager.getConnection(connectionString);
+	}
+
+
+	/**
 	 * Releases SQL resources. It's best to release SQL resources in reverse
 	 * order of their creation. This method <strong>must be used</strong> when
 	 * dealing with SQL stuff.
@@ -116,19 +157,19 @@ public class DatabaseUtilities
 	 * connection will not be closed after we are finished performing
 	 * operations here.
 	 * 
-	 * @param user_id
+	 * @param userId
 	 * The ID of the user as a long. This is the user's Facebook ID.
 	 * 
-	 * @param user_name
+	 * @param userName
 	 * The name of the user as a String.
 	 * 
 	 * @return
 	 * True if we were able to successfully insert this new user into the
 	 * database OR if the user already exists in the database. False if the
-	 * user did not exist in the database and we were unable to insert him
-	 * into it.
+	 * user did not exist in the database OR we were unable to insert him into
+	 * it.
 	 */
-	public static boolean ensureUserExistsInDatabase(final Connection sqlConnection, final long user_id, final String user_name)
+	public static boolean ensureUserExistsInDatabase(final Connection sqlConnection, final long userId, final String userName)
 	{
 		boolean errorFree = true;
 		PreparedStatement sqlStatement = null;
@@ -140,7 +181,7 @@ public class DatabaseUtilities
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
-			sqlStatement.setLong(1, user_id);
+			sqlStatement.setLong(1, userId);
 
 			// run the SQL statement and acquire any return information
 			final ResultSet sqlResult = sqlStatement.executeQuery();
@@ -158,8 +199,8 @@ public class DatabaseUtilities
 				sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 				// prevent SQL injection by inserting data this way
-				sqlStatement.setLong(1, user_id);
-				sqlStatement.setString(2, user_name);
+				sqlStatement.setLong(1, userId);
+				sqlStatement.setString(2, userName);
 
 				// run the SQL statement
 				sqlStatement.executeUpdate();
@@ -179,22 +220,58 @@ public class DatabaseUtilities
 
 
 	/**
+	 * Query the database for a game's info.
+	 * 
+	 * @param sqlConnection
+	 * Your existing database Connection object. Must already be connected, as
+	 * this method makes no attempt at doing so.
+	 * 
+	 * @param gameId
+	 * The ID of the game you're searching for.
+	 * 
+	 * @return
+	 * The query's resulting ResultSet object. Could be empty or even null,
+	 * check for that with the ResultSet's .next() method.
+	 * 
+	 * @throws
+	 * If at some point there is some kind of connection error or query problem
+	 * with the SQL database then this Exception will be thrown.
+	 */
+	public static ResultSet grabGamesInfo(final Connection sqlConnection, final String gameId) throws SQLException
+	{
+		// prepare a SQL statement to be run on the database
+		final String sqlStatementString = "SELECT " + TABLE_GAMES_COLUMN_BOARD + " FROM " + TABLE_GAMES + " WHERE " + TABLE_GAMES_COLUMN_ID + " = ?";
+		final PreparedStatement sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+
+		// prevent SQL injection by inserting data this way
+		sqlStatement.setString(1, gameId);
+
+		// run the SQL statement and acquire any return information
+		final ResultSet sqlResult = sqlStatement.executeQuery();
+
+		closeSQLStatement(sqlStatement);
+
+		return sqlResult;
+	}
+
+
+	/**
 	 * Query the database for a user who's ID matches the input's.
 	 * 
 	 * @param sqlConnection
 	 * Your existing database Connection object. Must already be connected, as
 	 * this method makes no attempt at doing so.
 	 * 
-	 * @param user
+	 * @param userId
 	 * The ID of the user you're searching for as a long.
 	 * 
 	 * @return
 	 * The name of the user that you queried for as a String.
 	 */
-	public static String grabUsersName(final Connection sqlConnection, final long user)
+	public static String grabUsersName(final Connection sqlConnection, final long userId)
 	{
-		PreparedStatement sqlStatement = null;
 		String username = null;
+		PreparedStatement sqlStatement = null;
 
 		try
 		{
@@ -203,7 +280,7 @@ public class DatabaseUtilities
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
-			sqlStatement.setLong(1, user);
+			sqlStatement.setLong(1, userId);
 
 			// run the SQL statement and acquire any return information
 			final ResultSet sqlResult = sqlStatement.executeQuery();
@@ -239,17 +316,17 @@ public class DatabaseUtilities
 	 * An existing connection to the database. This method will make no attempt
 	 * to either open or close the connection.
 	 * 
-	 * @param user_id
+	 * @param userId
 	 * ID of the user that you want to find a reg_id for.
 	 * 
 	 * @return
-	 * Returns the reg_id of the user that you want as a String. If the user
+	 * Returns the regId of the user that you want as a String. If the user
 	 * could not be found, null is returned.
 	 */
-	public static String grabUsersRegId(final Connection sqlConnection, final long user_id)
+	public static String grabUsersRegId(final Connection sqlConnection, final long userId)
 	{
+		String regId = null;
 		PreparedStatement sqlStatement = null;
-		String reg_id = null;
 
 		try
 		{
@@ -258,7 +335,7 @@ public class DatabaseUtilities
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
-			sqlStatement.setLong(1, user_id);
+			sqlStatement.setLong(1, userId);
 
 			// run the SQL statement and acquire any return information
 			final ResultSet sqlResult = sqlStatement.executeQuery();
@@ -266,7 +343,7 @@ public class DatabaseUtilities
 			if (sqlResult.next())
 			// user with specified id was found in the database
 			{
-				reg_id = sqlResult.getString(DatabaseUtilities.TABLE_USERS_COLUMN_REG_ID);
+				regId = sqlResult.getString(DatabaseUtilities.TABLE_USERS_COLUMN_REG_ID);
 			}
 		}
 		catch (final SQLException e)
@@ -278,48 +355,7 @@ public class DatabaseUtilities
 			closeSQLStatement(sqlStatement);
 		}
 
-		return reg_id;
-	}
-
-
-	/**
-	 * Establishes a connection to the SQL database and returns that newly made
-	 * connection. I followed this guide to understand how to connect to the
-	 * MySQL database that is created when making a new Amazon Elastic
-	 * Beanstalk application:
-	 * http://docs.amazonwebservices.com/elasticbeanstalk/latest/dg/create_deploy_Java.rds.html
-	 * A MySQL JDBC Driver is required for this MySQL connection to actually
-	 * work. You can download that driver from here:
-	 * https://dev.mysql.com/downloads/connector/j/
-	 * 
-	 * @return
-	 * Returns a newly made connection to the SQL database.
-	 * 
-	 * @throws SQLException
-	 * If a connection to the SQL database could not be created then a
-	 * SQLException will be thrown.
-	 * 
-	 * @throws Exception
-	 * If, when trying to load the MySQL JDBC driver there is an error, then
-	 * an Exception will be thrown.
-	 */
-	public static Connection getSQLConnection() throws SQLException, Exception
-	{
-		// ensure that the MySQL JDBC Driver has been loaded
-		Class.forName("com.mysql.jdbc.Driver").newInstance();
-
-		// acquire database credentials from Amazon Web Services
-		final String hostname = System.getProperty("RDS_HOSTNAME");
-		final String port = System.getProperty("RDS_PORT");
-		final String dbName = System.getProperty("RDS_DB_NAME");
-		final String username = System.getProperty("RDS_USERNAME");
-		final String password = System.getProperty("RDS_PASSWORD");
-
-		// create the connection string
-		final String connectionString = "jdbc:mysql://" + hostname + ":" + port + "/" + dbName + "?user=" + username + "&password=" + password;
-
-		// return a new connection to the database
-		return DriverManager.getConnection(connectionString);
+		return regId;
 	}
 
 
@@ -366,17 +402,17 @@ public class DatabaseUtilities
 	 * currently existing regId value with the regId value that you specify
 	 * here.
 	 * 
+	 * @param userRegId
+	 * The given user's new regId.
+	 * 
 	 * @param sqlConnection
 	 * An existing connection to the database. This method will make no attempt
 	 * to either open or close the connection.
 	 * 
-	 * @param userRegId
-	 * The given user's new regId.
-	 * 
 	 * @param userId
 	 * The user ID of the user's who's regId needs to be updated.
 	 */
-	public static void updateUserRegId(final Connection sqlConnection, final String userRegId, final long userId)
+	public static void updateUserRegId(final Connection sqlConnection, final long userId, final String userRegId)
 	{
 		PreparedStatement sqlStatement = null;
 

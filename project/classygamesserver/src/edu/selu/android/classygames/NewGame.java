@@ -103,34 +103,34 @@ public class NewGame extends HttpServlet
 					gameType = Byte.valueOf(Utilities.POST_DATA_GAME_TYPE_CHECKERS);
 				}
 
-				board = GameUtilities.newGame(parameter_board, gameType.byteValue());
-
-				if (board.checkValidity() == Utilities.BOARD_NEW_GAME)
+				try
 				{
-					try
+					board = GameUtilities.newGame(parameter_board, gameType.byteValue());
+
+					if (board.checkValidity() == Utilities.BOARD_NEW_GAME)
 					{
 						newGame();
 					}
-					catch (final JSONException e)
+					else
 					{
-						printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
-					}
-					catch (final SQLException e)
-					{
-						printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
-					}
-					catch (final Exception e)
-					{
-						printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
-					}
-					finally
-					{
-						DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
+						printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_BOARD_INVALID));
 					}
 				}
-				else
+				catch (final JSONException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_BOARD_INVALID));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
+				}
+				catch (final SQLException e)
+				{
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+				}
+				catch (final Exception e)
+				{
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
+				}
+				finally
+				{
+					DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
 				}
 			}
 			else
@@ -162,7 +162,7 @@ public class NewGame extends HttpServlet
 	 */
 	private void newGame() throws JSONException, SQLException, Exception
 	{
-		sqlConnection = DatabaseUtilities.getSQLConnection();
+		sqlConnection = DatabaseUtilities.acquireSQLConnection();
 
 		if (DatabaseUtilities.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), parameter_userChallengedName))
 		{

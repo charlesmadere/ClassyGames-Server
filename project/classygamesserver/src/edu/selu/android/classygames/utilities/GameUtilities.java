@@ -23,33 +23,29 @@ public class GameUtilities
 	 * @return
 	 * Returns a GenericBoard object if one could be instantiated. Returns null
 	 * otherwise.
+	 * 
+	 * @throws JSONException
+	 * If at some point the JSON data that this method tries to create has an
+	 * issue then this Exception will be thrown.
 	 */
-	public static GenericBoard newGame(final String parameter_board, final byte gameType)
+	public static GenericBoard newGame(final String parameter_board, final byte gameType) throws JSONException
 	{
 		GenericBoard board = null;
 
-		try
-		{
-			final JSONObject boardJSON = new JSONObject(parameter_board);
+		final JSONObject boardJSON = new JSONObject(parameter_board);
 
-			if (Utilities.verifyValidString(parameter_board))
+		if (Utilities.verifyValidString(parameter_board))
+		{
+			switch (gameType)
 			{
-				switch (gameType)
-				{
-					case Utilities.POST_DATA_GAME_TYPE_CHESS:
-						board = new edu.selu.android.classygames.games.chess.Board(boardJSON);
-						break;
+				case Utilities.POST_DATA_GAME_TYPE_CHESS:
+					board = new edu.selu.android.classygames.games.chess.Board(boardJSON);
+					break;
 
-					case Utilities.POST_DATA_GAME_TYPE_CHECKERS:
-					default:
-						board = new edu.selu.android.classygames.games.checkers.Board(boardJSON);
-						break;
-				}
+				case Utilities.POST_DATA_GAME_TYPE_CHECKERS:
+					board = new edu.selu.android.classygames.games.checkers.Board(boardJSON);
+					break;
 			}
-		}
-		catch (final JSONException e)
-		{
-
 		}
 
 		return board;

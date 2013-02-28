@@ -105,7 +105,7 @@ public class RemoveRegId extends HttpServlet
 	 */
 	private void removeRegId() throws SQLException, Exception
 	{
-		sqlConnection = DatabaseUtilities.getSQLConnection();
+		sqlConnection = DatabaseUtilities.acquireSQLConnection();
 		DatabaseUtilities.removeUserRegId(sqlConnection, userId.longValue());
 		printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_REMOVED_FROM_DATABASE));
 	}

@@ -97,7 +97,7 @@ public class GetGame extends HttpServlet
 	 */
 	private void getGame() throws SQLException, Exception
 	{
-		sqlConnection = DatabaseUtilities.getSQLConnection();
+		sqlConnection = DatabaseUtilities.acquireSQLConnection();
 
 		// prepare a SQL statement to be run on the database
 		final String sqlStatementString = "SELECT " + DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD + " FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
