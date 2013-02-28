@@ -34,18 +34,13 @@ public class GetGame extends HttpServlet
 
 
 
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
 	public GetGame()
 	{
 		super();
 	}
 
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
+	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException
 	{
 		response.setContentType(Utilities.CONTENT_TYPE_JSON);
@@ -54,9 +49,7 @@ public class GetGame extends HttpServlet
 	}
 
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
+	@Override
 	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException
 	{
 		response.setContentType(Utilities.CONTENT_TYPE_JSON);
