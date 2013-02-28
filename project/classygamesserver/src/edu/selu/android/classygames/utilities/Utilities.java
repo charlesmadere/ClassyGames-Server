@@ -62,10 +62,11 @@ public class Utilities
 	public final static String POST_ERROR_DATABASE_COULD_NOT_GET_BOARD_DATA = "Was unable to acquire board data from the database.";
 	public final static String POST_ERROR_DATABASE_COULD_NOT_GET_GAMES = "Was unable to acquire a list of games from the database";
 	public final static String POST_ERROR_DATABASE_COULD_NOT_LOAD = "Database DriverManager could not be loaded.";
+	public final static String POST_ERROR_GAME_IS_ALREADY_OVER = "Attempted to add a new move to a game that has already been completed!";
+	public final static String POST_ERROR_GCM_FAILED_TO_SEND = "Google Cloud Message failed to send.";
+	public final static String POST_ERROR_GENERIC = "POST data received but an error occurred.";
 	public final static String POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD = "JDBC Driver could not be loaded.";
 	public final static String POST_ERROR_JSON_EXCEPTION = "JSONException error!";
-	public final static String POST_ERROR_GAME_IS_ALREADY_OVER = "Attempted to add a new move to a game that has already been completed!";
-	public final static String POST_ERROR_GENERIC = "POST data received but an error occurred.";
 	public final static String POST_ERROR_INVALID_CHALLENGER = "Invalid challenger!";
 	public final static String POST_ERROR_ITS_NOT_YOUR_TURN = "Attempted to make a new move when it wasn't the user's turn!";
 	public final static String POST_SUCCESS_GAME_ADDED_TO_DATABASE = "Game successfully added to database!";

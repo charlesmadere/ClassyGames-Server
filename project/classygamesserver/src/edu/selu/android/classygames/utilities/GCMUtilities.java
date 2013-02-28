@@ -50,8 +50,12 @@ public class GCMUtilities
 	 * @param messageType
 	 * The type of message that this is. Could be a new move or a new game
 	 * type.
+	 * 
+	 * @throws IOException
+	 * An IOException could be thrown when the GCM message is attempted to be
+	 * sent.
 	 */
-	private static void sendMessage(final Connection sqlConnection, final String gameId, final Long userIdToShow, final String userNameToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType)
+	private static void sendMessage(final Connection sqlConnection, final String gameId, final Long userIdToShow, final String userNameToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType) throws IOException
 	{
 		final String regId = DatabaseUtilities.grabUsersRegId(sqlConnection, userIdOfReceiver.longValue());
 
@@ -70,36 +74,29 @@ public class GCMUtilities
 				.addData(Utilities.POST_DATA_MESSAGE_TYPE, messageType.toString())
 				.build();
 
-			try
+			final Result result = sender.send(message, regId, RETRY_ATTEMPTS);
+			final String messageId = result.getMessageId();
+
+			if (Utilities.verifyValidString(messageId))
 			{
-				final Result result = sender.send(message, regId, RETRY_ATTEMPTS);
-				final String messageId = result.getMessageId();
+				final String canonicalRegId = result.getCanonicalRegistrationId();
 
-				if (Utilities.verifyValidString(messageId))
+				if (Utilities.verifyValidString(canonicalRegId))
+				// same device has more than one registration ID: update database. Replace
+				// the existing regId with this new one
 				{
-					final String canonicalRegId = result.getCanonicalRegistrationId();
-
-					if (Utilities.verifyValidString(canonicalRegId))
-					// same device has more than one registration ID: update database. Replace
-					// the existing regId with this new one
-					{
-						DatabaseUtilities.updateUserRegId(sqlConnection, userIdOfReceiver.longValue(), canonicalRegId);
-					}
-				}
-				else
-				{
-					final String errorCodeName = result.getErrorCodeName();
-
-					if (errorCodeName.equals(Constants.ERROR_NOT_REGISTERED))
-					// application has been removed from device - unregister database
-					{
-						DatabaseUtilities.removeUserRegId(sqlConnection, userIdToShow);
-					}
+					DatabaseUtilities.updateUserRegId(sqlConnection, userIdOfReceiver.longValue(), canonicalRegId);
 				}
 			}
-			catch (final IOException e)
+			else
 			{
+				final String errorCodeName = result.getErrorCodeName();
 
+				if (errorCodeName.equals(Constants.ERROR_NOT_REGISTERED))
+				// application has been removed from device - unregister database
+				{
+					DatabaseUtilities.removeUserRegId(sqlConnection, userIdToShow);
+				}
 			}
 		}
 	}
@@ -127,8 +124,12 @@ public class GCMUtilities
 	 * @param messageType
 	 * The type of message that this is. Could be a new move or a new game
 	 * type.
+	 * 
+	 * @throws IOException
+	 * An IOException could be thrown when the GCM message is attempted to be
+	 * sent.
 	 */
-	public static void sendMessage(final Connection sqlConnection, final String gameId, final Long userIdToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType)
+	public static void sendMessage(final Connection sqlConnection, final String gameId, final Long userIdToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType) throws IOException
 	{
 		final String userNameToShow = DatabaseUtilities.grabUsersName(sqlConnection, userIdToShow.longValue());
 		sendMessage(sqlConnection, gameId, userIdToShow, userNameToShow, userIdOfReceiver, gameType, messageType);
@@ -160,8 +161,12 @@ public class GCMUtilities
 	 * 
 	 * @param userNameOfReceiver
 	 * Name of the user that is getting the win notification.
+	 * 
+	 * @throws IOException
+	 * An IOException could be thrown when the GCM message is attempted to be
+	 * sent.
 	 */
-	public static void sendMessages(final Connection sqlConnection, final String gameId, final Long userIdToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType, final String userNameOfReceiver)
+	public static void sendMessages(final Connection sqlConnection, final String gameId, final Long userIdToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType, final String userNameOfReceiver) throws IOException
 	{
 		final String userNameToShow = DatabaseUtilities.grabUsersName(sqlConnection, userIdToShow.longValue());
 		sendMessage(sqlConnection, gameId, userIdToShow, userNameToShow, userIdOfReceiver, gameType, Byte.valueOf(Utilities.BOARD_LOSE));

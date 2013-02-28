@@ -88,6 +88,11 @@ public class NewMove extends HttpServlet
 				try
 				{
 					newMove();
+					printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_MOVE_ADDED_TO_DATABASE));
+				}
+				catch (final IOException e)
+				{
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND));
 				}
 				catch (final JSONException e)
 				{
@@ -121,6 +126,10 @@ public class NewMove extends HttpServlet
 	/**
 	 * Runs the meat of this servlet's code.
 	 * 
+	 * @throws IOException
+	 * An IOException could be thrown when the GCM message is attempted to be
+	 * sent.
+	 * 
 	 * @throws JSONException
 	 * If at some point the JSON data that this method tries to create has an
 	 * issue then this Exception will be thrown.
@@ -133,7 +142,7 @@ public class NewMove extends HttpServlet
 	 * If the JDBC driver could not be loaded then this Exception will be
 	 * thrown.
 	 */
-	private void newMove() throws JSONException, SQLException, Exception
+	private void newMove() throws IOException, JSONException, SQLException, Exception
 	{
 		sqlConnection = DatabaseUtilities.acquireSQLConnection();
 
@@ -151,7 +160,8 @@ public class NewMove extends HttpServlet
 					final byte database_gameType = sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE);
 					final byte database_turn = sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_TURN);
 
-					if ((userCreatorId.longValue() == database_userChallengedId && database_turn == DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED) || (userCreatorId.longValue() == database_userCreatorId && database_turn == DatabaseUtilities.TABLE_GAMES_TURN_CREATOR))
+					if ((userCreatorId.longValue() == database_userChallengedId && database_turn == DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED)
+						|| (userCreatorId.longValue() == database_userCreatorId && database_turn == DatabaseUtilities.TABLE_GAMES_TURN_CREATOR))
 					{
 						final String database_oldBoard = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD);
 						board = GameUtilities.newGame(database_oldBoard, database_gameType);
@@ -195,8 +205,6 @@ public class NewMove extends HttpServlet
 
 							// run the SQL statement
 							sqlStatement.executeUpdate();
-
-							printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_MOVE_ADDED_TO_DATABASE));
 						}
 						else
 						{

@@ -116,6 +116,10 @@ public class NewGame extends HttpServlet
 						printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_BOARD_INVALID));
 					}
 				}
+				catch (final IOException e)
+				{
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND));
+				}
 				catch (final JSONException e)
 				{
 					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
@@ -148,6 +152,10 @@ public class NewGame extends HttpServlet
 	/**
 	 * Runs the meat of this servlet's code.
 	 * 
+	 * @throws IOException
+	 * An IOException could be thrown when the GCM message is attempted to be
+	 * sent.
+	 * 
 	 * @throws JSONException
 	 * If at some point the JSON data that this method tries to create has an
 	 * issue then this Exception will be thrown.
@@ -160,7 +168,7 @@ public class NewGame extends HttpServlet
 	 * If the JDBC driver could not be loaded then this Exception will be
 	 * thrown.
 	 */
-	private void newGame() throws JSONException, SQLException, Exception
+	private void newGame() throws IOException, JSONException, SQLException, Exception
 	{
 		sqlConnection = DatabaseUtilities.acquireSQLConnection();
 
@@ -216,7 +224,7 @@ public class NewGame extends HttpServlet
 
 				if (runStatus != RUN_STATUS_NO_ERROR || !Utilities.verifyValidString(digest))
 				// check to see if we encountered any of the exceptions above
-				//or if our digest is broken
+				// or if our digest is broken
 				{
 					continueToRun = false;
 				}
