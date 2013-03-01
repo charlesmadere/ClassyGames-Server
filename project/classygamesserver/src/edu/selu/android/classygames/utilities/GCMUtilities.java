@@ -3,6 +3,7 @@ package edu.selu.android.classygames.utilities;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import com.google.android.gcm.server.Constants;
 import com.google.android.gcm.server.Message;
@@ -54,8 +55,12 @@ public class GCMUtilities
 	 * @throws IOException
 	 * An IOException could be thrown when the GCM message is attempted to be
 	 * sent.
+	 * 
+	 * @throws SQLException
+	 * If at some point there is some kind of connection error or query problem
+	 * with the SQL database then this Exception will be thrown.
 	 */
-	private static void sendMessage(final Connection sqlConnection, final String gameId, final Long userIdToShow, final String userNameToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType) throws IOException
+	private static void sendMessage(final Connection sqlConnection, final String gameId, final Long userIdToShow, final String userNameToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType) throws IOException, SQLException
 	{
 		final String regId = DatabaseUtilities.grabUsersRegId(sqlConnection, userIdOfReceiver.longValue());
 
@@ -128,8 +133,12 @@ public class GCMUtilities
 	 * @throws IOException
 	 * An IOException could be thrown when the GCM message is attempted to be
 	 * sent.
+	 * 
+	 * @throws SQLException
+	 * If at some point there is some kind of connection error or query problem
+	 * with the SQL database then this Exception will be thrown.
 	 */
-	public static void sendMessage(final Connection sqlConnection, final String gameId, final Long userIdToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType) throws IOException
+	public static void sendMessage(final Connection sqlConnection, final String gameId, final Long userIdToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType) throws IOException, SQLException
 	{
 		final String userNameToShow = DatabaseUtilities.grabUsersName(sqlConnection, userIdToShow.longValue());
 		sendMessage(sqlConnection, gameId, userIdToShow, userNameToShow, userIdOfReceiver, gameType, messageType);
@@ -165,8 +174,12 @@ public class GCMUtilities
 	 * @throws IOException
 	 * An IOException could be thrown when the GCM message is attempted to be
 	 * sent.
+	 * 
+	 * @throws SQLException
+	 * If at some point there is some kind of connection error or query problem
+	 * with the SQL database then this Exception will be thrown.
 	 */
-	public static void sendMessages(final Connection sqlConnection, final String gameId, final Long userIdToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType, final String userNameOfReceiver) throws IOException
+	public static void sendMessages(final Connection sqlConnection, final String gameId, final Long userIdToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType, final String userNameOfReceiver) throws IOException, SQLException
 	{
 		final String userNameToShow = DatabaseUtilities.grabUsersName(sqlConnection, userIdToShow.longValue());
 		sendMessage(sqlConnection, gameId, userIdToShow, userNameToShow, userIdOfReceiver, gameType, Byte.valueOf(Utilities.BOARD_LOSE));

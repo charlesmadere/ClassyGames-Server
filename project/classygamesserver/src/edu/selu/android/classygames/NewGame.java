@@ -184,99 +184,72 @@ public class NewGame extends HttpServlet
 	private void newGame() throws UnsupportedEncodingException, IOException, JSONException, NoSuchAlgorithmException, SQLException, Exception
 	{
 		sqlConnection = DatabaseUtilities.acquireSQLConnection();
+		DatabaseUtilities.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), parameter_userChallengedName);
 
-		if (DatabaseUtilities.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), parameter_userChallengedName))
+		board.flipTeams();
+		final JSONObject boardJSON = board.makeJSON();
+		final String boardJSONString = boardJSON.toString();
+
+		boolean continueToRun = true;
+		String digest = null;
+
+		do
+		// This loop does a ton of stuff. First a digest is created to be
+		// used as this new game's game ID. Then we check to see if this ID
+		// is already in the database. If the ID is already in the
+		// database, we check to see if the game it belongs to is a
+		// finished game. If it is a finished game, then we can safely
+		// replace the data from that game with the data from our new game.
+		// If it is not a finished game, this whole loop will have to
+		// restart as we're going to have to create a new ID (we somehow
+		// managed to create an SHA-256 digest that clashed with another
+		// one. The odds of this happening are extremely unlikely but we
+		// still have to check for it.)
+		// But back to the ifs and such: if we created an ID that does not
+		// already exist in the database, then we can simply insert our new
+		// game data safely into it.
 		{
-			board.flipTeams();
-			final JSONObject boardJSON = board.makeJSON();
-			final String boardJSONString = boardJSON.toString();
+			// create a digest to use as the Game ID
+			digest = createDigest
+			(
+				userChallengedId.toString().getBytes(Utilities.UTF8),
+				userCreatorId.toString().getBytes(Utilities.UTF8),
+				boardJSONString.getBytes(Utilities.UTF8)
+			);
 
-			boolean continueToRun = true;
-			String digest = null;
+			// prepare a SQL statement to be run on the database
+			String sqlStatementString = "SELECT " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
+			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
-			do
-			// This loop does a ton of stuff. First a digest is created to be
-			// used as this new game's game ID. Then we check to see if this ID
-			// is already in the database. If the ID is already in the
-			// database, we check to see if the game it belongs to is a
-			// finished game. If it is a finished game, then we can safely
-			// replace the data from that game with the data from our new game.
-			// If it is not a finished game, this whole loop will have to
-			// restart as we're going to have to create a new ID (we somehow
-			// managed to create an SHA-256 digest that clashed with another
-			// one. The odds of this happening are extremely unlikely but we
-			// still have to check for it.)
-			// But back to the ifs and such: if we created an ID that does not
-			// already exist in the database, then we can simply insert our new
-			// game data safely into it.
+			// prevent SQL injection by inserting data this way
+			sqlStatement.setString(1, digest);
+
+			// run the SQL statement and acquire any return information
+			final ResultSet sqlResult = sqlStatement.executeQuery();
+
+			if (sqlResult.next())
+			// the digest we created to use as an ID already exists in the
+			// games table
 			{
-				// create a digest to use as the Game ID
-				digest = createDigest
-				(
-					userChallengedId.toString().getBytes(Utilities.UTF8),
-					userCreatorId.toString().getBytes(Utilities.UTF8),
-					boardJSONString.getBytes(Utilities.UTF8)
-				);
-
-				// prepare a SQL statement to be run on the database
-				String sqlStatementString = "SELECT " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
-				sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-
-				// prevent SQL injection by inserting data this way
-				sqlStatement.setString(1, digest);
-
-				// run the SQL statement and acquire any return information
-				final ResultSet sqlResult = sqlStatement.executeQuery();
-
-				if (sqlResult.next())
-				// the digest we created to use as an ID already exists in the
-				// games table
-				{
-					if (sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED) == DatabaseUtilities.TABLE_GAMES_FINISHED_TRUE)
-					// Game with the digest we created already exists, AND
-					// has been finished. Because of this, we can safely
-					// replace that game's data with our new game's data
-					{
-						DatabaseUtilities.closeSQLStatement(sqlStatement);
-
-						// prepare a SQL statement to be run on the database
-						sqlStatementString = "UPDATE " + DatabaseUtilities.TABLE_GAMES + " SET " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_TURN + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " = ? WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
-						sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-
-						// prevent SQL injection by inserting data this way
-						sqlStatement.setLong(1, userCreatorId.longValue());
-						sqlStatement.setLong(2, userChallengedId.longValue());
-						sqlStatement.setString(3, boardJSONString);
-						sqlStatement.setByte(4, DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED);
-						sqlStatement.setByte(5, gameType.byteValue());
-						sqlStatement.setByte(6, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
-						sqlStatement.setString(7, digest);
-
-						// run the SQL statement
-						sqlStatement.executeUpdate();
-
-						continueToRun = false;
-					}
-				}
-				else
-				// the digest that we created to use as an ID DOES NOT already
-				// exist in the games table. We we can now just simply insert
-				// this new game's data into the table.
+				if (sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED) == DatabaseUtilities.TABLE_GAMES_FINISHED_TRUE)
+				// Game with the digest we created already exists, AND
+				// has been finished. Because of this, we can safely
+				// replace that game's data with our new game's data
 				{
 					DatabaseUtilities.closeSQLStatement(sqlStatement);
 
 					// prepare a SQL statement to be run on the database
-					sqlStatementString = "INSERT INTO " + DatabaseUtilities.TABLE_GAMES + " " + DatabaseUtilities.TABLE_GAMES_FORMAT + " " + DatabaseUtilities.TABLE_GAMES_VALUES;
+					sqlStatementString = "UPDATE " + DatabaseUtilities.TABLE_GAMES + " SET " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_TURN + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " = ? WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
 					sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 					// prevent SQL injection by inserting data this way
-					sqlStatement.setString(1, digest);
-					sqlStatement.setLong(2, userCreatorId.longValue());
-					sqlStatement.setLong(3, userChallengedId.longValue());
-					sqlStatement.setString(4, boardJSONString);
-					sqlStatement.setByte(5, DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED);
-					sqlStatement.setByte(6, gameType.byteValue());
-					sqlStatement.setByte(7, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
+					sqlStatement.setLong(1, userCreatorId.longValue());
+					sqlStatement.setLong(2, userChallengedId.longValue());
+					sqlStatement.setString(3, boardJSONString);
+					sqlStatement.setByte(4, DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED);
+					sqlStatement.setByte(5, gameType.byteValue());
+					sqlStatement.setByte(6, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
+					sqlStatement.setString(7, digest);
 
 					// run the SQL statement
 					sqlStatement.executeUpdate();
@@ -284,15 +257,36 @@ public class NewGame extends HttpServlet
 					continueToRun = false;
 				}
 			}
-			while (continueToRun);
+			else
+			// the digest that we created to use as an ID DOES NOT already
+			// exist in the games table. We we can now just simply insert
+			// this new game's data into the table.
+			{
+				DatabaseUtilities.closeSQLStatement(sqlStatement);
 
-			GCMUtilities.sendMessage(sqlConnection, digest, userCreatorId, userChallengedId, gameType, Byte.valueOf(Utilities.BOARD_NEW_GAME));
-			printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_GAME_ADDED_TO_DATABASE));
+				// prepare a SQL statement to be run on the database
+				sqlStatementString = "INSERT INTO " + DatabaseUtilities.TABLE_GAMES + " " + DatabaseUtilities.TABLE_GAMES_FORMAT + " " + DatabaseUtilities.TABLE_GAMES_VALUES;
+				sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+
+				// prevent SQL injection by inserting data this way
+				sqlStatement.setString(1, digest);
+				sqlStatement.setLong(2, userCreatorId.longValue());
+				sqlStatement.setLong(3, userChallengedId.longValue());
+				sqlStatement.setString(4, boardJSONString);
+				sqlStatement.setByte(5, DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED);
+				sqlStatement.setByte(6, gameType.byteValue());
+				sqlStatement.setByte(7, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
+
+				// run the SQL statement
+				sqlStatement.executeUpdate();
+
+				continueToRun = false;
+			}
 		}
-		else
-		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_INVALID_CHALLENGER));
-		}
+		while (continueToRun);
+
+		GCMUtilities.sendMessage(sqlConnection, digest, userCreatorId, userChallengedId, gameType, Byte.valueOf(Utilities.BOARD_NEW_GAME));
+		printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_GAME_ADDED_TO_DATABASE));
 	}
 
 

@@ -163,59 +163,43 @@ public class DatabaseUtilities
 	 * @param userName
 	 * The name of the user as a String.
 	 * 
-	 * @return
-	 * True if we were able to successfully insert this new user into the
-	 * database OR if the user already exists in the database. False if the
-	 * user did not exist in the database OR we were unable to insert him into
-	 * it.
+	 * @throws SQLException
+	 * If at some point there is some kind of connection error or query problem
+	 * with the SQL database then this Exception will be thrown.
 	 */
-	public static boolean ensureUserExistsInDatabase(final Connection sqlConnection, final long userId, final String userName)
+	public static void ensureUserExistsInDatabase(final Connection sqlConnection, final long userId, final String userName) throws SQLException
 	{
-		boolean errorFree = true;
-		PreparedStatement sqlStatement = null;
+		// prepare a SQL statement to be run on the database
+		String sqlStatementString = "SELECT * FROM " + TABLE_USERS + " WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
+		PreparedStatement sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
-		try
+		// prevent SQL injection by inserting data this way
+		sqlStatement.setLong(1, userId);
+
+		// run the SQL statement and acquire any return information
+		final ResultSet sqlResult = sqlStatement.executeQuery();
+
+		if (sqlResult.next())
+		// user exists in the database. no further actions needs to be taken
+		{
+
+		}
+		else
+		// user does not exist in the database. we need to put them in there
 		{
 			// prepare a SQL statement to be run on the database
-			String sqlStatementString = "SELECT * FROM " + TABLE_USERS + " WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
+			sqlStatementString = "INSERT INTO " + TABLE_USERS + " (" + TABLE_USERS_COLUMN_ID + ", " + TABLE_USERS_COLUMN_NAME + ") VALUES (?, ?)";
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
 			sqlStatement.setLong(1, userId);
+			sqlStatement.setString(2, userName);
 
-			// run the SQL statement and acquire any return information
-			final ResultSet sqlResult = sqlStatement.executeQuery();
-
-			if (sqlResult.next())
-			// user exists in the database. no further actions needs to be taken
-			{
-
-			}
-			else
-			// user does not exist in the database. we need to put them in there
-			{
-				// prepare a SQL statement to be run on the database
-				sqlStatementString = "INSERT INTO " + TABLE_USERS + " (" + TABLE_USERS_COLUMN_ID + ", " + TABLE_USERS_COLUMN_NAME + ") VALUES (?, ?)";
-				sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-
-				// prevent SQL injection by inserting data this way
-				sqlStatement.setLong(1, userId);
-				sqlStatement.setString(2, userName);
-
-				// run the SQL statement
-				sqlStatement.executeUpdate();
-			}
-		}
-		catch (final SQLException e)
-		{
-			errorFree = false;
-		}
-		finally
-		{
-			closeSQLStatement(sqlStatement);
+			// run the SQL statement
+			sqlStatement.executeUpdate();
 		}
 
-		return errorFree;
+		closeSQLStatement(sqlStatement);
 	}
 
 
@@ -233,7 +217,7 @@ public class DatabaseUtilities
 	 * The query's resulting ResultSet object. Could be empty or even null,
 	 * check for that with the ResultSet's .next() method.
 	 * 
-	 * @throws
+	 * @throws SQLException
 	 * If at some point there is some kind of connection error or query problem
 	 * with the SQL database then this Exception will be thrown.
 	 */
@@ -266,44 +250,35 @@ public class DatabaseUtilities
 	 * The ID of the user you're searching for as a long.
 	 * 
 	 * @return
-	 * The name of the user that you queried for as a String.
+	 * The name of the user that you queried for as a String. If the user could
+	 * not be found then this method will return null.
+	 * 
+	 * @throws SQLException
+	 * If at some point there is some kind of connection error or query problem
+	 * with the SQL database then this Exception will be thrown.
 	 */
-	public static String grabUsersName(final Connection sqlConnection, final long userId)
+	public static String grabUsersName(final Connection sqlConnection, final long userId) throws SQLException
 	{
 		String username = null;
-		PreparedStatement sqlStatement = null;
 
-		try
+		// prepare a SQL statement to be run on the MySQL database
+		final String sqlStatementString = "SELECT " + TABLE_USERS_COLUMN_NAME + " FROM " + TABLE_USERS + " WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
+		final PreparedStatement sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+
+		// prevent SQL injection by inserting data this way
+		sqlStatement.setLong(1, userId);
+
+		// run the SQL statement and acquire any return information
+		final ResultSet sqlResult = sqlStatement.executeQuery();
+
+		if (sqlResult.next())
+		// check to see that we got some SQL return data
 		{
-			// prepare a SQL statement to be run on the MySQL database
-			final String sqlStatementString = "SELECT " + TABLE_USERS_COLUMN_NAME + " FROM " + TABLE_USERS + " WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
-			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-
-			// prevent SQL injection by inserting data this way
-			sqlStatement.setLong(1, userId);
-
-			// run the SQL statement and acquire any return information
-			final ResultSet sqlResult = sqlStatement.executeQuery();
-
-			if (sqlResult.next())
-			// check to see that we got some SQL return data
-			{
-				// grab the user's name from the SQL query
-				username = sqlResult.getString(TABLE_USERS_COLUMN_NAME);
-			}
-			else
-			{
-				username = Utilities.APP_NAME;
-			}
+			// grab the user's name from the SQL query
+			username = sqlResult.getString(TABLE_USERS_COLUMN_NAME);
 		}
-		catch (final SQLException e)
-		{
 
-		}
-		finally
-		{
-			closeSQLStatement(sqlStatement);
-		}
+		closeSQLStatement(sqlStatement);
 
 		return username;
 	}
@@ -322,38 +297,32 @@ public class DatabaseUtilities
 	 * @return
 	 * Returns the regId of the user that you want as a String. If the user
 	 * could not be found, null is returned.
+	 * 
+	 * @throws SQLException
+	 * If at some point there is some kind of connection error or query problem
+	 * with the SQL database then this Exception will be thrown.
 	 */
-	public static String grabUsersRegId(final Connection sqlConnection, final long userId)
+	public static String grabUsersRegId(final Connection sqlConnection, final long userId) throws SQLException
 	{
 		String regId = null;
-		PreparedStatement sqlStatement = null;
 
-		try
+		// prepare a SQL statement to be run on the database
+		final String sqlStatementString = "SELECT " + TABLE_USERS_COLUMN_REG_ID + " FROM " + TABLE_USERS + " WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
+		final PreparedStatement sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+
+		// prevent SQL injection by inserting data this way
+		sqlStatement.setLong(1, userId);
+
+		// run the SQL statement and acquire any return information
+		final ResultSet sqlResult = sqlStatement.executeQuery();
+
+		if (sqlResult.next())
+		// user with specified id was found in the database
 		{
-			// prepare a SQL statement to be run on the database
-			final String sqlStatementString = "SELECT " + TABLE_USERS_COLUMN_REG_ID + " FROM " + TABLE_USERS + " WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
-			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-
-			// prevent SQL injection by inserting data this way
-			sqlStatement.setLong(1, userId);
-
-			// run the SQL statement and acquire any return information
-			final ResultSet sqlResult = sqlStatement.executeQuery();
-
-			if (sqlResult.next())
-			// user with specified id was found in the database
-			{
-				regId = sqlResult.getString(DatabaseUtilities.TABLE_USERS_COLUMN_REG_ID);
-			}
+			regId = sqlResult.getString(DatabaseUtilities.TABLE_USERS_COLUMN_REG_ID);
 		}
-		catch (final SQLException e)
-		{
 
-		}
-		finally
-		{
-			closeSQLStatement(sqlStatement);
-		}
+		closeSQLStatement(sqlStatement);
 
 		return regId;
 	}
@@ -369,31 +338,24 @@ public class DatabaseUtilities
 	 * 
 	 * @param userId
 	 * The user ID of the user who's regId needs to be removed.
+	 * 
+	 * @throws SQLException
+	 * If at some point there is some kind of connection error or query problem
+	 * with the SQL database then this Exception will be thrown.
 	 */
-	public static void removeUserRegId(final Connection sqlConnection, final long userId)
+	public static void removeUserRegId(final Connection sqlConnection, final long userId) throws SQLException
 	{
-		PreparedStatement sqlStatement = null;
+		// prepare a SQL statement to be run on the database
+		final String sqlStatementString = "UPDATE " + TABLE_USERS + " SET " + TABLE_USERS_COLUMN_REG_ID + " = null WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
+		final PreparedStatement sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
-		try
-		{
-			// prepare a SQL statement to be run on the database
-			final String sqlStatementString = "UPDATE " + TABLE_USERS + " SET " + TABLE_USERS_COLUMN_REG_ID + " = null WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
-			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+		// prevent SQL injection by inserting data this way
+		sqlStatement.setLong(1, userId);
 
-			// prevent SQL injection by inserting data this way
-			sqlStatement.setLong(1, userId);
+		// run the SQL statement
+		sqlStatement.executeUpdate();
 
-			// run the SQL statement
-			sqlStatement.executeUpdate();
-		}
-		catch (final SQLException e)
-		{
-
-		}
-		finally
-		{
-			closeSQLStatement(sqlStatement);
-		}
+		closeSQLStatement(sqlStatement);
 	}
 
 
@@ -411,32 +373,25 @@ public class DatabaseUtilities
 	 * 
 	 * @param userId
 	 * The user ID of the user's who's regId needs to be updated.
+	 * 
+	 * @throws SQLException
+	 * If at some point there is some kind of connection error or query problem
+	 * with the SQL database then this Exception will be thrown.
 	 */
-	public static void updateUserRegId(final Connection sqlConnection, final long userId, final String userRegId)
+	public static void updateUserRegId(final Connection sqlConnection, final long userId, final String userRegId) throws SQLException
 	{
-		PreparedStatement sqlStatement = null;
+		// prepare a SQL statement to be run on the database
+		final String sqlStatementString = "UPDATE " + TABLE_USERS + " SET " + TABLE_USERS_COLUMN_REG_ID + " = ? WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
+		final PreparedStatement sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
-		try
-		{
-			// prepare a SQL statement to be run on the database
-			final String sqlStatementString = "UPDATE " + TABLE_USERS + " SET " + TABLE_USERS_COLUMN_REG_ID + " = ? WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
-			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+		// prevent SQL injection by inserting user data this way
+		sqlStatement.setString(1, userRegId);
+		sqlStatement.setLong(2, userId);
 
-			// prevent SQL injection by inserting user data this way
-			sqlStatement.setString(1, userRegId);
-			sqlStatement.setLong(2, userId);
+		// run the SQL statement
+		sqlStatement.executeUpdate();
 
-			// run the SQL statement
-			sqlStatement.executeUpdate();
-		} 
-		catch (final SQLException e)
-		{
-
-		}
-		finally
-		{
-			closeSQLStatement(sqlStatement);
-		}
+		closeSQLStatement(sqlStatement);
 	}
 
 
