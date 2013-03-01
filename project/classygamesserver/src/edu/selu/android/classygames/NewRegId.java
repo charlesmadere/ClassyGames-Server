@@ -28,9 +28,9 @@ public class NewRegId extends HttpServlet
 	private PreparedStatement sqlStatement;
 	private PrintWriter printWriter;
 
-	private String parameter_userId;
-	private String parameter_userName;
-	private String parameter_userRegId;
+	private String param_userId;
+	private String param_userName;
+	private String param_userRegId;
 
 	private Long userId;
 
@@ -58,14 +58,14 @@ public class NewRegId extends HttpServlet
 		response.setContentType(Utilities.CONTENT_TYPE_JSON);
 		printWriter = response.getWriter();
 
-		parameter_userId = request.getParameter(Utilities.POST_DATA_ID);
-		parameter_userName = request.getParameter(Utilities.POST_DATA_NAME);
-		parameter_userRegId = request.getParameter(Utilities.POST_DATA_REG_ID);
+		param_userId = request.getParameter(Utilities.POST_DATA_ID);
+		param_userName = request.getParameter(Utilities.POST_DATA_NAME);
+		param_userRegId = request.getParameter(Utilities.POST_DATA_REG_ID);
 
-		if (Utilities.verifyValidStrings(parameter_userId, parameter_userName, parameter_userRegId))
+		if (Utilities.verifyValidStrings(param_userId, param_userName, param_userRegId))
 		// check inputs for validity
 		{
-			userId = Long.valueOf(parameter_userId);
+			userId = Long.valueOf(param_userId);
 
 			if (Utilities.verifyValidLong(userId))
 			// check inputs for validity
@@ -76,11 +76,11 @@ public class NewRegId extends HttpServlet
 				}
 				catch (final SQLException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT + e.getLocalizedMessage()));
 				}
 				catch (final Exception e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD + e.getLocalizedMessage()));
 				}
 				finally
 				{
@@ -134,8 +134,8 @@ public class NewRegId extends HttpServlet
 			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
-			sqlStatement.setString(1, parameter_userName);
-			sqlStatement.setString(2, parameter_userRegId);
+			sqlStatement.setString(1, param_userName);
+			sqlStatement.setString(2, param_userRegId);
 			sqlStatement.setLong(3, userId.longValue());
 		}
 		else
@@ -149,8 +149,8 @@ public class NewRegId extends HttpServlet
 
 			// prevent SQL injection by inserting data this way
 			sqlStatement.setLong(1, userId.longValue());
-			sqlStatement.setString(2, parameter_userName);
-			sqlStatement.setString(3, parameter_userRegId);
+			sqlStatement.setString(2, param_userName);
+			sqlStatement.setString(3, param_userRegId);
 		}
 
 		// run the SQL statement

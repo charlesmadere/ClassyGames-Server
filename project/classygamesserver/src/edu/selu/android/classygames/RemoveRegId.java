@@ -25,7 +25,7 @@ public class RemoveRegId extends HttpServlet
 	private Connection sqlConnection;
 	private PrintWriter printWriter;
 
-	private String parameter_userId;
+	private String param_userId;
 
 	private Long userId;
 
@@ -53,12 +53,12 @@ public class RemoveRegId extends HttpServlet
 		response.setContentType(Utilities.CONTENT_TYPE_JSON);
 		printWriter = response.getWriter();
 
-		parameter_userId = request.getParameter(Utilities.POST_DATA_ID);
+		param_userId = request.getParameter(Utilities.POST_DATA_ID);
 
-		if (Utilities.verifyValidString(parameter_userId))
+		if (Utilities.verifyValidString(param_userId))
 		// check inputs for validity
 		{
-			userId = Long.valueOf(parameter_userId);
+			userId = Long.valueOf(param_userId);
 
 			if (Utilities.verifyValidLong(userId))
 			// check inputs for validity
@@ -106,7 +106,7 @@ public class RemoveRegId extends HttpServlet
 	private void removeRegId() throws SQLException, Exception
 	{
 		sqlConnection = DatabaseUtilities.acquireSQLConnection();
-		DatabaseUtilities.removeUserRegId(sqlConnection, userId.longValue());
+		DatabaseUtilities.updateUserRegId(sqlConnection, userId.longValue(), null);
 		printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_REMOVED_FROM_DATABASE));
 	}
 

@@ -35,11 +35,11 @@ public class NewMove extends HttpServlet
 	private PrintWriter printWriter;
 	private ResultSet sqlResult;
 
-	private String parameter_userChallengedId;
-	private String parameter_userChallengedName;
-	private String parameter_userCreatorId;
-	private String parameter_gameId;
-	private String parameter_board;
+	private String param_userChallengedId;
+	private String param_userChallengedName;
+	private String param_userCreatorId;
+	private String param_gameId;
+	private String param_board;
 
 	private Long userChallengedId;
 	private Long userCreatorId;
@@ -70,17 +70,17 @@ public class NewMove extends HttpServlet
 		response.setContentType(Utilities.CONTENT_TYPE_JSON);
 		printWriter = response.getWriter();
 
-		parameter_userChallengedId = request.getParameter(Utilities.POST_DATA_USER_CHALLENGED);
-		parameter_userChallengedName = request.getParameter(Utilities.POST_DATA_NAME);
-		parameter_userCreatorId = request.getParameter(Utilities.POST_DATA_USER_CREATOR);
-		parameter_gameId = request.getParameter(Utilities.POST_DATA_GAME_ID);
-		parameter_board = request.getParameter(Utilities.POST_DATA_BOARD);
+		param_userChallengedId = request.getParameter(Utilities.POST_DATA_USER_CHALLENGED);
+		param_userChallengedName = request.getParameter(Utilities.POST_DATA_NAME);
+		param_userCreatorId = request.getParameter(Utilities.POST_DATA_USER_CREATOR);
+		param_gameId = request.getParameter(Utilities.POST_DATA_GAME_ID);
+		param_board = request.getParameter(Utilities.POST_DATA_BOARD);
 
-		if (Utilities.verifyValidStrings(parameter_userChallengedId, parameter_userChallengedName, parameter_userCreatorId, parameter_gameId, parameter_board))
+		if (Utilities.verifyValidStrings(param_userChallengedId, param_userChallengedName, param_userCreatorId, param_gameId, param_board))
 		// check inputs for validity
 		{
-			userChallengedId = Long.valueOf(parameter_userChallengedId);
-			userCreatorId = Long.valueOf(parameter_userCreatorId);
+			userChallengedId = Long.valueOf(param_userChallengedId);
+			userCreatorId = Long.valueOf(param_userCreatorId);
 
 			if (Utilities.verifyValidLongs(userChallengedId, userCreatorId))
 			// check inputs for validity
@@ -91,19 +91,19 @@ public class NewMove extends HttpServlet
 				}
 				catch (final IOException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND + e.getLocalizedMessage()));
 				}
 				catch (final JSONException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION + e.getLocalizedMessage()));
 				}
 				catch (final SQLException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT + e.getLocalizedMessage()));
 				}
 				catch (final Exception e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD + e.getLocalizedMessage()));
 				}
 				finally
 				{
@@ -144,27 +144,27 @@ public class NewMove extends HttpServlet
 	private void newMove() throws IOException, JSONException, SQLException, Exception
 	{
 		sqlConnection = DatabaseUtilities.acquireSQLConnection();
-		DatabaseUtilities.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), parameter_userChallengedName);
+		DatabaseUtilities.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), param_userChallengedName);
 
-		sqlResult = DatabaseUtilities.grabGamesInfo(sqlConnection, parameter_gameId);
+		sqlResult = DatabaseUtilities.grabGamesInfo(sqlConnection, param_gameId);
 
-		if (sqlResult.next())
+		if (sqlResult != null && sqlResult.next())
 		{
 			if (sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED) == DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE)
 			// make sure that the game has not been finished
 			{
-				final long database_userChallengedId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED);
-				final long database_userCreatorId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR);
-				final Byte database_gameType = Byte.valueOf(sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE));
-				final byte database_turn = sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_TURN);
+				final long db_userChallengedId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED);
+				final long db_userCreatorId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR);
+				final Byte db_gameType = Byte.valueOf(sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE));
+				final byte db_turn = sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_TURN);
 
-				if ((userCreatorId.longValue() == database_userChallengedId && database_turn == DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED)
-					|| (userCreatorId.longValue() == database_userCreatorId && database_turn == DatabaseUtilities.TABLE_GAMES_TURN_CREATOR))
+				if ((userCreatorId.longValue() == db_userChallengedId && db_turn == DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED)
+					|| (userCreatorId.longValue() == db_userCreatorId && db_turn == DatabaseUtilities.TABLE_GAMES_TURN_CREATOR))
 				{
-					final String database_oldBoard = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD);
+					final String db_oldBoard = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD);
 
-					board = GameUtilities.newGame(database_oldBoard, database_gameType.byteValue());
-					final JSONObject parameter_boardJSON = new JSONObject(parameter_board);
+					board = GameUtilities.newGame(db_oldBoard, db_gameType.byteValue());
+					final JSONObject parameter_boardJSON = new JSONObject(param_board);
 					final Byte boardValidationResult = Byte.valueOf(board.checkValidity(parameter_boardJSON));
 
 					if (boardValidationResult.byteValue() == Utilities.BOARD_NEW_MOVE || boardValidationResult.byteValue() == Utilities.BOARD_WIN)
@@ -180,11 +180,11 @@ public class NewMove extends HttpServlet
 						// prevent SQL injection by inserting data this way
 						sqlStatement.setString(1, newBoardJSONString);
 
-						if (database_turn == DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED)
+						if (db_turn == DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED)
 						{
 							sqlStatement.setByte(2, DatabaseUtilities.TABLE_GAMES_TURN_CREATOR);
 						}
-						else if (database_turn == DatabaseUtilities.TABLE_GAMES_TURN_CREATOR)
+						else if (db_turn == DatabaseUtilities.TABLE_GAMES_TURN_CREATOR)
 						{
 							sqlStatement.setByte(2, DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED);
 						}
@@ -198,18 +198,18 @@ public class NewMove extends HttpServlet
 							sqlStatement.setByte(3, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
 						}
 
-						sqlStatement.setString(4, parameter_gameId);
+						sqlStatement.setString(4, param_gameId);
 
 						// run the SQL statement
 						sqlStatement.executeUpdate();
 
 						if (boardValidationResult.byteValue() == Utilities.BOARD_WIN)
 						{
-							GCMUtilities.sendMessages(sqlConnection, parameter_gameId, userCreatorId, userChallengedId, boardValidationResult, database_gameType, parameter_userChallengedName);
+							GCMUtilities.sendMessages(sqlConnection, param_gameId, userCreatorId, userChallengedId, boardValidationResult, db_gameType, param_userChallengedName);
 						}
 						else if (boardValidationResult.byteValue() == Utilities.BOARD_NEW_MOVE)
 						{
-							GCMUtilities.sendMessage(sqlConnection, parameter_gameId, userCreatorId, userChallengedId, database_gameType, boardValidationResult);
+							GCMUtilities.sendMessage(sqlConnection, param_gameId, userCreatorId, userChallengedId, db_gameType, boardValidationResult);
 						}
 
 						printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_MOVE_ADDED_TO_DATABASE));

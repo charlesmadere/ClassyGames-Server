@@ -100,7 +100,7 @@ public class GCMUtilities
 				if (errorCodeName.equals(Constants.ERROR_NOT_REGISTERED))
 				// application has been removed from device - unregister database
 				{
-					DatabaseUtilities.removeUserRegId(sqlConnection, userIdToShow);
+					DatabaseUtilities.updateUserRegId(sqlConnection, userIdToShow, null);
 				}
 			}
 		}

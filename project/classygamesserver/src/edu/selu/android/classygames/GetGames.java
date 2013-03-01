@@ -34,7 +34,7 @@ public class GetGames extends HttpServlet
 	private PrintWriter printWriter;
 	private ResultSet sqlResult;
 
-	private String parameter_userId;
+	private String param_userId;
 
 	private Long userId;
 
@@ -62,12 +62,12 @@ public class GetGames extends HttpServlet
 		response.setContentType(Utilities.CONTENT_TYPE_JSON);
 		printWriter = response.getWriter();
 
-		parameter_userId = request.getParameter(Utilities.POST_DATA_ID);
+		param_userId = request.getParameter(Utilities.POST_DATA_ID);
 
-		if (Utilities.verifyValidString(parameter_userId))
+		if (Utilities.verifyValidString(param_userId))
 		// check inputs for validity
 		{
-			userId = Long.valueOf(parameter_userId);
+			userId = Long.valueOf(param_userId);
 
 			if (Utilities.verifyValidLong(userId))
 			// check inputs for validity
@@ -78,15 +78,15 @@ public class GetGames extends HttpServlet
 				}
 				catch (final JSONException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION + e.getLocalizedMessage()));
 				}
 				catch (final SQLException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT + e.getLocalizedMessage()));
 				}
 				catch (final Exception e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD + e.getLocalizedMessage()));
 				}
 				finally
 				{
@@ -169,37 +169,37 @@ public class GetGames extends HttpServlet
 		do
 		// loop through all of the SQL return data
 		{
-			final String database_gameId = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_ID);
-			final long database_userCreatorId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR);
-			final long database_userChallengedId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED);
-			final byte database_gameType = sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE);
-			final Timestamp database_lastMove = sqlResult.getTimestamp(DatabaseUtilities.TABLE_GAMES_COLUMN_LAST_MOVE);
+			final String db_gameId = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_ID);
+			final long db_userCreatorId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR);
+			final long db_userChallengedId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED);
+			final byte db_gameType = sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE);
+			final Timestamp db_lastMove = sqlResult.getTimestamp(DatabaseUtilities.TABLE_GAMES_COLUMN_LAST_MOVE);
 
 			// Initialize a JSONObject. All of the current game's data will be
 			// stored here. At the end of this loop iteration this JSONObject
 			// will be added to one of the above JSONArrays.
 			final JSONObject game = new JSONObject();
 
-			if (database_userCreatorId == userId.longValue())
+			if (db_userCreatorId == userId.longValue())
 			{
-				game.put(Utilities.POST_DATA_ID, database_userChallengedId);
-				game.put(Utilities.POST_DATA_NAME, DatabaseUtilities.grabUsersName(sqlConnection, database_userChallengedId));
+				game.put(Utilities.POST_DATA_ID, db_userChallengedId);
+				game.put(Utilities.POST_DATA_NAME, DatabaseUtilities.grabUsersName(sqlConnection, db_userChallengedId));
 			}
 			else
 			{
-				game.put(Utilities.POST_DATA_ID, database_userCreatorId);
-				game.put(Utilities.POST_DATA_NAME, DatabaseUtilities.grabUsersName(sqlConnection, database_userCreatorId));
+				game.put(Utilities.POST_DATA_ID, db_userCreatorId);
+				game.put(Utilities.POST_DATA_NAME, DatabaseUtilities.grabUsersName(sqlConnection, db_userCreatorId));
 			}
 
-			game.put(Utilities.POST_DATA_GAME_ID, database_gameId);
-			game.put(Utilities.POST_DATA_GAME_TYPE, database_gameType);
-			game.put(Utilities.POST_DATA_LAST_MOVE, database_lastMove.getTime() / 1000);
+			game.put(Utilities.POST_DATA_GAME_ID, db_gameId);
+			game.put(Utilities.POST_DATA_GAME_TYPE, db_gameType);
+			game.put(Utilities.POST_DATA_LAST_MOVE, db_lastMove.getTime() / 1000);
 
 			switch (sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_TURN))
 			{
 				case DatabaseUtilities.TABLE_GAMES_TURN_CREATOR:
 				// it's the creator's turn
-					if (database_userCreatorId == userId.longValue())
+					if (db_userCreatorId == userId.longValue())
 					{
 						turnYours.put(game);
 					}
@@ -211,7 +211,7 @@ public class GetGames extends HttpServlet
 
 				case DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED:
 				// it's the challenger's turn
-					if (database_userChallengedId == userId.longValue())
+					if (db_userChallengedId == userId.longValue())
 					{
 						turnYours.put(game);
 					}

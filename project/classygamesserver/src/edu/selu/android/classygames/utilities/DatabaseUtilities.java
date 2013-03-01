@@ -215,7 +215,8 @@ public class DatabaseUtilities
 	 * 
 	 * @return
 	 * The query's resulting ResultSet object. Could be empty or even null,
-	 * check for that with the ResultSet's .next() method.
+	 * check for that and then the emptyness with the ResultSet's .next()
+	 * method.
 	 * 
 	 * @throws SQLException
 	 * If at some point there is some kind of connection error or query problem
@@ -224,11 +225,48 @@ public class DatabaseUtilities
 	public static ResultSet grabGamesInfo(final Connection sqlConnection, final String gameId) throws SQLException
 	{
 		// prepare a SQL statement to be run on the database
-		final String sqlStatementString = "SELECT " + TABLE_GAMES_COLUMN_BOARD + " FROM " + TABLE_GAMES + " WHERE " + TABLE_GAMES_COLUMN_ID + " = ?";
+		final String sqlStatementString = "SELECT * FROM " + TABLE_GAMES + " WHERE " + TABLE_GAMES_COLUMN_ID + " = ?";
 		final PreparedStatement sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 		// prevent SQL injection by inserting data this way
 		sqlStatement.setString(1, gameId);
+
+		// run the SQL statement and acquire any return information
+		final ResultSet sqlResult = sqlStatement.executeQuery();
+
+		closeSQLStatement(sqlStatement);
+
+		return sqlResult;
+	}
+
+
+	/**
+	 * Query the database for a user's info.
+	 * 
+	 * @param sqlConnection
+	 * Your existing database Connection object. Must already be connected, as
+	 * this method makes no attempt at doing so.
+	 * 
+	 * @param userId
+	 * The ID of the user you're searching for.
+	 * 
+	 * @return
+	 * The query's resulting ResultSet object. Could be empty or even null,
+	 * check for that and then the emptyness with the ResultSet's .next()
+	 * method.
+	 * 
+	 * @throws SQLException
+	 * If at some point there is some kind of connection error or query problem
+	 * with the SQL database then this Exception will be thrown.
+	 */
+	public static ResultSet grabUsersInfo(final Connection sqlConnection, final long userId) throws SQLException
+	{
+		// prepare a SQL statement to be run on the database
+		final String sqlStatementString = "SELECT * FROM " + TABLE_USERS + " WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
+		final PreparedStatement sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+
+		// prevent SQL injection by inserting data this way
+		sqlStatement.setLong(1, userId);
 
 		// run the SQL statement and acquire any return information
 		final ResultSet sqlResult = sqlStatement.executeQuery();
@@ -329,43 +367,10 @@ public class DatabaseUtilities
 
 
 	/**
-	 * Removes a given user's regId from the database. This just replaces the
-	 * currently existing regId value with null.
-	 * 
-	 * @param sqlConnection
-	 * An existing connection to the database. This method will make no attempt
-	 * to either open or close the connection.
-	 * 
-	 * @param userId
-	 * The user ID of the user who's regId needs to be removed.
-	 * 
-	 * @throws SQLException
-	 * If at some point there is some kind of connection error or query problem
-	 * with the SQL database then this Exception will be thrown.
-	 */
-	public static void removeUserRegId(final Connection sqlConnection, final long userId) throws SQLException
-	{
-		// prepare a SQL statement to be run on the database
-		final String sqlStatementString = "UPDATE " + TABLE_USERS + " SET " + TABLE_USERS_COLUMN_REG_ID + " = null WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
-		final PreparedStatement sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-
-		// prevent SQL injection by inserting data this way
-		sqlStatement.setLong(1, userId);
-
-		// run the SQL statement
-		sqlStatement.executeUpdate();
-
-		closeSQLStatement(sqlStatement);
-	}
-
-
-	/**
 	 * Updates a given user's regId in the database. This just replaces the
 	 * currently existing regId value with the regId value that you specify
-	 * here.
-	 * 
-	 * @param userRegId
-	 * The given user's new regId.
+	 * here. If the specified regId is null then the user's regId will just be
+	 * removed.
 	 * 
 	 * @param sqlConnection
 	 * An existing connection to the database. This method will make no attempt
@@ -374,19 +379,37 @@ public class DatabaseUtilities
 	 * @param userId
 	 * The user ID of the user's who's regId needs to be updated.
 	 * 
+	 * @param regId
+	 * The given user's new regId. Set this to null if you want the user's
+	 * regId to be removed.
+	 * 
 	 * @throws SQLException
 	 * If at some point there is some kind of connection error or query problem
 	 * with the SQL database then this Exception will be thrown.
 	 */
-	public static void updateUserRegId(final Connection sqlConnection, final long userId, final String userRegId) throws SQLException
+	public static void updateUserRegId(final Connection sqlConnection, final long userId, final String regId) throws SQLException
 	{
-		// prepare a SQL statement to be run on the database
-		final String sqlStatementString = "UPDATE " + TABLE_USERS + " SET " + TABLE_USERS_COLUMN_REG_ID + " = ? WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
-		final PreparedStatement sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+		PreparedStatement sqlStatement = null;
 
-		// prevent SQL injection by inserting user data this way
-		sqlStatement.setString(1, userRegId);
-		sqlStatement.setLong(2, userId);
+		if (Utilities.verifyValidString(regId))
+		{
+			// prepare a SQL statement to be run on the database
+			final String sqlStatementString = "UPDATE " + TABLE_USERS + " SET " + TABLE_USERS_COLUMN_REG_ID + " = ? WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
+			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+
+			// prevent SQL injection by inserting user data this way
+			sqlStatement.setString(1, regId);
+			sqlStatement.setLong(2, userId);
+		}
+		else
+		{
+			// prepare a SQL statement to be run on the database
+			final String sqlStatementString = "UPDATE " + TABLE_USERS + " SET " + TABLE_USERS_COLUMN_REG_ID + " = null WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
+			sqlStatement = sqlConnection.prepareStatement(sqlStatementString); 
+
+			// prevent SQL injection by inserting user data this way
+			sqlStatement.setLong(1, userId);
+		}
 
 		// run the SQL statement
 		sqlStatement.executeUpdate();

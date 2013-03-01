@@ -38,11 +38,11 @@ public class NewGame extends HttpServlet
 	private PreparedStatement sqlStatement;
 	private PrintWriter printWriter;
 
-	private String parameter_userChallengedId;
-	private String parameter_userChallengedName;
-	private String parameter_userCreatorId;
-	private String parameter_gameType;
-	private String parameter_board;
+	private String param_userChallengedId;
+	private String param_userChallengedName;
+	private String param_userCreatorId;
+	private String param_gameType;
+	private String param_board;
 
 	private Long userChallengedId;
 	private Long userCreatorId;
@@ -74,24 +74,24 @@ public class NewGame extends HttpServlet
 		response.setContentType(Utilities.CONTENT_TYPE_JSON);
 		printWriter = response.getWriter();
 
-		parameter_userChallengedId = request.getParameter(Utilities.POST_DATA_USER_CHALLENGED);
-		parameter_userChallengedName = request.getParameter(Utilities.POST_DATA_NAME);
-		parameter_userCreatorId = request.getParameter(Utilities.POST_DATA_USER_CREATOR);
-		parameter_gameType = request.getParameter(Utilities.POST_DATA_GAME_TYPE);
-		parameter_board = request.getParameter(Utilities.POST_DATA_BOARD);
+		param_userChallengedId = request.getParameter(Utilities.POST_DATA_USER_CHALLENGED);
+		param_userChallengedName = request.getParameter(Utilities.POST_DATA_NAME);
+		param_userCreatorId = request.getParameter(Utilities.POST_DATA_USER_CREATOR);
+		param_gameType = request.getParameter(Utilities.POST_DATA_GAME_TYPE);
+		param_board = request.getParameter(Utilities.POST_DATA_BOARD);
 
-		if (Utilities.verifyValidStrings(parameter_userChallengedId, parameter_userChallengedName, parameter_userCreatorId, parameter_board))
+		if (Utilities.verifyValidStrings(param_userChallengedId, param_userChallengedName, param_userCreatorId, param_board))
 		{
-			userChallengedId = Long.valueOf(parameter_userChallengedId);
-			userCreatorId = Long.valueOf(parameter_userCreatorId);
+			userChallengedId = Long.valueOf(param_userChallengedId);
+			userCreatorId = Long.valueOf(param_userCreatorId);
 
 			if (Utilities.verifyValidLongs(userChallengedId, userCreatorId))
 			// check inputs for validity
 			{
-				if (Utilities.verifyValidString(parameter_gameType))
+				if (Utilities.verifyValidString(param_gameType))
 				// check to see if we were given a gameType parameter
 				{
-					gameType = Byte.valueOf(parameter_gameType);
+					gameType = Byte.valueOf(param_gameType);
 				}
 				else
 				{
@@ -100,7 +100,7 @@ public class NewGame extends HttpServlet
 
 				try
 				{
-					board = GameUtilities.newGame(parameter_board, gameType.byteValue());
+					board = GameUtilities.newGame(param_board, gameType.byteValue());
 
 					if (board.checkValidity() == Utilities.BOARD_NEW_GAME)
 					{
@@ -113,27 +113,27 @@ public class NewGame extends HttpServlet
 				}
 				catch (final UnsupportedEncodingException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DIGEST_HAD_IMPROPER_ENCODING));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DIGEST_HAD_IMPROPER_ENCODING + e.getLocalizedMessage()));
 				}
 				catch (final IOException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND + e.getLocalizedMessage()));
 				}
 				catch (final JSONException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION + e.getLocalizedMessage()));
 				}
 				catch (final NoSuchAlgorithmException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DIGEST_HAD_UNSUPPORTED_ALGORITHM));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DIGEST_HAD_UNSUPPORTED_ALGORITHM + e.getLocalizedMessage()));
 				}
 				catch (final SQLException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT + e.getLocalizedMessage()));
 				}
 				catch (final Exception e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD + e.getLocalizedMessage()));
 				}
 				finally
 				{
@@ -184,7 +184,7 @@ public class NewGame extends HttpServlet
 	private void newGame() throws UnsupportedEncodingException, IOException, JSONException, NoSuchAlgorithmException, SQLException, Exception
 	{
 		sqlConnection = DatabaseUtilities.acquireSQLConnection();
-		DatabaseUtilities.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), parameter_userChallengedName);
+		DatabaseUtilities.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), param_userChallengedName);
 
 		board.flipTeams();
 		final JSONObject boardJSON = board.makeJSON();

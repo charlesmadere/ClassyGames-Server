@@ -3,7 +3,7 @@ Follow this guide to learn how to deploy the `classygamesserver` Eclipse Elastic
 
 1. Make sure that the `classygamesserver` project has no errors. Do a clean and then a full build of the project.
 
-2. Export the project from Eclipse as a WAR file. To do this, select the `classygamesserver` project in the Eclipse Package Explorer, then go to File > Export... > Web > WAR file. Click Next.
+2. Export the project from Eclipse as a `.war` file. To do this, select the `classygamesserver` project in the Eclipse Package Explorer, then go to *File* > *Export...* > *Web* > *WAR file*. Click Next.
 
 3. On this next page of the Export dialog you'll need to make sure of a few things: (A) *Web project* must be set to `classygamesserver`. (B) *Destination* should be set to a valid location, (C) *Target runtime* should have *Optimize for a specific server runtime* checked and *AWS Elastic Beanstalk J2EE Runtime* selected in the dropdown box, (D) *Export source files* should not be checked, and finally, (E) *Overwrite existing file* should be checked. This will place a `.war` file on your desktop.
 
@@ -19,4 +19,4 @@ Follow this guide to learn how to deploy the `classygamesserver` Eclipse Elastic
 
 9. The *Create an RDS DB Instance* radio button should be checked, *DB Engine:* `mysql`, *Instance Class:* `db.t1.micro`, *Allocated Storage:* `5GB`, *Deletion Policy:* `Create snapshot`, *Multiple Availability Zones* should be unchecked. Click *Continue*.
 
-10. This page is just a confirmation page. Make sure that everything looks okay and hit *Finish*!
+10. This page is just a confirmation page. Make sure that everything looks okay before hitting *Finish*. If you click *Finish* and then realize that something was wrong, you will definitely regret it. Deleting an application from Elastic Beanstalk requires that the application is first completely deployed before it can be deleted. So you'll be wasting at least 20 minutes of your time.

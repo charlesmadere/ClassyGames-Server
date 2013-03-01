@@ -29,7 +29,7 @@ public class GetGame extends HttpServlet
 	private PrintWriter printWriter;
 	private ResultSet sqlResult;
 
-	private String parameter_gameId;
+	private String param_gameId;
 
 
 
@@ -55,9 +55,9 @@ public class GetGame extends HttpServlet
 		response.setContentType(Utilities.CONTENT_TYPE_JSON);
 		printWriter = response.getWriter();
 
-		parameter_gameId = request.getParameter(Utilities.POST_DATA_ID);
+		param_gameId = request.getParameter(Utilities.POST_DATA_ID);
 
-		if (Utilities.verifyValidString(parameter_gameId))
+		if (Utilities.verifyValidString(param_gameId))
 		// check inputs for validity
 		{
 			try
@@ -66,11 +66,11 @@ public class GetGame extends HttpServlet
 			}
 			catch (final SQLException e)
 			{
-				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT + e.getLocalizedMessage()));
 			}
 			catch (final Exception e)
 			{
-				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD + e.getLocalizedMessage()));
 			}
 			finally
 			{
@@ -104,7 +104,7 @@ public class GetGame extends HttpServlet
 		sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 		// prevent SQL injection by inserting data this way
-		sqlStatement.setString(1, parameter_gameId);
+		sqlStatement.setString(1, param_gameId);
 
 		// run the SQL statement and acquire any return information
 		sqlResult = sqlStatement.executeQuery();
