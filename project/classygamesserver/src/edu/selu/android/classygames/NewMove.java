@@ -88,8 +88,6 @@ public class NewMove extends HttpServlet
 				try
 				{
 					newMove();
-
-					printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_MOVE_ADDED_TO_DATABASE));
 				}
 				catch (final IOException e)
 				{
@@ -158,14 +156,15 @@ public class NewMove extends HttpServlet
 				{
 					final long database_userChallengedId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED);
 					final long database_userCreatorId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR);
-					final byte database_gameType = sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE);
+					final Byte database_gameType = Byte.valueOf(sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE));
 					final byte database_turn = sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_TURN);
 
 					if ((userCreatorId.longValue() == database_userChallengedId && database_turn == DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED)
 						|| (userCreatorId.longValue() == database_userCreatorId && database_turn == DatabaseUtilities.TABLE_GAMES_TURN_CREATOR))
 					{
 						final String database_oldBoard = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD);
-						board = GameUtilities.newGame(database_oldBoard, database_gameType);
+
+						board = GameUtilities.newGame(database_oldBoard, database_gameType.byteValue());
 						final JSONObject parameter_boardJSON = new JSONObject(parameter_board);
 						final Byte boardValidationResult = Byte.valueOf(board.checkValidity(parameter_boardJSON));
 
@@ -194,18 +193,29 @@ public class NewMove extends HttpServlet
 							if (boardValidationResult.byteValue() == Utilities.BOARD_WIN)
 							{
 								sqlStatement.setByte(3, DatabaseUtilities.TABLE_GAMES_FINISHED_TRUE);
-								GCMUtilities.sendMessages(sqlConnection, parameter_gameId, userCreatorId, userChallengedId, boardValidationResult, Byte.valueOf(database_gameType), parameter_userChallengedName);
+								GCMUtilities.sendMessages(sqlConnection, parameter_gameId, userCreatorId, userChallengedId, boardValidationResult, database_gameType, parameter_userChallengedName);
 							}
 							else if (boardValidationResult.byteValue() == Utilities.BOARD_NEW_MOVE)
 							{
 								sqlStatement.setByte(3, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
-								GCMUtilities.sendMessage(sqlConnection, parameter_gameId, userCreatorId, userChallengedId, Byte.valueOf(database_gameType), boardValidationResult);
+								GCMUtilities.sendMessage(sqlConnection, parameter_gameId, userCreatorId, userChallengedId, database_gameType, boardValidationResult);
 							}
 
 							sqlStatement.setString(4, parameter_gameId);
 
 							// run the SQL statement
 							sqlStatement.executeUpdate();
+
+							if (boardValidationResult.byteValue() == Utilities.BOARD_WIN)
+							{
+								GCMUtilities.sendMessages(sqlConnection, parameter_gameId, userCreatorId, userChallengedId, boardValidationResult, database_gameType, parameter_userChallengedName);
+							}
+							else if (boardValidationResult.byteValue() == Utilities.BOARD_NEW_MOVE)
+							{
+								GCMUtilities.sendMessage(sqlConnection, parameter_gameId, userCreatorId, userChallengedId, database_gameType, boardValidationResult);
+							}
+
+							printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_MOVE_ADDED_TO_DATABASE));
 						}
 						else
 						{

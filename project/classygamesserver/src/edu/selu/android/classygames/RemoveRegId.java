@@ -66,8 +66,6 @@ public class RemoveRegId extends HttpServlet
 				try
 				{
 					removeRegId();
-
-					printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_REMOVED_FROM_DATABASE));
 				}
 				catch (final SQLException e)
 				{
@@ -109,6 +107,7 @@ public class RemoveRegId extends HttpServlet
 	{
 		sqlConnection = DatabaseUtilities.acquireSQLConnection();
 		DatabaseUtilities.removeUserRegId(sqlConnection, userId.longValue());
+		printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_REMOVED_FROM_DATABASE));
 	}
 
 

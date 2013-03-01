@@ -85,8 +85,6 @@ public class SkipMove extends HttpServlet
 				try
 				{
 					skipMove();
-
-					printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_MOVE_ADDED_TO_DATABASE));
 				}
 				catch (final IOException e)
 				{
@@ -185,6 +183,9 @@ public class SkipMove extends HttpServlet
 
 						// run the SQL statement
 						sqlStatement.executeUpdate();
+
+						printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_MOVE_ADDED_TO_DATABASE));
+						
 					}
 					else
 					{

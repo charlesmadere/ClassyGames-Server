@@ -73,8 +73,6 @@ public class NewRegId extends HttpServlet
 				try
 				{
 					newRegId();
-
-					printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_ADDED_TO_DATABASE));
 				}
 				catch (final SQLException e)
 				{
@@ -157,6 +155,8 @@ public class NewRegId extends HttpServlet
 
 		// run the SQL statement
 		sqlStatement.executeUpdate();
+
+		printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_ADDED_TO_DATABASE));
 	}
 
 

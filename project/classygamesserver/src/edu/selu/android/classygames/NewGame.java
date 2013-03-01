@@ -105,8 +105,6 @@ public class NewGame extends HttpServlet
 					if (board.checkValidity() == Utilities.BOARD_NEW_GAME)
 					{
 						newGame();
-
-						printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_GAME_ADDED_TO_DATABASE));
 					}
 					else
 					{
@@ -289,6 +287,7 @@ public class NewGame extends HttpServlet
 			while (continueToRun);
 
 			GCMUtilities.sendMessage(sqlConnection, digest, userCreatorId, userChallengedId, gameType, Byte.valueOf(Utilities.BOARD_NEW_GAME));
+			printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_GAME_ADDED_TO_DATABASE));
 		}
 		else
 		{
