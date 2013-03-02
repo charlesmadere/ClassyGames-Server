@@ -189,6 +189,8 @@ public class NewMove extends HttpServlet
 					if (boardValidationResult.byteValue() == Utilities.BOARD_NEW_MOVE || boardValidationResult.byteValue() == Utilities.BOARD_WIN)
 					{
 						line = 191;
+						board = GameUtilities.newGame(param_board, db_gameType.byteValue());
+						line = 192;
 						board.flipTeams();
 						line = 193;
 						final JSONObject newBoardJSON = board.makeJSON();
