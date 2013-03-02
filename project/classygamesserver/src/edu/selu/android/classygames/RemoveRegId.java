@@ -73,7 +73,7 @@ public class RemoveRegId extends HttpServlet
 				}
 				catch (final Exception e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC));
 				}
 				finally
 				{

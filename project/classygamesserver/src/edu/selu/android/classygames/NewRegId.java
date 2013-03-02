@@ -76,11 +76,11 @@ public class NewRegId extends HttpServlet
 				}
 				catch (final SQLException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT + e.getLocalizedMessage()));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT + e.getMessage()));
 				}
 				catch (final Exception e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JDBC_DRIVER_COULD_NOT_LOAD + e.getLocalizedMessage()));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC + e.getMessage()));
 				}
 				finally
 				{
