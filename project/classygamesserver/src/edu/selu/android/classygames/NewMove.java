@@ -164,8 +164,8 @@ public class NewMove extends HttpServlet
 					final String db_oldBoard = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD);
 
 					board = GameUtilities.newGame(db_oldBoard, db_gameType.byteValue());
-					final JSONObject parameter_boardJSON = new JSONObject(param_board);
-					final Byte boardValidationResult = Byte.valueOf(board.checkValidity(parameter_boardJSON));
+					final JSONObject param_boardJSON = new JSONObject(param_board);
+					final Byte boardValidationResult = Byte.valueOf(board.checkValidity(param_boardJSON));
 
 					if (boardValidationResult.byteValue() == Utilities.BOARD_NEW_MOVE || boardValidationResult.byteValue() == Utilities.BOARD_WIN)
 					{

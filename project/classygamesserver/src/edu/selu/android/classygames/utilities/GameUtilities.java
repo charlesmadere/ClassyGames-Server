@@ -14,7 +14,7 @@ public class GameUtilities
 	/**
 	 * Attempts to create (and then return) a GenericBoard object.
 	 * 
-	 * @param parameter_board
+	 * @param param_board
 	 * JSON String containing this game board's information.
 	 * 
 	 * @param gameType
@@ -28,13 +28,13 @@ public class GameUtilities
 	 * If at some point the JSON data that this method tries to create has an
 	 * issue then this Exception will be thrown.
 	 */
-	public static GenericBoard newGame(final String parameter_board, final byte gameType) throws JSONException
+	public static GenericBoard newGame(final String param_board, final byte gameType) throws JSONException
 	{
 		GenericBoard board = null;
 
-		final JSONObject boardJSON = new JSONObject(parameter_board);
+		final JSONObject boardJSON = new JSONObject(param_board);
 
-		if (Utilities.verifyValidString(parameter_board))
+		if (Utilities.verifyValidString(param_board))
 		{
 			switch (gameType)
 			{

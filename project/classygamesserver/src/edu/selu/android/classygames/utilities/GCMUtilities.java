@@ -72,7 +72,7 @@ public class GCMUtilities
 		// ensure that we were able to grab a valid regId for the user
 		{
 			// load the GCM Sender class
-			Class.forName("com.google.android.gcm.server.Sender").newInstance();
+//			Class.forName("com.google.android.gcm.server.Sender").newInstance();
 
 			// Create a GCM Sender object with our Google API key
 			final Sender sender = new Sender(KeysAndConstants.GOOGLE_API_KEY);
