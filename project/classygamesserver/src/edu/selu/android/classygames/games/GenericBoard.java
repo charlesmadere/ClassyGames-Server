@@ -5,8 +5,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.selu.android.classygames.utilities.Utilities;
-
 
 /**
  * A generic Board class. All games need to have their own Board class that
@@ -129,6 +127,9 @@ public abstract class GenericBoard
 				final GenericPiece piece = position.getPiece();
 				final GenericPiece pieceInverse = positionInverse.getPiece();
 
+				piece.switchTeam();
+				pieceInverse.switchTeam();
+
 				position.setPiece(pieceInverse);
 				positionInverse.setPiece(piece);
 			}
@@ -233,8 +234,8 @@ public abstract class GenericBoard
 	private void initializeBoardFromJSON() throws JSONException
 	{
 		final JSONArray teams = boardJSON.getJSONObject("board").getJSONArray("teams");
-		initializeTeamFromJSON(teams.getJSONArray(0), GenericPiece.TEAM_PLAYER);
-		initializeTeamFromJSON(teams.getJSONArray(1), GenericPiece.TEAM_OPPONENT);
+		initializeTeamFromJSON(teams.getJSONArray(0), GenericPiece.TEAM_OPPONENT);
+		initializeTeamFromJSON(teams.getJSONArray(1), GenericPiece.TEAM_PLAYER);
 	}
 
 
