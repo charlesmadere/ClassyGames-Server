@@ -234,8 +234,6 @@ public class DatabaseUtilities
 		// run the SQL statement and acquire any return information
 		final ResultSet sqlResult = sqlStatement.executeQuery();
 
-		closeSQLStatement(sqlStatement);
-
 		return sqlResult;
 	}
 
@@ -270,8 +268,6 @@ public class DatabaseUtilities
 
 		// run the SQL statement and acquire any return information
 		final ResultSet sqlResult = sqlStatement.executeQuery();
-
-		closeSQLStatement(sqlStatement);
 
 		return sqlResult;
 	}

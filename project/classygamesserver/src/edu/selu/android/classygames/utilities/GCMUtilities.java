@@ -59,14 +59,22 @@ public class GCMUtilities
 	 * @throws SQLException
 	 * If at some point there is some kind of connection error or query problem
 	 * with the SQL database then this Exception will be thrown.
+	 * 
+	 * @throws Exception
+	 * If the GCM library couldn't be loaded then this Exception will be
+	 * thrown.
 	 */
-	private static void sendMessage(final Connection sqlConnection, final String gameId, final Long userIdToShow, final String userNameToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType) throws IOException, SQLException
+	private static void sendMessage(final Connection sqlConnection, final String gameId, final Long userIdToShow, final String userNameToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType) throws IOException, SQLException, Exception
 	{
 		final String regId = DatabaseUtilities.grabUsersRegId(sqlConnection, userIdOfReceiver.longValue());
 
 		if (Utilities.verifyValidString(regId))
 		// ensure that we were able to grab a valid regId for the user
 		{
+			// load the GCM Sender class
+			Class.forName("com.google.android.gcm.server.Sender").newInstance();
+
+			// Create a GCM Sender object with our Google API key
 			final Sender sender = new Sender(KeysAndConstants.GOOGLE_API_KEY);
 
 			// build the message that will be sent to the client device
@@ -137,8 +145,12 @@ public class GCMUtilities
 	 * @throws SQLException
 	 * If at some point there is some kind of connection error or query problem
 	 * with the SQL database then this Exception will be thrown.
+	 * 
+	 * @throws Exception
+	 * If the GCM library couldn't be loaded then this Exception will be
+	 * thrown.
 	 */
-	public static void sendMessage(final Connection sqlConnection, final String gameId, final Long userIdToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType) throws IOException, SQLException
+	public static void sendMessage(final Connection sqlConnection, final String gameId, final Long userIdToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType) throws IOException, SQLException, Exception
 	{
 		final String userNameToShow = DatabaseUtilities.grabUsersName(sqlConnection, userIdToShow.longValue());
 		sendMessage(sqlConnection, gameId, userIdToShow, userNameToShow, userIdOfReceiver, gameType, messageType);
@@ -178,8 +190,12 @@ public class GCMUtilities
 	 * @throws SQLException
 	 * If at some point there is some kind of connection error or query problem
 	 * with the SQL database then this Exception will be thrown.
+	 * 
+	 * @throws Exception
+	 * If the GCM library couldn't be loaded then this Exception will be
+	 * thrown.
 	 */
-	public static void sendMessages(final Connection sqlConnection, final String gameId, final Long userIdToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType, final String userNameOfReceiver) throws IOException, SQLException
+	public static void sendMessages(final Connection sqlConnection, final String gameId, final Long userIdToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType, final String userNameOfReceiver) throws IOException, SQLException, Exception
 	{
 		final String userNameToShow = DatabaseUtilities.grabUsersName(sqlConnection, userIdToShow.longValue());
 		sendMessage(sqlConnection, gameId, userIdToShow, userNameToShow, userIdOfReceiver, gameType, Byte.valueOf(Utilities.BOARD_LOSE));
