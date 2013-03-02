@@ -119,23 +119,23 @@ public class NewGame extends HttpServlet
 				}
 				catch (final UnsupportedEncodingException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DIGEST_HAD_IMPROPER_ENCODING + e.getMessage()));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DIGEST_HAD_IMPROPER_ENCODING + " ~ " + line + " ~ " + e.getMessage()));
 				}
 				catch (final IOException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND + e.getMessage()));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND + " ~ " + line + " ~ " + e.getMessage()));
 				}
 				catch (final JSONException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION + e.getMessage()));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION + " ~ " + line + " ~ " + e.getMessage()));
 				}
 				catch (final NoSuchAlgorithmException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DIGEST_HAD_UNSUPPORTED_ALGORITHM + e.getMessage()));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DIGEST_HAD_UNSUPPORTED_ALGORITHM + " ~ " + line + " ~ " + e.getMessage()));
 				}
 				catch (final SQLException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT + e.getMessage()));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT + " ~ " + line + " ~ " + e.getMessage()));
 				}
 				catch (final Exception e)
 				{
