@@ -5,6 +5,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.selu.android.classygames.utilities.Utilities;
+
 
 /**
  * A generic Board class. All games need to have their own Board class that
