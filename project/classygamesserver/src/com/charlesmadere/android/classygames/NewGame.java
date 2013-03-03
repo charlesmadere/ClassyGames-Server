@@ -1,4 +1,4 @@
-package edu.selu.android.classygames;
+package com.charlesmadere.android.classygames;
 
 
 import java.io.IOException;
@@ -20,11 +20,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.selu.android.classygames.games.GenericBoard;
-import edu.selu.android.classygames.utilities.DatabaseUtilities;
-import edu.selu.android.classygames.utilities.GCMUtilities;
-import edu.selu.android.classygames.utilities.GameUtilities;
-import edu.selu.android.classygames.utilities.Utilities;
+import com.charlesmadere.android.classygames.games.GenericBoard;
+import com.charlesmadere.android.classygames.utilities.DatabaseUtilities;
+import com.charlesmadere.android.classygames.utilities.GCMUtilities;
+import com.charlesmadere.android.classygames.utilities.GameUtilities;
+import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
 public class NewGame extends HttpServlet

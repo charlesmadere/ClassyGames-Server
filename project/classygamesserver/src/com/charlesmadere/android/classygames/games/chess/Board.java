@@ -1,11 +1,12 @@
-package edu.selu.android.classygames.games.chess;
+package com.charlesmadere.android.classygames.games.chess;
 
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.selu.android.classygames.games.GenericBoard;
-import edu.selu.android.classygames.games.Position;
+import com.charlesmadere.android.classygames.games.GenericBoard;
+import com.charlesmadere.android.classygames.games.Position;
+
 
 
 /**

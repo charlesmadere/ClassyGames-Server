@@ -1,4 +1,4 @@
-package edu.selu.android.classygames;
+package com.charlesmadere.android.classygames;
 
 
 import java.io.IOException;
@@ -18,8 +18,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.selu.android.classygames.utilities.DatabaseUtilities;
-import edu.selu.android.classygames.utilities.Utilities;
+import com.charlesmadere.android.classygames.utilities.DatabaseUtilities;
+import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
 public class GetGames extends HttpServlet

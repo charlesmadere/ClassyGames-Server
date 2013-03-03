@@ -1,11 +1,12 @@
-package edu.selu.android.classygames.games;
+package com.charlesmadere.android.classygames.games;
 
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.selu.android.classygames.utilities.Utilities;
+import com.charlesmadere.android.classygames.utilities.Utilities;
+
 
 
 /**

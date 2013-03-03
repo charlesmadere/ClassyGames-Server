@@ -1,4 +1,4 @@
-package edu.selu.android.classygames.games;
+package com.charlesmadere.android.classygames.games;
 
 
 public class Coordinate

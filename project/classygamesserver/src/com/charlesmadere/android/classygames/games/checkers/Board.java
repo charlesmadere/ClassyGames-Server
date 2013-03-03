@@ -1,12 +1,13 @@
-package edu.selu.android.classygames.games.checkers;
+package com.charlesmadere.android.classygames.games.checkers;
 
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.selu.android.classygames.games.Coordinate;
-import edu.selu.android.classygames.games.GenericBoard;
-import edu.selu.android.classygames.games.Position;
+import com.charlesmadere.android.classygames.games.Coordinate;
+import com.charlesmadere.android.classygames.games.GenericBoard;
+import com.charlesmadere.android.classygames.games.Position;
+
 
 
 /**

@@ -1,4 +1,4 @@
-package edu.selu.android.classygames.utilities;
+package com.charlesmadere.android.classygames.utilities;
 
 
 import java.util.Random;

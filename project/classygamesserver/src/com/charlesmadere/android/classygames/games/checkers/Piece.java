@@ -1,7 +1,7 @@
-package edu.selu.android.classygames.games.checkers;
+package com.charlesmadere.android.classygames.games.checkers;
 
 
-import edu.selu.android.classygames.games.GenericPiece;
+import com.charlesmadere.android.classygames.games.GenericPiece;
 
 
 /**

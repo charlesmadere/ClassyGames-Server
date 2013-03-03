@@ -1,10 +1,11 @@
-package edu.selu.android.classygames.utilities;
+package com.charlesmadere.android.classygames.utilities;
 
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.selu.android.classygames.games.GenericBoard;
+import com.charlesmadere.android.classygames.games.GenericBoard;
+
 
 
 public class GameUtilities
@@ -39,11 +40,11 @@ public class GameUtilities
 			switch (gameType)
 			{
 				case Utilities.POST_DATA_GAME_TYPE_CHESS:
-					board = new edu.selu.android.classygames.games.chess.Board(boardJSON);
+					board = new com.charlesmadere.android.classygames.games.chess.Board(boardJSON);
 					break;
 
 				case Utilities.POST_DATA_GAME_TYPE_CHECKERS:
-					board = new edu.selu.android.classygames.games.checkers.Board(boardJSON);
+					board = new com.charlesmadere.android.classygames.games.checkers.Board(boardJSON);
 					break;
 			}
 		}

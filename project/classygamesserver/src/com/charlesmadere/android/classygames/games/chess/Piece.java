@@ -1,7 +1,7 @@
-package edu.selu.android.classygames.games.chess;
+package com.charlesmadere.android.classygames.games.chess;
 
 
-import edu.selu.android.classygames.games.GenericPiece;
+import com.charlesmadere.android.classygames.games.GenericPiece;
 
 
 /**
