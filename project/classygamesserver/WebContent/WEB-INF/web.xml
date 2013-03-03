@@ -13,7 +13,7 @@
 		<description></description>
 		<display-name>GetGame</display-name>
 		<servlet-name>GetGame</servlet-name>
-		<servlet-class>edu.selu.android.classygames.GetGame</servlet-class>
+		<servlet-class>com.charlesmadere.android.classygames.GetGame</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>GetGame</servlet-name>
@@ -23,7 +23,7 @@
 		<description></description>
 		<display-name>GetGames</display-name>
 		<servlet-name>GetGames</servlet-name>
-		<servlet-class>edu.selu.android.classygames.GetGames</servlet-class>
+		<servlet-class>com.charlesmadere.android.classygames.GetGames</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>GetGames</servlet-name>
@@ -33,7 +33,7 @@
 		<description></description>
 		<display-name>NewGame</display-name>
 		<servlet-name>NewGame</servlet-name>
-		<servlet-class>edu.selu.android.classygames.NewGame</servlet-class>
+		<servlet-class>com.charlesmadere.android.classygames.NewGame</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>NewGame</servlet-name>
@@ -43,7 +43,7 @@
 		<description></description>
 		<display-name>NewMove</display-name>
 		<servlet-name>NewMove</servlet-name>
-		<servlet-class>edu.selu.android.classygames.NewMove</servlet-class>
+		<servlet-class>com.charlesmadere.android.classygames.NewMove</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>NewMove</servlet-name>
@@ -53,7 +53,7 @@
 		<description></description>
 		<display-name>NewRegId</display-name>
 		<servlet-name>NewRegId</servlet-name>
-		<servlet-class>edu.selu.android.classygames.NewRegId</servlet-class>
+		<servlet-class>com.charlesmadere.android.classygames.NewRegId</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>NewRegId</servlet-name>
@@ -63,7 +63,7 @@
 		<description></description>
 		<display-name>RemoveRegId</display-name>
 		<servlet-name>RemoveRegId</servlet-name>
-		<servlet-class>edu.selu.android.classygames.RemoveRegId</servlet-class>
+		<servlet-class>com.charlesmadere.android.classygames.RemoveRegId</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>RemoveRegId</servlet-name>
@@ -73,7 +73,7 @@
 		<description></description>
 		<display-name>SkipMove</display-name>
 		<servlet-name>SkipMove</servlet-name>
-		<servlet-class>edu.selu.android.classygames.SkipMove</servlet-class>
+		<servlet-class>com.charlesmadere.android.classygames.SkipMove</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SkipMove</servlet-name>
