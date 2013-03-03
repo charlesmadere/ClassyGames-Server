@@ -45,8 +45,6 @@ public class SkipMove extends HttpServlet
 
 	private GenericBoard board;
 
-	int line = 0;
-
 
 
 
@@ -87,21 +85,19 @@ public class SkipMove extends HttpServlet
 			{
 				try
 				{
-					line = 90;
 					skipMove();
-					line = 92;
 				}
 				catch (final IOException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND + " ~ " + line + " ~ " + e.getMessage()));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND));
 				}
 				catch (final SQLException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT + " ~ " + line + " ~ " + e.getMessage()));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
 				}
 				catch (final Exception e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC + " ~ " + line + " ~ " + e.getMessage()));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC));
 				}
 				finally
 				{
@@ -141,83 +137,54 @@ public class SkipMove extends HttpServlet
 	 */
 	private void skipMove() throws IOException, SQLException, Exception
 	{
-		line = 144;
 		sqlConnection = DatabaseUtilities.acquireSQLConnection();
-		line = 146;
 		DatabaseUtilities.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), param_userChallengedName);
-		line = 148;
 
 		sqlResult = DatabaseUtilities.grabGamesInfo(sqlConnection, param_gameId);
-		line = 151;
 
 		if (sqlResult != null && sqlResult.next())
 		{
-			line = 155;
 			if (sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED) == DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE)
 			// make sure that the game has not been finished
 			{
-				line = 159;
 				final long db_userChallengedId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED);
-				line = 161;
 				final long db_userCreatorId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR);
-				line = 163;
 				final Byte db_gameType = Byte.valueOf(sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE));
-				line = 165;
 				final byte db_turn = sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_TURN);
-				line = 167;
 
 				if ((userCreatorId.longValue() == db_userChallengedId && db_turn == DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED)
 					|| (userCreatorId.longValue() == db_userCreatorId && db_turn == DatabaseUtilities.TABLE_GAMES_TURN_CREATOR))
 				{
-					line = 172;
 					final String db_oldBoard = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD);
-					line = 174;
 
 					board = GameUtilities.newGame(db_oldBoard, db_gameType.byteValue());
-					line = 177;
 					board.flipTeams();
-					line = 179;
-
 					final JSONObject boardJSON = board.makeJSON();
-					line = 182;
 					final String boardJSONString = boardJSON.toString();
-					line = 184;
 
 					// prepare a SQL statement to be run on the database
 					final String sqlStatementString = "UPDATE " + DatabaseUtilities.TABLE_GAMES + " SET " + DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_TURN + " = ?, "  + DatabaseUtilities.TABLE_GAMES_COLUMN_LAST_MOVE + " = NOW() WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
-					line = 188;
 					sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-					line = 190;
 
 					// prevent SQL injection by inserting data this way
 					sqlStatement.setString(1, boardJSONString);
-					line = 194;
 
 					if (db_turn == DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED)
 					{
-						line = 198;
 						sqlStatement.setByte(2, DatabaseUtilities.TABLE_GAMES_TURN_CREATOR);
-						line = 200;
 					}
 					else if (db_turn == DatabaseUtilities.TABLE_GAMES_TURN_CREATOR)
 					{
-						line = 204;
 						sqlStatement.setByte(2, DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED);
-						line = 206;
 					}
 
-					line = 209;
 					sqlStatement.setString(3, param_gameId);
-					line = 211;
 
 					// run the SQL statement
 					sqlStatement.executeUpdate();
-					line = 215;
 
 					GCMUtilities.sendMessage(sqlConnection, param_gameId, userCreatorId, userChallengedId, db_gameType, Byte.valueOf(Utilities.BOARD_NEW_MOVE));
-					line = 218;
 					printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_MOVE_ADDED_TO_DATABASE));
-					line = 220;
 				}
 				else
 				{

@@ -78,15 +78,15 @@ public class GetGames extends HttpServlet
 				}
 				catch (final JSONException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION + e.getMessage()));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
 				}
 				catch (final SQLException e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT + e.getMessage()));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
 				}
 				catch (final Exception e)
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC + e.getMessage()));
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC));
 				}
 				finally
 				{
