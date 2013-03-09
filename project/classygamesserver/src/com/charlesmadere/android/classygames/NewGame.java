@@ -147,7 +147,7 @@ public class NewGame extends HttpServlet
 		}
 		else
 		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
+			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_EMPTY));
 		}
 	}
 
@@ -217,17 +217,11 @@ public class NewGame extends HttpServlet
 				boardJSONString.getBytes(Utilities.UTF8)
 			);
 
-			// prepare a SQL statement to be run on the database
-			String sqlStatementString = "SELECT " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
-			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+			// check to see if the digest we created is already taken by a game
+			// in the database
+			final ResultSet sqlResult = DatabaseUtilities.grabGamesInfo(sqlConnection, digest);
 
-			// prevent SQL injection by inserting data this way
-			sqlStatement.setString(1, digest);
-
-			// run the SQL statement and acquire any return information
-			final ResultSet sqlResult = sqlStatement.executeQuery();
-
-			if (sqlResult.next())
+			if (sqlResult != null && sqlResult.next())
 			// the digest we created to use as an ID already exists in the
 			// games table
 			{
@@ -239,7 +233,7 @@ public class NewGame extends HttpServlet
 					DatabaseUtilities.closeSQLStatement(sqlStatement);
 
 					// prepare a SQL statement to be run on the database
-					sqlStatementString = "UPDATE " + DatabaseUtilities.TABLE_GAMES + " SET " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_TURN + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " = ? WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
+					final String sqlStatementString = "UPDATE " + DatabaseUtilities.TABLE_GAMES + " SET " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_TURN + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " = ? WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
 					sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 					// prevent SQL injection by inserting data this way
@@ -265,7 +259,7 @@ public class NewGame extends HttpServlet
 				DatabaseUtilities.closeSQLStatement(sqlStatement);
 
 				// prepare a SQL statement to be run on the database
-				sqlStatementString = "INSERT INTO " + DatabaseUtilities.TABLE_GAMES + " " + DatabaseUtilities.TABLE_GAMES_FORMAT + " " + DatabaseUtilities.TABLE_GAMES_VALUES;
+				final String sqlStatementString = "INSERT INTO " + DatabaseUtilities.TABLE_GAMES + " " + DatabaseUtilities.TABLE_GAMES_FORMAT + " " + DatabaseUtilities.TABLE_GAMES_VALUES;
 				sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
 
 				// prevent SQL injection by inserting data this way
