@@ -142,7 +142,8 @@ public class ForfeitGame extends HttpServlet
 				// run the SQL statement
 				sqlStatement.executeUpdate();
 
-				GCMUtilities.sendMessages(sqlConnection, param_gameId, userCreatorId, userChallengedId, Byte.valueOf(Utilities.BOARD_WIN), Byte.valueOf(Utilities.POST_DATA_GAME_TYPE_CHECKERS), param_userChallengedName);
+				GCMUtilities.sendMessages(sqlConnection, param_gameId, userChallengedId, userCreatorId, Byte.valueOf(Utilities.BOARD_WIN), Byte.valueOf(Utilities.POST_DATA_GAME_TYPE_CHECKERS), param_userChallengedName);
+				printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_GENERIC));
 			}
 			else
 			{
