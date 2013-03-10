@@ -19,6 +19,9 @@ Installation Directions
 12. Right click on `classygamesserver` in the Package Explorer and choose *Properties*. Choose *Project Facets* and make sure that *Java* is set to *1.6*, then click *OK*.
 13. Now you've imported the project but are going to be missing all of the source files. You're going to need to download this repository as it currently is and paste in those source files.
 
+Changelog
+---------
+Classy Games Server v1.5.1 was released on March 9th, 2013, and includes support for the new `ForfeitGame` function.
 
 API Documentation
 -----------------
