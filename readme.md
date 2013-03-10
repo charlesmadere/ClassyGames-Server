@@ -19,70 +19,114 @@ Installation Directions
 12. Right click on `classygamesserver` in the Package Explorer and choose *Properties*. Choose *Project Facets* and make sure that *Java* is set to *1.6*, then click *OK*.
 13. Now you've imported the project but are going to be missing all of the source files. You're going to need to download this repository as it currently is and paste in those source files.
 
+Changelog
+---------
+Classy Games Server v1.5.1 was released on March 9th, 2013, and includes support for the new `ForfeitGame` function.
 
 API Documentation
 -----------------
 This is an attempt to document exactly how to make API calls against the Classy Games server code. All of the below endpoints **require** HTTP POST requests in order for them to gather data, **not HTTP GET**! All of these endpoints will respond to your input with a `UTF-8` encoded JSON String (`application/json; charset=UTF-8`) as output.
 
-+ ### GetGame ###
-    + Outputs the state of the game board as a JSON String. Is used to acquire the board data for a specific game.
++ ### GetGame `http://classygames.net/GetGame` ###
+    + Outputs the state of the game board as a `JSON` String. Is used to acquire the board data for a specific game.
 
     + *Input*
         + **`id`** a String that closely resembles a `SHA-256` hash.
+        + **Example input**
+            + `string`
 
     + *Output*
         + Hello, World!
+        + **Example output**
+            + `string`
 
-+ ### GetGames ###
++ ### GetGames `http://classygames.net/GetGames` ###
     + Outputs a list of games that the given user has. This output will only contain in progress games.
 
     + *Input*
         + **`id`** a String, that represents the current user's Facebook id. As a numeral this would be a `long`.
+        + **Example input**
+            + `string`
 
     + *Output*
         + Hello, World!
+        + **Example output**
+            + `string`
 
-+ ### NewGame ###
++ ### ForfeitGame `http://classygames.net/ForfeitGame` ###
+    + Allows a user to quit (and therefore lose) a game that has not already been finished.
+
+    + *Input*
+        + **`id`** a String
+        + **Example input**
+            + `string`
+
+    + *Output*
+        + Hello, World!
+        + **Example output**
+            + `string`
+
++ ### NewGame `http://classygames.net/NewGame` ###
     + Creates a new game of the specified game type with the specified user.
 
     + *Input*
         + Hello, World!
+        + **Example input**
+            + `string`
 
     + *Output*
         + Hello, World!
+        + **Example output**
+            + `string`
 
-+ ### NewMove ###
++ ### NewMove `http://classygames.net/NewMove` ###
     + Creates a new move in an already existing game.
 
     + *Input*
         + Hello, World!
+        + **Example input**
+            + `string`
 
     + *Output*
         + Hello, World!
+        + **Example output**
+            + `string`
 
-+ ### NewRegId ###
++ ### NewRegId `http://classygames.net/NewRegId` ###
     + Registers a user with the server. This is needed primarily for push (GCM - Google Cloud Messaging) notifications.
 
     + *Input*
         + Hello, World!
+        + **Example input**
+            + `string`
 
     + *Output*
         + Hello, World!
+        + **Example output**
+            + `string`
 
-+ ### RemoveRegId ###
++ ### RemoveRegId `http://classygames.net/RemoveRegId` ###
     + Removes a user's device ID from the server. The user will no longer be able to receive push (GCM - Google Cloud Messaging) notifications until they register again. This does not remove a user's data from the database entirely however.
 
     + *Input*
         + Hello, World!
+        + **Example input**
+            + `string`
 
     + *Output*
         + Hello, World!
+        + **Example output**
+            + `string`
 
-+ ### SkipMove ###
++ ### SkipMove `http://classygames.net/SkipMove` ###
     + Allows someone to pass. The given game will then switch to the other user's turn.
 
     + *Input*
         + Hello, World!
+        + **Example input**
+            + `string`
 
     + *Output*
         + Hello, World!
+        + **Example output**
+            + `string`

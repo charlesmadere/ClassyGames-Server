@@ -87,7 +87,7 @@ public class RemoveRegId extends HttpServlet
 		}
 		else
 		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
+			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_EMPTY));
 		}
 	}
 
