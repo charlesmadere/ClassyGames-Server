@@ -12,46 +12,114 @@
 				height: 100%;
 				margin-left: auto;
 				margin-right: auto;
-				max-width: 768px;
+				max-width: 800px;
 				padding-left: 1em;
 				padding-right: 1em;
 			}
 
-			h1, h2, h3
+			h1, h2
 			{
 				font-family: Roboto, "Segoe UI", Arial, sans-serif;
 			}
 
-			span.code, li, code
+			section
+			{
+				margin-bottom: 4em;
+			}
+
+			h3, span.code, li
 			{
 				font-family: Consolas, "Courier New", Courier, monospace;
 			}
 
-			code
+			article
+			{
+				margin-bottom: 4em;
+				padding-left: 1em;
+				border-left-style: dotted;
+				border-left-width: 1px;
+			}
+
+			div.code
 			{
 				background-color: #EEEEEE;
-				padding-left: 1em;
-				padding-right: 1em;
+				font-family: Consolas, "Courier New", Courier, monospace;
+				margin: 1em;
+				padding: 0.5em;
 			}
 		</style>
 		<title>Classy Games Server Documentation</title>
 	</head>
 
 	<body>
-		<h1>Classy Games Server Documentation</h1>
-		<p>This is an attempt to document exactly how to make API calls against the Classy Games server code. All of the below endpoints require <span class="code">HTTP POST</span> requests in order for them to properly gather your given data. All of these endpoints will respond to your input with a <span class="code">UTF-8</span> encoded <span class="code">JSON</span> String (<span class="code">application/json; charset=UTF-8</span>) as output.</p>
-		<p>Knowledge of parsing <span class="code">JSON</span> data will be needed to understand how to manipulate the server's output.</p>
-		<h2>Endpoints</h2>
-		<ol>
-			<li><a href="#">GetGame</a></li>
-			<li><a href="#">GetGames</a></li>
-			<li><a href="#">ForfeitGame</a></li>
-			<li><a href="#">NewGame</a></li>
-			<li><a href="#">NewMove</a></li>
-			<li><a href="#">NewRegId</a></li>
-			<li><a href="#">RemoveRegId</a></li>
-		</ol>
-		<code>Hello, World!</code>
+		<header>
+			<h1>Classy Games Server Documentation</h1>
+			<p>This is an attempt to document exactly how to make API calls against the Classy Games server code. All of the below endpoints require <span class="code">HTTP POST</span> requests in order for them to properly gather your given data. All of these endpoints will respond to your input with a <span class="code">UTF-8</span> encoded <span class="code">JSON</span> String (<span class="code">application/json; charset=UTF-8</span>) as output.</p>
+			<p>Knowledge of parsing <span class="code">JSON</span> data will be needed to understand how to manipulate the server's output.</p>
+		</header>
+		<section>
+			<h2>Endpoints</h2>
+			<ol>
+				<li><a href="#GetGame">GetGame</a></li>
+				<li><a href="#GetGames">GetGames</a></li>
+				<li><a href="#ForfeitGame">ForfeitGame</a></li>
+				<li><a href="#NewGame">NewGame</a></li>
+				<li><a href="#NewMove">NewMove</a></li>
+				<li><a href="#NewRegId">NewRegId</a></li>
+				<li><a href="#RemoveRegId">RemoveRegId</a></li>
+			</ol>
+		</section>
+		<section>
+			<article id="GetGame">
+				<header>
+					<h3>1. GetGame</h3>
+				</header>
+				<p>Hello, World!</p>
+				<div class="code">Hello, World!</div>
+			</article>
+			<article id="GetGames">
+				<header>
+					<h3>2. GetGames</h3>
+				</header>
+				<p>Hello, World!</p>
+				<div class="code">Hello, World!</div>
+			</article>
+			<article id="ForfeitGame">
+				<header>
+					<h3>3. ForfeitGame</h3>
+				</header>
+				<p>Hello, World!</p>
+				<div class="code">Hello, World!</div>
+			</article>
+			<article id="NewGame">
+				<header>
+					<h3>4. NewGame</h3>
+				</header>
+				<p>Hello, World!</p>
+				<div class="code">Hello, World!</div>
+			</article>
+			<article id="NewMove">
+				<header>
+					<h3>5. NewMove</h3>
+				</header>
+				<p>Hello, World!</p>
+				<div class="code">Hello, World!</div>
+			</article>
+			<article id="NewRegId">
+				<header>
+					<h3>6. NewRegId</h3>
+				</header>
+				<p>Hello, World!</p>
+				<div class="code">Hello, World!</div>
+			</article>
+			<article id="RemoveRegId">
+				<header>
+					<h3>7. RemoveRegId</h3>
+				</header>
+				<p>Hello, World!</p>
+				<div class="code">Hello, World!</div>
+			</article>
+		</section>
 	</body>
 
 </html>
