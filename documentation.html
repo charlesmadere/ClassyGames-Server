@@ -1,0 +1,57 @@
+﻿<!doctype html>
+
+
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<style type="text/css">
+			body
+			{
+				font-family: Cambria, "Times New Roman", Times, serif;
+				height: 100%;
+				margin-left: auto;
+				margin-right: auto;
+				max-width: 768px;
+				padding-left: 1em;
+				padding-right: 1em;
+			}
+
+			h1, h2, h3
+			{
+				font-family: Roboto, "Segoe UI", Arial, sans-serif;
+			}
+
+			span.code, li, code
+			{
+				font-family: Consolas, "Courier New", Courier, monospace;
+			}
+
+			code
+			{
+				background-color: #EEEEEE;
+				padding-left: 1em;
+				padding-right: 1em;
+			}
+		</style>
+		<title>Classy Games Server Documentation</title>
+	</head>
+
+	<body>
+		<h1>Classy Games Server Documentation</h1>
+		<p>This is an attempt to document exactly how to make API calls against the Classy Games server code. All of the below endpoints require <span class="code">HTTP POST</span> requests in order for them to properly gather your given data. All of these endpoints will respond to your input with a <span class="code">UTF-8</span> encoded <span class="code">JSON</span> String (<span class="code">application/json; charset=UTF-8</span>) as output.</p>
+		<p>Knowledge of parsing <span class="code">JSON</span> data will be needed to understand how to manipulate the server's output.</p>
+		<h2>Endpoints</h2>
+		<ol>
+			<li><a href="#">GetGame</a></li>
+			<li><a href="#">GetGames</a></li>
+			<li><a href="#">ForfeitGame</a></li>
+			<li><a href="#">NewGame</a></li>
+			<li><a href="#">NewMove</a></li>
+			<li><a href="#">NewRegId</a></li>
+			<li><a href="#">RemoveRegId</a></li>
+		</ol>
+		<code>Hello, World!</code>
+	</body>
+
+</html>

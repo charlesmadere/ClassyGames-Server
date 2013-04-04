@@ -21,17 +21,18 @@ Installation Directions
 
 Changelog
 ---------
-Classy Games Server v1.5.1 was released on March 9th, 2013, and includes support for the new `ForfeitGame` function.
+Classy Games Server v1.5.1 was released on March 9th, 2013 and added support for the new `ForfeitGame` function.
 
 API Documentation
 -----------------
+This information has moved from this convoluted markdown file to a more legible HTML page. Check it out here: [documentation.html](documentation.html).
 This is an attempt to document exactly how to make API calls against the Classy Games server code. All of the below endpoints **require** HTTP POST requests in order for them to gather data, **not HTTP GET**! All of these endpoints will respond to your input with a `UTF-8` encoded JSON String (`application/json; charset=UTF-8`) as output.
 
 + ### GetGame `http://classygames.net/GetGame` ###
     + Outputs the state of the game board as a `JSON` String. Is used to acquire the board data for a specific game.
 
     + *Input*
-        + **`id`** a String that closely resembles a `SHA-256` hash.
+        + `id` a String that closely resembles an `SHA-256` hash.
         + **Example input**
             + `string`
 
