@@ -9,17 +9,27 @@
 			body
 			{
 				font-family: Cambria, "Times New Roman", Times, serif;
-				height: 100%;
 				margin-left: auto;
 				margin-right: auto;
-				max-width: 800px;
+				max-width: 48em;
 				padding-left: 1em;
 				padding-right: 1em;
 			}
 
-			h1, h2
+			h1
+			{
+				margin-top: 0em;
+			}
+
+			h1, h2, h4, h5
 			{
 				font-family: Roboto, "Segoe UI", Arial, sans-serif;
+			}
+
+			abbr
+			{
+				border-bottom-style: dotted;
+				border-bottom-width: 0.1em;
 			}
 
 			section
@@ -27,24 +37,50 @@
 				margin-bottom: 4em;
 			}
 
-			h3, span.code, li
+			h3, span.code, li, div.code
 			{
 				font-family: Consolas, "Courier New", Courier, monospace;
 			}
 
 			article
 			{
+				border-left-style: dotted;
+				border-left-width: 0.1em;
 				margin-bottom: 4em;
 				padding-left: 1em;
-				border-left-style: dotted;
-				border-left-width: 1px;
+			}
+
+			h3
+			{
+				letter-spacing: 0.1em;
+			}
+
+			h4
+			{
+				letter-spacing: 0.1em;
+			}
+
+			li p
+			{
+				font-family: Cambria, "Times New Roman", Times, serif;
+				margin-bottom: 0.25em;
+				margin-top: 0.25em;
+			}
+
+			li h5
+			{
+				letter-spacing: 0.25em;
+				margin-bottom: 1em;
+				margin-top: 0em;
 			}
 
 			div.code
 			{
 				background-color: #EEEEEE;
-				font-family: Consolas, "Courier New", Courier, monospace;
-				margin: 1em;
+				border-color: #AAAAAA;
+				border-style: solid;
+				border-width: 0.1em;
+				margin: 0.5em;
 				padding: 0.5em;
 			}
 		</style>
@@ -54,67 +90,114 @@
 	<body>
 		<header>
 			<h1>Classy Games Server Documentation</h1>
-			<p>This is an attempt to document exactly how to make API calls against the Classy Games server code. All of the below endpoints require <span class="code">HTTP POST</span> requests in order for them to properly gather your given data. All of these endpoints will respond to your input with a <span class="code">UTF-8</span> encoded <span class="code">JSON</span> String (<span class="code">application/json; charset=UTF-8</span>) as output.</p>
+			<p>This is an attempt to document exactly how to make API calls against the Classy Games server code. All of the below endpoints require <span class="code">HTTP POST</span> requests in order for them to properly gather your given data. All of these endpoints will respond to your input with a <span class="code">UTF-8</span> encoded <span class="code"><abbr title="JavaScript Object Notation">JSON</abbr></span> string (<span class="code">application/json; charset=UTF-8</span>) as output.</p>
 			<p>Knowledge of parsing <span class="code">JSON</span> data will be needed to understand how to manipulate the server's output.</p>
 		</header>
 		<section>
 			<h2>Endpoints</h2>
-			<ol>
-				<li><a href="#GetGame">GetGame</a></li>
-				<li><a href="#GetGames">GetGames</a></li>
-				<li><a href="#ForfeitGame">ForfeitGame</a></li>
-				<li><a href="#NewGame">NewGame</a></li>
-				<li><a href="#NewMove">NewMove</a></li>
-				<li><a href="#NewRegId">NewRegId</a></li>
-				<li><a href="#RemoveRegId">RemoveRegId</a></li>
-			</ol>
+			<nav>
+				<ol>
+					<li><a href="#Example">Example</a></li>
+					<li><a href="#GetGame">GetGame</a></li>
+					<li><a href="#GetGames">GetGames</a></li>
+					<li><a href="#ForfeitGame">ForfeitGame</a></li>
+					<li><a href="#NewGame">NewGame</a></li>
+					<li><a href="#NewMove">NewMove</a></li>
+					<li><a href="#NewRegId">NewRegId</a></li>
+					<li><a href="#RemoveRegId">RemoveRegId</a></li>
+					<li><a href="#SkipMove">SkipMove</a></li>
+				</ol>
+			</nav>
 		</section>
 		<section>
+			<article id="Example">
+				<header>
+					<h3>1. Example</h3>
+				</header>
+				<p>This example is here so that you can more easily understand the meaning of all of the actual Classy Games Server API endpoints.</p>
+				<h4>Input</h4>
+				<p>This section lists the inputs that any given API endpoint requires in order for the server to properly respond to your request. So in this example's case the list below requires <span class="code">id</span> and <span class="code">board</span> data to be sent via <span class="code">HTTP POST</span>. If you fail to send <span class="code">HTTP POST</span> data to both of those inputs then the server will reject your response with a message notifying you that you did not send the proper amount of data. If you properly send all necessary data then the server may still encounter some issue; in this case the server will notify you of the issue. If you properly send all necessary data and the server does not encounter any issues then you will receive a <span class="code">JSON</span> response containing the data that you requested.</p>
+				<ol>
+					<li>
+						id
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code">
+							<h5>example</h5>
+							Hello, World!
+						</div>
+					</li>
+					<li>
+						board
+						<p>A <span class="code">JSON</span> string that represents the game board.</p>
+						<div class="code">
+							<h5>example</h5>
+							Hello, World!
+						</div>
+					</li>
+				</ol>
+				<h4>Output</h4>
+				<div class="code">Hello, World!</div>
+			</article>
 			<article id="GetGame">
 				<header>
-					<h3>1. GetGame</h3>
+					<h3>2. GetGame</h3>
 				</header>
-				<p>Hello, World!</p>
+				<p>Outputs the state of the game board as a <span class="code">JSON</span> string. Should be used to acquire the board data for a specific game.</p>
+				<h4>Input</h4>
+				<ol>
+					<li>
+						id
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+					</li>
+				</ol>
+				<h4>Output</h4>
 				<div class="code">Hello, World!</div>
 			</article>
 			<article id="GetGames">
 				<header>
-					<h3>2. GetGames</h3>
+					<h3>3. GetGames</h3>
 				</header>
 				<p>Hello, World!</p>
 				<div class="code">Hello, World!</div>
 			</article>
 			<article id="ForfeitGame">
 				<header>
-					<h3>3. ForfeitGame</h3>
+					<h3>4. ForfeitGame</h3>
 				</header>
 				<p>Hello, World!</p>
 				<div class="code">Hello, World!</div>
 			</article>
 			<article id="NewGame">
 				<header>
-					<h3>4. NewGame</h3>
+					<h3>5. NewGame</h3>
 				</header>
 				<p>Hello, World!</p>
 				<div class="code">Hello, World!</div>
 			</article>
 			<article id="NewMove">
 				<header>
-					<h3>5. NewMove</h3>
+					<h3>6. NewMove</h3>
 				</header>
 				<p>Hello, World!</p>
 				<div class="code">Hello, World!</div>
 			</article>
 			<article id="NewRegId">
 				<header>
-					<h3>6. NewRegId</h3>
+					<h3>7. NewRegId</h3>
 				</header>
 				<p>Hello, World!</p>
 				<div class="code">Hello, World!</div>
 			</article>
 			<article id="RemoveRegId">
 				<header>
-					<h3>7. RemoveRegId</h3>
+					<h3>8. RemoveRegId</h3>
+				</header>
+				<p>Hello, World!</p>
+				<div class="code">Hello, World!</div>
+			</article>
+			<article id="SkipMove">
+				<header>
+					<h3>9. SkipMove</h3>
 				</header>
 				<p>Hello, World!</p>
 				<div class="code">Hello, World!</div>
