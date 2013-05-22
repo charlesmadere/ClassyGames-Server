@@ -18,12 +18,14 @@
 
 			h1
 			{
+				letter-spacing: -0.05em;
 				margin-top: 0em;
+				text-align: center;
 			}
 
 			h1, h2, h4, h5
 			{
-				font-family: Roboto, "Segoe UI", Arial, sans-serif;
+				font-family: Roboto, "Segoe UI", Arial, Helvetica, sans-serif;
 			}
 
 			abbr
@@ -39,25 +41,31 @@
 
 			h3, span.code, li, div.code
 			{
-				font-family: Consolas, "Courier New", Courier, monospace;
+				font-family: Consolas, Menlo, "Courier New", Courier, monospace;
 			}
 
 			article
 			{
-				border-left-style: dotted;
+				border-left-color: #CCCCCC;
+				border-left-style: dashed;
 				border-left-width: 0.1em;
-				margin-bottom: 4em;
+				margin-bottom: 6em;
 				padding-left: 1em;
 			}
 
-			h3
+			h3, h4, h5
 			{
 				letter-spacing: 0.1em;
 			}
 
-			h4
+			p
 			{
-				letter-spacing: 0.1em;
+				line-height: 150%;
+			}
+
+			article ol li
+			{
+				margin-bottom: 2em;
 			}
 
 			li p
@@ -65,13 +73,6 @@
 				font-family: Cambria, "Times New Roman", Times, serif;
 				margin-bottom: 0.25em;
 				margin-top: 0.25em;
-			}
-
-			li h5
-			{
-				letter-spacing: 0.25em;
-				margin-bottom: 1em;
-				margin-top: 0em;
 			}
 
 			div.code
@@ -91,16 +92,17 @@
 		<header>
 			<h1>Classy Games Server Documentation</h1>
 			<p>This is an attempt to document exactly how to make API calls against the Classy Games server code. All of the below endpoints require <span class="code">HTTP POST</span> requests in order for them to properly gather your given data. All of these endpoints will respond to your input with a <span class="code">UTF-8</span> encoded <span class="code"><abbr title="JavaScript Object Notation">JSON</abbr></span> string (<span class="code">application/json; charset=UTF-8</span>) as output.</p>
-			<p>Knowledge of parsing <span class="code">JSON</span> data will be needed to understand how to manipulate the server's output.</p>
+			<p>Knowledge of parsing <span class="code">JSON</span> data will be needed in order to understand how to read and manipulate the server's output.</p>
+			<p>This document was last updated on May 21, 2013 and is seeing heavy construction as of this time.</p>
 		</header>
 		<section>
 			<h2>Endpoints</h2>
 			<nav>
 				<ol>
 					<li><a href="#Example">Example</a></li>
+					<li><a href="#ForfeitGame">ForfeitGame</a></li>
 					<li><a href="#GetGame">GetGame</a></li>
 					<li><a href="#GetGames">GetGames</a></li>
-					<li><a href="#ForfeitGame">ForfeitGame</a></li>
 					<li><a href="#NewGame">NewGame</a></li>
 					<li><a href="#NewMove">NewMove</a></li>
 					<li><a href="#NewRegId">NewRegId</a></li>
@@ -116,31 +118,59 @@
 				</header>
 				<p>This example is here so that you can more easily understand the meaning of all of the actual Classy Games Server API endpoints.</p>
 				<h4>Input</h4>
-				<p>This section lists the inputs that any given API endpoint requires in order for the server to properly respond to your request. So in this example's case the list below requires <span class="code">id</span> and <span class="code">board</span> data to be sent via <span class="code">HTTP POST</span>. If you fail to send <span class="code">HTTP POST</span> data to both of those inputs then the server will reject your response with a message notifying you that you did not send the proper amount of data. If you properly send all necessary data then the server may still encounter some issue; in this case the server will notify you of the issue. If you properly send all necessary data and the server does not encounter any issues then you will receive a <span class="code">JSON</span> response containing the data that you requested.</p>
+				<p>This section lists the inputs that the API endpoint requires in order for the server to properly respond to your request. So in this example's case, the list below shows that this endpoint requires <span class="code">id</span> and <span class="code">board</span> data to be sent via. If you fail to send <span class="code">HTTP POST</span> data to both of those inputs then the server will reject your response with a message notifying you that you did not send the proper amount of data. If you properly send all necessary data then the server may still encounter some issue; in this case the server will notify you of the issue. If you properly send all necessary data and the server does not encounter any issues then you will receive a <span class="code">JSON</span> response containing the data that you requested.</p>
 				<ol>
 					<li>
 						id
-						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
-						<div class="code">
-							<h5>example</h5>
-							Hello, World!
-						</div>
+						<p>This area describes the data for the <span class="code">id</span> parameter. The grey area below this shows an example of what this type of data should look like.</p>
+						<div class="code">A3F3B92D38BE145BCBD20911B2AA8E97</div>
 					</li>
 					<li>
 						board
-						<p>A <span class="code">JSON</span> string that represents the game board.</p>
-						<div class="code">
-							<h5>example</h5>
-							Hello, World!
-						</div>
+						<p>This section would detail the data for the <span class="code">board</span> parameter.</p>
+						<div class="code">Hello, World!</div>
 					</li>
 				</ol>
-				<h4>Output</h4>
+				<h4>Correct Output</h4>
+				<p>Here you'll see the exact output you'd receive if you sent the server the above information. But uh, well, that's actually not completely true. The example input data is going to be largely made up, and as such if the server wants an ID, and you send it the ID that is shown in the example, that ID may not exist, which then means that you will not receive the data as shown in this example output. If you do everything right, as specified in the input section above, you will receive data that is identical to this, except that it, well, doesn't contain the same information. This section is mostly useful for writing your parsing code, as you'll know how to read through the received <span class="code">JSON</span> data.</p>
 				<div class="code">Hello, World!</div>
+				<h4>Alternate Outputs</h4>
+				<p>This area talks about the type of information you'd receive if something is incorrect regarding your data, if the server can't find the information you've requested, if the server encountered an error, or a bunch of other things. Each specific error is further detailed in each API endpoint's documentation.</p>
+				<ol>
+					<li>
+						Malformed Input Data
+						<p>Something was wrong with the data that you sent the server.</p>
+						<div class="code">Hello, World!</div>
+					</li>
+				</ol>
+			</article>
+			<article id="ForfeitGame">
+				<header>
+					<h3>2. ForfeitGame</h3>
+				</header>
+				<p>Text</p>
+				<h4>Input</h4>
+				<ol>
+					<li>
+						id
+						<p>Info</p>
+						<div class="code"></div>
+					</li>
+				</ol>
+				<h4>Correct Output</h4>
+				<div class="code">Hello, World!</div>
+				<h4>Alternate Outputs</h4>
+				<ol>
+					<li>
+						Malformed Input Data
+						<p>Something was wrong with the data that you sent the server.</p>
+						<div class="code">Hello, World!</div>
+					</li>
+				</ol>
 			</article>
 			<article id="GetGame">
 				<header>
-					<h3>2. GetGame</h3>
+					<h3>3. GetGame</h3>
 				</header>
 				<p>Outputs the state of the game board as a <span class="code">JSON</span> string. Should be used to acquire the board data for a specific game.</p>
 				<h4>Input</h4>
@@ -148,59 +178,163 @@
 					<li>
 						id
 						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
 					</li>
 				</ol>
-				<h4>Output</h4>
+				<h4>Correct Output</h4>
 				<div class="code">Hello, World!</div>
+				<h4>Alternate Outputs</h4>
+				<ol>
+					<li>
+						Malformed Input Data
+						<p>Something was wrong with the data that you sent the server.</p>
+						<div class="code">Hello, World!</div>
+					</li>
+				</ol>
 			</article>
 			<article id="GetGames">
 				<header>
-					<h3>3. GetGames</h3>
+					<h3>4. GetGames</h3>
 				</header>
-				<p>Hello, World!</p>
+				<p>Outputs the state of the game board as a <span class="code">JSON</span> string. Should be used to acquire the board data for a specific game.</p>
+				<h4>Input</h4>
+				<ol>
+					<li>
+						id
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+				</ol>
+				<h4>Correct Output</h4>
 				<div class="code">Hello, World!</div>
-			</article>
-			<article id="ForfeitGame">
-				<header>
-					<h3>4. ForfeitGame</h3>
-				</header>
-				<p>Hello, World!</p>
-				<div class="code">Hello, World!</div>
+				<h4>Alternate Outputs</h4>
+				<ol>
+					<li>
+						Malformed Input Data
+						<p>Something was wrong with the data that you sent the server.</p>
+						<div class="code">Hello, World!</div>
+					</li>
+				</ol>
 			</article>
 			<article id="NewGame">
 				<header>
 					<h3>5. NewGame</h3>
 				</header>
-				<p>Hello, World!</p>
+				<p>Outputs the state of the game board as a <span class="code">JSON</span> string. Should be used to acquire the board data for a specific game.</p>
+				<h4>Input</h4>
+				<ol>
+					<li>
+						id
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+				</ol>
+				<h4>Correct Output</h4>
 				<div class="code">Hello, World!</div>
+				<h4>Alternate Outputs</h4>
+				<ol>
+					<li>
+						Malformed Input Data
+						<p>Something was wrong with the data that you sent the server.</p>
+						<div class="code">Hello, World!</div>
+					</li>
+				</ol>
 			</article>
 			<article id="NewMove">
 				<header>
 					<h3>6. NewMove</h3>
 				</header>
-				<p>Hello, World!</p>
+				<p>Outputs the state of the game board as a <span class="code">JSON</span> string. Should be used to acquire the board data for a specific game.</p>
+				<h4>Input</h4>
+				<ol>
+					<li>
+						id
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+				</ol>
+				<h4>Correct Output</h4>
 				<div class="code">Hello, World!</div>
+				<h4>Alternate Outputs</h4>
+				<ol>
+					<li>
+						Malformed Input Data
+						<p>Something was wrong with the data that you sent the server.</p>
+						<div class="code">Hello, World!</div>
+					</li>
+				</ol>
 			</article>
 			<article id="NewRegId">
 				<header>
 					<h3>7. NewRegId</h3>
 				</header>
-				<p>Hello, World!</p>
+				<p>Outputs the state of the game board as a <span class="code">JSON</span> string. Should be used to acquire the board data for a specific game.</p>
+				<h4>Input</h4>
+				<ol>
+					<li>
+						id
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+				</ol>
+				<h4>Correct Output</h4>
 				<div class="code">Hello, World!</div>
+				<h4>Alternate Outputs</h4>
+				<ol>
+					<li>
+						Malformed Input Data
+						<p>Something was wrong with the data that you sent the server.</p>
+						<div class="code">Hello, World!</div>
+					</li>
+				</ol>
 			</article>
 			<article id="RemoveRegId">
 				<header>
 					<h3>8. RemoveRegId</h3>
 				</header>
-				<p>Hello, World!</p>
+				<p>Outputs the state of the game board as a <span class="code">JSON</span> string. Should be used to acquire the board data for a specific game.</p>
+				<h4>Input</h4>
+				<ol>
+					<li>
+						id
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+				</ol>
+				<h4>Correct Output</h4>
 				<div class="code">Hello, World!</div>
+				<h4>Alternate Outputs</h4>
+				<ol>
+					<li>
+						Malformed Input Data
+						<p>Something was wrong with the data that you sent the server.</p>
+						<div class="code">Hello, World!</div>
+					</li>
+				</ol>
 			</article>
 			<article id="SkipMove">
 				<header>
 					<h3>9. SkipMove</h3>
 				</header>
-				<p>Hello, World!</p>
+				<p>Outputs the state of the game board as a <span class="code">JSON</span> string. Should be used to acquire the board data for a specific game.</p>
+				<h4>Input</h4>
+				<ol>
+					<li>
+						id
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+				</ol>
+				<h4>Correct Output</h4>
 				<div class="code">Hello, World!</div>
+				<h4>Alternate Outputs</h4>
+				<ol>
+					<li>
+						Malformed Input Data
+						<p>Something was wrong with the data that you sent the server.</p>
+						<div class="code">Hello, World!</div>
+					</li>
+				</ol>
 			</article>
 		</section>
 	</body>
