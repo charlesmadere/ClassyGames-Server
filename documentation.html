@@ -9,6 +9,7 @@
 			body
 			{
 				font-family: Cambria, "Times New Roman", Times, serif;
+				line-height: 1.5em;
 				margin-left: auto;
 				margin-right: auto;
 				max-width: 48em;
@@ -19,7 +20,6 @@
 			h1
 			{
 				letter-spacing: -0.05em;
-				margin-top: 0em;
 				text-align: center;
 			}
 
@@ -37,6 +37,11 @@
 			section
 			{
 				margin-bottom: 4em;
+			}
+
+			h2
+			{
+				margin-top: 2em;
 			}
 
 			h3, span.code, li, div.code
@@ -58,16 +63,6 @@
 				letter-spacing: 0.1em;
 			}
 
-			p
-			{
-				line-height: 150%;
-			}
-
-			article ol li
-			{
-				margin-bottom: 2em;
-			}
-
 			li p
 			{
 				font-family: Cambria, "Times New Roman", Times, serif;
@@ -81,7 +76,7 @@
 				border-color: #AAAAAA;
 				border-style: solid;
 				border-width: 0.1em;
-				margin: 0.5em;
+				margin: 0.5em 0.5em 2em 0.5em;
 				padding: 0.5em;
 			}
 		</style>
@@ -93,7 +88,7 @@
 			<h1>Classy Games Server Documentation</h1>
 			<p>This is an attempt to document exactly how to make API calls against the Classy Games server code. All of the below endpoints require <span class="code">HTTP POST</span> requests in order for them to properly gather your given data. All of these endpoints will respond to your input with a <span class="code">UTF-8</span> encoded <span class="code"><abbr title="JavaScript Object Notation">JSON</abbr></span> string (<span class="code">application/json; charset=UTF-8</span>) as output.</p>
 			<p>Knowledge of parsing <span class="code">JSON</span> data will be needed in order to understand how to read and manipulate the server's output.</p>
-			<p>This document was last updated on May 21, 2013 and is seeing heavy construction as of this time.</p>
+			<p>This document was last updated on <strong>BLAH BLAH</strong> and is seeing heavy construction as of this time.</p>
 		</header>
 		<section>
 			<h2>Endpoints</h2>
@@ -152,7 +147,22 @@
 				<h4>Input</h4>
 				<ol>
 					<li>
-						id
+						user_challenged
+						<p>Info</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						name
+						<p>Info</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						user_creator
+						<p>Info</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						game_id
 						<p>Info</p>
 						<div class="code"></div>
 					</li>
@@ -224,7 +234,27 @@
 				<h4>Input</h4>
 				<ol>
 					<li>
-						id
+						user_challenged
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						name
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						user_creator
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						game_type
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						board
 						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
 						<div class="code"></div>
 					</li>
@@ -248,7 +278,27 @@
 				<h4>Input</h4>
 				<ol>
 					<li>
-						id
+						user_challenged
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						name
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						user_creator
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						game_id
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						board
 						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
 						<div class="code"></div>
 					</li>
@@ -273,6 +323,16 @@
 				<ol>
 					<li>
 						id
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						name
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						reg_id
 						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
 						<div class="code"></div>
 					</li>
@@ -320,7 +380,22 @@
 				<h4>Input</h4>
 				<ol>
 					<li>
-						id
+						user_challenged
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						name
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						user_creator
+						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
+						<div class="code"></div>
+					</li>
+					<li>
+						game_id
 						<p>A string that closely resembles an <span class="code">SHA-256</span> hash.</p>
 						<div class="code"></div>
 					</li>
