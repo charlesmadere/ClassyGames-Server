@@ -131,53 +131,91 @@
 				<div class="code">Hello, World!</div>
 				<h4>Alternate Outputs</h4>
 				<p>This area talks about the type of information you'd receive if something is incorrect regarding your data, if the server can't find the information you've requested, if the server encountered an error, or a bunch of other things. Each specific error is further detailed in each API endpoint's documentation.</p>
+				<p>Some errors are common throughout all of the API endpoints. Please pardon the redundancy!</p>
 				<ol>
 					<li>
 						Malformed Input Data
 						<p>Something was wrong with the data that you sent the server.</p>
-						<div class="code">Hello, World!</div>
+						<div class="code">This area would have the actual message that you would've received from the server in the event that this error was encountered.</div>
 					</li>
 				</ol>
 			</article>
+
 			<article id="ForfeitGame">
 				<header>
 					<h3>2. ForfeitGame</h3>
 				</header>
-				<p>Text</p>
+				<p>Allows a user to forfeit a game. This action can be completed on a game that is either this user's turn or their opponent's turn. After a game has been forfeitted, a push notification is sent out to both users.</p>
 				<h4>Input</h4>
 				<ol>
 					<li>
 						user_challenged
-						<p>Info</p>
-						<div class="code"></div>
+						<p>The ID of the current user's opponent. This ID should be obtained from Facebook and is a <span class="code">long</span>.</p>
+						<div class="code">9223372036854775807</div>
 					</li>
 					<li>
 						name
-						<p>Info</p>
-						<div class="code"></div>
+						<p>The name of the current user's opponent. This should be taken from Facebook and is a <span class="code">String</span>.</p>
+						<div class="code">Charles Madere</div>
 					</li>
 					<li>
 						user_creator
-						<p>Info</p>
-						<div class="code"></div>
+						<p>The current user's Facebook ID. As with all of the above inputs, this one should also be gathered from Facebook. This is a <span class="code">String</span>.</p>
+						<div class="code">372036854775808</div>
 					</li>
 					<li>
 						game_id
-						<p>Info</p>
+						<p>The ID of the game that is being forfeitted. This is a <span class="code">String</span> that closely resembles an <span class="code">SHA-256</span> hash.</p>
 						<div class="code"></div>
 					</li>
 				</ol>
 				<h4>Correct Output</h4>
-				<div class="code">Hello, World!</div>
+				<div class="code">POST data received.</div>
 				<h4>Alternate Outputs</h4>
 				<ol>
 					<li>
+						No Input Data Detected
+						<p>The server did not receive any <span class="code">HTTP POST</span> data. You may have tried to use <span class="code">HTTP GET</span> instead (which the server does not support).</p>
+						<div class="code">No POST data detected.</div>
+					</li>
+					<li>
+						Empty or Incomplete Input Data
+						<p>Something was wrong with the data that you sent the server.</p>
+						<div class="code">POST data is empty or incomplete.</div>
+					</li>
+					<li>
 						Malformed Input Data
 						<p>Something was wrong with the data that you sent the server.</p>
-						<div class="code">Hello, World!</div>
+						<div class="code">POST data is malformed.</div>
+					</li>
+					<li>
+						Google Cloud Message Failed to Send
+						<p>A push notification was attempted but failed. This probably means that you did not do anything wrong; most likely the server is configured improperly. Notify the server administrator, yeah?</p>
+						<div class="code">Google Cloud Message failed to send.</div>
+					</li>
+					<li>
+						Database Connection was Unable to be Established
+						<p>A connection to the server database was attempted but failed. Again, you probably didn't do anything wrong. Tell the server administrator!</p>
+						<div class="code">Database connection was unable to be established.</div>
+					</li>
+					<li>
+						Generic Error
+						<p>The dreaded meaningless error. You should notify the server administrator if you get this.</p>
+						<div class="code">POST data received but an error occurred.</div>
+					</li>
+					<li>
+						Game is Already Over
+						<p>You tried to forfeit a game that was already over. This could potentially happen if the user was viewing an old games list as they maybe hadn't refreshed it in a while.</p>
+						<div class="code">Attempted to add a new move to a game that has already been completed!</div>
+					</li>
+					<li>
+						Could not Find Game with Specified ID
+						<p>The game you tried to forfeit? Well apparently it doesn't exist. This is definitely a client side error (unless somehow the entire database has been wiped or something). Check your code that grabs and sends the game's ID.</p>
+						<div class="code">Game could not be found with specified ID.</div>
 					</li>
 				</ol>
 			</article>
+
 			<article id="GetGame">
 				<header>
 					<h3>3. GetGame</h3>
@@ -226,6 +264,7 @@
 					</li>
 				</ol>
 			</article>
+
 			<article id="NewGame">
 				<header>
 					<h3>5. NewGame</h3>
@@ -270,6 +309,7 @@
 					</li>
 				</ol>
 			</article>
+
 			<article id="NewMove">
 				<header>
 					<h3>6. NewMove</h3>
@@ -314,6 +354,7 @@
 					</li>
 				</ol>
 			</article>
+
 			<article id="NewRegId">
 				<header>
 					<h3>7. NewRegId</h3>
@@ -348,6 +389,7 @@
 					</li>
 				</ol>
 			</article>
+
 			<article id="RemoveRegId">
 				<header>
 					<h3>8. RemoveRegId</h3>
@@ -372,6 +414,7 @@
 					</li>
 				</ol>
 			</article>
+
 			<article id="SkipMove">
 				<header>
 					<h3>9. SkipMove</h3>
