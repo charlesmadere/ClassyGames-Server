@@ -64,7 +64,9 @@ public class GCMUtilities
 	 * If the GCM library couldn't be loaded then this Exception will be
 	 * thrown.
 	 */
-	private static void sendMessage(final Connection sqlConnection, final String gameId, final Long userIdToShow, final String userNameToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType) throws IOException, SQLException, Exception
+	private static void sendMessage(final Connection sqlConnection, final String gameId, final Long userIdToShow,
+		final String userNameToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType)
+		throws IOException, SQLException, Exception
 	{
 		final String regId = DatabaseUtilities.grabUsersRegId(sqlConnection, userIdOfReceiver.longValue());
 
