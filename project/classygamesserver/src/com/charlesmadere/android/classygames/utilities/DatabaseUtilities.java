@@ -167,7 +167,8 @@ public class DatabaseUtilities
 	 * If at some point there is some kind of connection error or query problem
 	 * with the SQL database then this Exception will be thrown.
 	 */
-	public static void ensureUserExistsInDatabase(final Connection sqlConnection, final long userId, final String userName) throws SQLException
+	public static void ensureUserExistsInDatabase(final Connection sqlConnection, final long userId, final String userName)
+		throws SQLException
 	{
 		// prepare a SQL statement to be run on the database
 		String sqlStatementString = "SELECT * FROM " + TABLE_USERS + " WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
@@ -222,7 +223,8 @@ public class DatabaseUtilities
 	 * If at some point there is some kind of connection error or query problem
 	 * with the SQL database then this Exception will be thrown.
 	 */
-	public static ResultSet grabGamesInfo(final Connection sqlConnection, final String gameId) throws SQLException
+	public static ResultSet grabGamesInfo(final Connection sqlConnection, final String gameId)
+		throws SQLException
 	{
 		// prepare a SQL statement to be run on the database
 		final String sqlStatementString = "SELECT * FROM " + TABLE_GAMES + " WHERE " + TABLE_GAMES_COLUMN_ID + " = ?";
@@ -257,7 +259,8 @@ public class DatabaseUtilities
 	 * If at some point there is some kind of connection error or query problem
 	 * with the SQL database then this Exception will be thrown.
 	 */
-	public static ResultSet grabUsersInfo(final Connection sqlConnection, final long userId) throws SQLException
+	public static ResultSet grabUsersInfo(final Connection sqlConnection, final long userId)
+		throws SQLException
 	{
 		// prepare a SQL statement to be run on the database
 		final String sqlStatementString = "SELECT * FROM " + TABLE_USERS + " WHERE " + TABLE_USERS_COLUMN_ID + " = ?";
@@ -291,7 +294,8 @@ public class DatabaseUtilities
 	 * If at some point there is some kind of connection error or query problem
 	 * with the SQL database then this Exception will be thrown.
 	 */
-	public static String grabUsersName(final Connection sqlConnection, final long userId) throws SQLException
+	public static String grabUsersName(final Connection sqlConnection, final long userId)
+		throws SQLException
 	{
 		String username = null;
 

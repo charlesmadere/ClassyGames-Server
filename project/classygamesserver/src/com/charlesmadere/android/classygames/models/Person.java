@@ -45,17 +45,6 @@ public class Person
 
 
 	/**
-	 * Creates a Person object. If possible, <strong>please avoid</strong>
-	 * using this constructor, and instead use this class's other, argument
-	 * taking, constructors.
-	 */
-	public Person()
-	{
-
-	}
-
-
-	/**
 	 * Creates a Person object.
 	 * 
 	 * @param id
@@ -68,6 +57,31 @@ public class Person
 	{
 		this.id = id;
 		this.name = name;
+	}
+
+
+	/**
+	 * 
+	 * 
+	 * @param id
+	 * 
+	 * 
+	 * @param name
+	 * 
+	 * 
+	 * @param sqlConnection
+	 * 
+	 * 
+	 * @throws SQLException
+	 * 
+	 */
+	public Person(final long id, final String name, final Connection sqlConnection)
+		throws SQLException
+	{
+		this.id = id;
+		this.name = name;
+
+		findRegId(sqlConnection);
 	}
 
 
