@@ -61,31 +61,6 @@ public class Person
 
 
 	/**
-	 * 
-	 * 
-	 * @param id
-	 * 
-	 * 
-	 * @param name
-	 * 
-	 * 
-	 * @param sqlConnection
-	 * 
-	 * 
-	 * @throws SQLException
-	 * 
-	 */
-	public Person(final long id, final String name, final Connection sqlConnection)
-		throws SQLException
-	{
-		this.id = id;
-		this.name = name;
-
-		findRegId(sqlConnection);
-	}
-
-
-	/**
 	 * Creates a Person object.
 	 * 
 	 * @param id
@@ -100,42 +75,6 @@ public class Person
 	public Person(final long id, final String name, final String regId)
 	{
 		this.id = id;
-		this.name = name;
-		this.regId = regId;
-	}
-
-
-	/**
-	 * Creates a Person object.
-	 * 
-	 * @param id
-	 * The Facebook ID of the user.
-	 * 
-	 * @param name
-	 * The Facebook name of the user.
-	 */
-	public Person(final String id, final String name)
-	{
-		this.id = Long.parseLong(id);
-		this.name = name;
-	}
-
-
-	/**
-	 * Creates a Person object.
-	 * 
-	 * @param id
-	 * The Facebook ID of the user.
-	 * 
-	 * @param name
-	 * The Facebook name of the user.
-	 * 
-	 * @param regId
-	 * The registration ID of the user's Android device.
-	 */
-	public Person(final String id, final String name, final String regId)
-	{
-		this.id = Long.parseLong(id);
 		this.name = name;
 		this.regId = regId;
 	}
@@ -243,49 +182,38 @@ public class Person
 
 
 	/**
-	 * 
+	 * If this Person object does not already have an Android registration ID
+	 * associated with it, then this method will attempt to find it in the
+	 * database. Note that it is possible for the registration ID to not be
+	 * able to be found. This is nothing really to worry about, but just know
+	 * then that this Person will not be able to receive push notifications.
 	 * 
 	 * @param sqlConnection
-	 * 
+	 * An existing open connection to the database.
 	 * 
 	 * @throws SQLException
-	 * 
+	 * If a database connection or query problem occurs, then this Exception
+	 * will be thrown.
 	 */
 	public void findRegId(final Connection sqlConnection) throws SQLException
 	{
-		final String sqlStatementString =
-			"SELECT * " +
-			" FROM " + DatabaseUtilities.TABLE_USERS +
-			" WHERE " + DatabaseUtilities.TABLE_USERS_COLUMN_ID + " = ?";
-
-		final PreparedStatement sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-		sqlStatement.setLong(1, id);
-
-		final ResultSet sqlResult = sqlStatement.executeQuery();
-
-		if (sqlResult.next())
+		if (!hasRegId())
 		{
-			regId = sqlResult.getString(DatabaseUtilities.TABLE_USERS_COLUMN_REG_ID);
+			final String sqlStatementString =
+				"SELECT * " +
+				" FROM " + DatabaseUtilities.TABLE_USERS +
+				" WHERE " + DatabaseUtilities.TABLE_USERS_COLUMN_ID + " = ?";
+	
+			final PreparedStatement sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+			sqlStatement.setLong(1, id);
+	
+			final ResultSet sqlResult = sqlStatement.executeQuery();
+	
+			if (sqlResult.next())
+			{
+				regId = sqlResult.getString(DatabaseUtilities.TABLE_USERS_COLUMN_REG_ID);
+			}
 		}
-	}
-
-
-	/**
-	 * 
-	 * 
-	 * @param sqlConnection
-	 * 
-	 * 
-	 * @return
-	 * 
-	 * 
-	 * @throws SQLException 
-	 * 
-	 */
-	public boolean findRegIdIfNoneCurrently(final Connection sqlConnection) throws SQLException
-	{
-		findRegId(sqlConnection);
-		return hasRegId();
 	}
 
 
