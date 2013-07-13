@@ -5,6 +5,7 @@
 
 	<head>
 		<meta charset="utf-8" />
+		<title>Classy Games Server Documentation</title>
 		<style type="text/css">
 			body
 			{
@@ -80,7 +81,6 @@
 				padding: 0.5em;
 			}
 		</style>
-		<title>Classy Games Server Documentation</title>
 	</head>
 
 	<body>
@@ -98,6 +98,7 @@
 					<li><a href="#ForfeitGame">ForfeitGame</a></li>
 					<li><a href="#GetGame">GetGame</a></li>
 					<li><a href="#GetGames">GetGames</a></li>
+					<li><a href="#GetStats">GetStats</a></li>
 					<li><a href="#NewGame">NewGame</a></li>
 					<li><a href="#NewMove">NewMove</a></li>
 					<li><a href="#NewRegId">NewRegId</a></li>
@@ -240,6 +241,32 @@
 					</li>
 				</ol>
 			</article>
+
+			<article id="GetStats">
+				<header>
+					<h3>8. GetStats</h3>
+				</header>
+				<p>Outputs the state of the game board as a <span class="code">JSON</span> string. Should be used to acquire the board data for a specific game.</p>
+				<h4>Input</h4>
+				<ol>
+					<li>
+						id
+						<p>A long that is the user's Facebook ID.</p>
+						<div class="code">203905803086416</div>
+					</li>
+				</ol>
+				<h4>Correct Output</h4>
+				<div class="code">Hello, World!</div>
+				<h4>Alternate Outputs</h4>
+				<ol>
+					<li>
+						Malformed Input Data
+						<p>Something was wrong with the data that you sent the server.</p>
+						<div class="code">Hello, World!</div>
+					</li>
+				</ol>
+			</article>
+
 			<article id="GetGames">
 				<header>
 					<h3>4. GetGames</h3>
