@@ -1,4 +1,4 @@
-package com.charlesmadere.android.classygames.gcm;
+package com.charlesmadere.android.classygames.models.gcm;
 
 
 import com.charlesmadere.android.classygames.models.Person;

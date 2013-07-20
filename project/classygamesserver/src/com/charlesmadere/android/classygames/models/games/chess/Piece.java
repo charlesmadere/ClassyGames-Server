@@ -1,13 +1,13 @@
-package com.charlesmadere.android.classygames.games.chess;
+package com.charlesmadere.android.classygames.models.games.chess;
 
 
-import com.charlesmadere.android.classygames.games.GenericPiece;
+import com.charlesmadere.android.classygames.models.games.GenericPiece;
 
 
 /**
  * Class representing a single Chess piece.
  */
-public class Piece extends GenericPiece
+public final class Piece extends GenericPiece
 {
 
 
@@ -17,6 +17,8 @@ public class Piece extends GenericPiece
 	public final static byte TYPE_ROOK = 4;
 	public final static byte TYPE_QUEEN = 5;
 	public final static byte TYPE_KING = 6;
+
+
 
 
 	/**

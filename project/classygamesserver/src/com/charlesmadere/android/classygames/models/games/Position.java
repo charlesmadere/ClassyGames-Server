@@ -1,4 +1,4 @@
-package com.charlesmadere.android.classygames.games;
+package com.charlesmadere.android.classygames.models.games;
 
 
 import org.json.JSONArray;
@@ -9,7 +9,7 @@ import org.json.JSONObject;
 /**
  * Class representing a single position, or spot, on the game board.
  */
-public class Position
+public final class Position
 {
 
 

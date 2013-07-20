@@ -11,16 +11,6 @@
 	</welcome-file-list>
 	<servlet>
 		<description></description>
-		<display-name>ForfeitGame</display-name>
-		<servlet-name>ForfeitGame</servlet-name>
-		<servlet-class>com.charlesmadere.android.classygames.ForfeitGame</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>ForfeitGame</servlet-name>
-		<url-pattern>/ForfeitGame</url-pattern>
-	</servlet-mapping>
-	<servlet>
-		<description></description>
 		<display-name>GetGame</display-name>
 		<servlet-name>GetGame</servlet-name>
 		<servlet-class>com.charlesmadere.android.classygames.GetGame</servlet-class>
@@ -38,6 +28,16 @@
 	<servlet-mapping>
 		<servlet-name>GetGames</servlet-name>
 		<url-pattern>/GetGames</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<description></description>
+		<display-name>GetStats</display-name>
+		<servlet-name>GetStats</servlet-name>
+		<servlet-class>com.charlesmadere.android.classygames.GetGames</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>GetStats</servlet-name>
+		<url-pattern>/GetStats</url-pattern>
 	</servlet-mapping>
 	<servlet>
 		<description></description>

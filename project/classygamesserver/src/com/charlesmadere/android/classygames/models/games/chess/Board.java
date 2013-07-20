@@ -1,11 +1,11 @@
-package com.charlesmadere.android.classygames.games.chess;
+package com.charlesmadere.android.classygames.models.games.chess;
 
 
+import com.charlesmadere.android.classygames.models.games.Coordinate;
+import com.charlesmadere.android.classygames.models.games.GenericBoard;
+import com.charlesmadere.android.classygames.models.games.Position;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.charlesmadere.android.classygames.games.GenericBoard;
-import com.charlesmadere.android.classygames.games.Position;
 
 
 
@@ -13,12 +13,20 @@ import com.charlesmadere.android.classygames.games.Position;
  * Class representing a Chess board. This board is made up of a bunch of
  * positions. Chess is 8 by 8, so that's 64 positions.
  */
-public class Board extends GenericBoard
+public final class Board extends GenericBoard
 {
 
 
 	private final static byte LENGTH_HORIZONTAL = 8;
 	private final static byte LENGTH_VERTICAL = 8;
+
+
+	/**
+	 * The castle move can only be performed once per game. The value of this
+	 * variable will be true if it has already been used. Otherwise, this will
+	 * only be set when the user actually does the castle technique.
+	 */
+	private boolean hasCastled = false;
 
 
 
@@ -118,13 +126,107 @@ public class Board extends GenericBoard
 
 
 
-
 	@Override
 	public boolean move(final Position previous, final Position current)
 	{
 		boolean isMoveValid = false;
 
+		if (isBoardLocked)
+		// If the board is locked, then that means that no piece is allowed to
+		// move around.
+		{
+			return false;
+		}
+		else if (previous.hasPiece() && previous.getPiece().isTeamOpponent())
+		// If the first position that the user selected has an opponent's piece
+		// on it then this is an invalid move.
+		{
+			return false;
+		}
+		else if (previous.hasPiece() && previous.getPiece().isTeamPlayer())
+		// This is the one way that a chess move can actually be valid.
+		{
+			final Piece piece = (Piece) previous.getPiece();
+			final Coordinate start = previous.getCoordinate();
+			final byte startX = start.getX();
+			final byte startY = start.getY();
+			final Coordinate end = current.getCoordinate();
+			final byte endX = end.getX();
+			final byte endY = end.getY();
+
+			switch (piece.getType())
+			{
+				case Piece.TYPE_PAWN:
+					break;
+
+				case Piece.TYPE_KNIGHT:
+					if (Math.abs(startX - endX) == 1)
+					{
+						if (Math.abs(startY - endY) == 2)
+						{
+							if (current.hasPiece())
+							{
+								final Piece p = (Piece) current.getPiece();
+
+								if (p.isTeamOpponent())
+								{
+									current.removePiece();
+									isMoveValid = true;
+								}
+								else
+								{
+									return false;
+								}
+							}
+							else
+							{
+								isMoveValid = true;
+							}
+						}
+						else
+						{
+							return false;
+						}
+					}
+					else if (Math.abs(startX - endX) == 2)
+					{
+						if (Math.abs(startY - endY) == 1)
+						{
+
+						}
+						else
+						{
+							return false;
+						}
+					}
+					else
+					{
+						return false;
+					}
+					break;
+
+				case Piece.TYPE_ROOK:
+					if (startX == endX && startY != endY)
+					{
+
+					}
+					else if (startX != endX && startY == endY)
+					{
+
+					}
+					break;
+			}
+		}
+
 		return isMoveValid;
+	}
+
+
+	@Override
+	public void performGameSpecificJSONChecks() throws JSONException
+	{
+		// TODO
+		// find the has_castled key-value pair in the boardJSON object
 	}
 
 
@@ -132,6 +234,30 @@ public class Board extends GenericBoard
 	protected void resetBoard()
 	{
 
+	}
+
+
+	/**
+	 * Performs a check to see if the user can perform a castle. Note this move
+	 * can only be performed once per game. More on the castle technique can be
+	 * found here: https://en.wikipedia.org/wiki/Chess#Castling
+	 *
+	 * @return
+	 * Returns true if the user can perform a castle.
+	 */
+	public boolean canCastle()
+	{
+		if (hasCastled)
+		{
+			return false;
+		}
+		else
+		{
+			// TODO
+			// Check to see if the castle technique can be used.
+
+			return false;
+		}
 	}
 
 

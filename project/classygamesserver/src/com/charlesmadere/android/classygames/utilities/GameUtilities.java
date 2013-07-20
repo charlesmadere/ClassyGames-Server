@@ -4,7 +4,7 @@ package com.charlesmadere.android.classygames.utilities;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.charlesmadere.android.classygames.games.GenericBoard;
+import com.charlesmadere.android.classygames.models.games.GenericBoard;
 
 
 
@@ -32,19 +32,18 @@ public class GameUtilities
 	public static GenericBoard newGame(final String param_board, final byte gameType) throws JSONException
 	{
 		GenericBoard board = null;
-
 		final JSONObject boardJSON = new JSONObject(param_board);
 
 		if (Utilities.verifyValidString(param_board))
 		{
 			switch (gameType)
 			{
-				case Utilities.POST_DATA_GAME_TYPE_CHESS:
-					board = new com.charlesmadere.android.classygames.games.chess.Board(boardJSON);
+				case Utilities.POST_DATA_GAME_TYPE_CHECKERS:
+					board = new com.charlesmadere.android.classygames.models.games.checkers.Board(boardJSON);
 					break;
 
-				case Utilities.POST_DATA_GAME_TYPE_CHECKERS:
-					board = new com.charlesmadere.android.classygames.games.checkers.Board(boardJSON);
+				case Utilities.POST_DATA_GAME_TYPE_CHESS:
+					board = new com.charlesmadere.android.classygames.models.games.chess.Board(boardJSON);
 					break;
 			}
 		}

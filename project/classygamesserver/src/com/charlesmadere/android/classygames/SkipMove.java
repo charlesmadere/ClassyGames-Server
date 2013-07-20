@@ -16,14 +16,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.charlesmadere.android.classygames.games.GenericBoard;
+import com.charlesmadere.android.classygames.models.games.GenericBoard;
 import com.charlesmadere.android.classygames.utilities.DatabaseUtilities;
 import com.charlesmadere.android.classygames.utilities.GCMUtilities;
 import com.charlesmadere.android.classygames.utilities.GameUtilities;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
-public class SkipMove extends HttpServlet
+public final class SkipMove extends HttpServlet
 {
 
 

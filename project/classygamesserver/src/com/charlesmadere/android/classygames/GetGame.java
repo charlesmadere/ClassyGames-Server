@@ -2,14 +2,9 @@ package com.charlesmadere.android.classygames;
 
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -17,17 +12,12 @@ import com.charlesmadere.android.classygames.utilities.DatabaseUtilities;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
-public class GetGame extends HttpServlet
+public final class GetGame extends Servlet
 {
 
 
 	private final static long serialVersionUID = 1L;
 
-
-	private Connection sqlConnection;
-	private PreparedStatement sqlStatement;
-	private PrintWriter printWriter;
-	private ResultSet sqlResult;
 
 	private String param_gameId;
 
@@ -40,20 +30,13 @@ public class GetGame extends HttpServlet
 	}
 
 
-	@Override
-	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException
-	{
-		response.setContentType(Utilities.CONTENT_TYPE_JSON);
-		printWriter = response.getWriter();
-		printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_NOT_DETECTED));
-	}
 
 
 	@Override
-	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException
+	protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
+		throws IOException, ServletException
 	{
-		response.setContentType(Utilities.CONTENT_TYPE_JSON);
-		printWriter = response.getWriter();
+		prepare(response);
 
 		param_gameId = request.getParameter(Utilities.POST_DATA_ID);
 

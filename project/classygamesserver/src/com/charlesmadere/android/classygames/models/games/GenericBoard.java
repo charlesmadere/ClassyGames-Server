@@ -1,11 +1,9 @@
-package com.charlesmadere.android.classygames.games;
+package com.charlesmadere.android.classygames.models.games;
 
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
 /**
@@ -16,17 +14,17 @@ public abstract class GenericBoard
 {
 
 
-	protected final static byte BOARD_INVALID = Utilities.BOARD_INVALID;
-	protected final static byte BOARD_NEW_GAME = Utilities.BOARD_NEW_GAME;
-	protected final static byte BOARD_NEW_MOVE = Utilities.BOARD_NEW_MOVE;
-	protected final static byte BOARD_WIN = Utilities.BOARD_WIN;
+	protected final static byte BOARD_INVALID = -1;
+	protected final static byte BOARD_NEW_GAME = 1;
+	protected final static byte BOARD_NEW_MOVE = 2;
+	protected final static byte BOARD_WIN = 3;
 
 
 
 
 	/**
-	 * The number of positions the board has horizontally. This can be thought
-	 * of as the board's X limit.
+	 * The number of positions that the board has horizontally. This can be
+	 * thought of as the board's X limit.
 	 */
 	protected byte lengthHorizontal;
 
@@ -54,14 +52,16 @@ public abstract class GenericBoard
 
 	/**
 	 * Boolean indicating whether or not a piece on this board has been moved.
-	 * This is different than the board being locked.
+	 * This does not prevent further moves on the board from being made. This
+	 * defaults to false.
 	 */
 	protected boolean hasMoveBeenMade;
 
 
 	/**
 	 * Boolean indicating whether or not this board is locked. If the board is
-	 * locked then pieces can't be moved.
+	 * locked, then that means that pieces can no longer be moved around on the
+	 * board. This defaults to false.
 	 */
 	protected boolean isBoardLocked;
 
@@ -264,6 +264,8 @@ public abstract class GenericBoard
 		final JSONArray teams = boardJSON.getJSONObject("board").getJSONArray("teams");
 		initializeTeamFromJSON(teams.getJSONArray(0), GenericPiece.TEAM_PLAYER);
 		initializeTeamFromJSON(teams.getJSONArray(1), GenericPiece.TEAM_OPPONENT);
+
+		performGameSpecificJSONChecks();
 	}
 
 
@@ -458,6 +460,19 @@ public abstract class GenericBoard
 
 
 	/**
+	 * Does some final JSON parsing to finish the setting up of the game board.
+	 *
+	 * @throws JSONException
+	 * If there was an error when trying to parse the JSON, then this Exception
+	 * will be thrown.
+	 */
+	public void performGameSpecificJSONChecks() throws JSONException
+	{
+
+	}
+
+
+	/**
 	 * This will reset the board back to it's original state as created
 	 * immediately after using this class's constructor.
 	 * 
@@ -470,6 +485,7 @@ public abstract class GenericBoard
 	{
 		hasMoveBeenMade = false;
 		isBoardLocked = false;
+
 		initializePositions();
 		resetBoard();
 
@@ -541,9 +557,13 @@ public abstract class GenericBoard
 	 * 
 	 * @param previous
 	 * The previous (old) position on the game board that the user clicked on.
+	 * This selected position contains the piece that the user wants to
+	 * actually move.
 	 * 
 	 * @param current
 	 * The current (new) position on the game board that the user clicked on.
+	 * This selected position is the location that the user wants to move their
+	 * selected piece to.
 	 * 
 	 * @return
 	 * Returns true if the given move is a valid one.

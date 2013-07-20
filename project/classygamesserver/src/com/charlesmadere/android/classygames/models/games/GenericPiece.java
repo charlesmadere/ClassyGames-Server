@@ -1,4 +1,4 @@
-package com.charlesmadere.android.classygames.games;
+package com.charlesmadere.android.classygames.models.games;
 
 
 /**
@@ -113,7 +113,7 @@ public abstract class GenericPiece
 	 */
 	public boolean isDead()
 	{
-		return team == TEAM_NULL && team == TYPE_NULL;
+		return team == TEAM_NULL && type == TYPE_NULL;
 	}
 
 
