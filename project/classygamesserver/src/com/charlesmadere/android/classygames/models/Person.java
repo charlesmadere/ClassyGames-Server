@@ -1,19 +1,16 @@
 package com.charlesmadere.android.classygames.models;
 
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.charlesmadere.android.classygames.utilities.DatabaseUtilities;
+import com.charlesmadere.android.classygames.utilities.DB;
+import com.charlesmadere.android.classygames.utilities.DBConstants;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
-/**
- * Class representing a real person.
- */
-public class Person
+public final class Person
 {
 
 
@@ -42,6 +39,48 @@ public class Person
 	private String regId;
 
 
+	/**
+	 * The number of checkers loses that this Person has.
+	 */
+	private int checkersLoses;
+
+
+	/**
+	 * The number of checkers wins that this Person has.
+	 */
+	private int checkersWins;
+
+
+	/**
+	 * The number of chess loses that this Person has.
+	 */
+	private int chessLoses;
+
+
+	/**
+	 * The number of chess wins that this Person has.
+	 */
+	private int chessWins;
+
+
+
+
+	/**
+	 * Creates a Person object from the given ID and then reads the remaining
+	 * data from the database.
+	 * 
+	 * @param id
+	 * The Facebook ID of the user.
+	 * 
+	 * @throws SQLException
+	 * If a database connection or query problem occurs, then this Exception
+	 * will be thrown.
+	 */
+	public Person(final long id) throws SQLException
+	{
+		this.id = id;
+		readRegId();
+	}
 
 
 	/**
@@ -52,11 +91,16 @@ public class Person
 	 * 
 	 * @param name
 	 * The Facebook name of the user.
+	 * 
+	 * @throws SQLException
+	 * If a database connection or query problem occurs, then this Exception
+	 * will be thrown.
 	 */
-	public Person(final long id, final String name)
+	public Person(final long id, final String name) throws SQLException
 	{
 		this.id = id;
 		this.name = name;
+		readRegId();
 	}
 
 
@@ -80,9 +124,35 @@ public class Person
 	}
 
 
+
+
+	public int getCheckersLoses()
+	{
+		return checkersLoses;
+	}
+
+
+	public int getCheckersWins()
+	{
+		return checkersWins;
+	}
+
+
+	public int getChessLoses()
+	{
+		return chessLoses;
+	}
+
+
+	public int getChessWins()
+	{
+		return chessWins;
+	}
+
+
 	/**
 	 * @return
-	 * Returns this Person's Facebook ID (a long).
+	 * Returns this Person's Facebook ID.
 	 */
 	public long getId()
 	{
@@ -91,24 +161,8 @@ public class Person
 
 
 	/**
-	 * Converts this Person's Facebook ID (a long) into a String and then
-	 * returns that String.
-	 * 
 	 * @return
-	 * Returns this Person's Facebook ID as a String.
-	 */
-	public String getIdAsString()
-	{
-		return String.valueOf(id);
-	}
-
-
-	/**
-	 * Returns this Person's Facebook name (a String). This is that person's
-	 * <strong>whole name</strong>.
-	 * 
-	 * @return
-	 * Returns this Person's Facebook name (a String).
+	 * Returns this Person's Facebook name. This is that person's whole name.
 	 */
 	public String getName()
 	{
@@ -140,22 +194,6 @@ public class Person
 
 
 	/**
-	 * Replaces this Person object's current Facebook ID with this newly given
-	 * id. An ID should be a number that is always greater than 0. This method
-	 * will convert the given String into a long. As this method doesn't check
-	 * for the possibility that a null String was given to it, this method will
-	 * cause a crash if that happens.
-	 * 
-	 * @param id
-	 * New Facebook ID of the user.
-	 */
-	public void setId(final String id)
-	{
-		this.id = Long.parseLong(id);
-	}
-
-
-	/**
 	 * Replaces this Person object's current Facebook name with this newly
 	 * given name. 
 	 * 
@@ -182,42 +220,6 @@ public class Person
 
 
 	/**
-	 * If this Person object does not already have an Android registration ID
-	 * associated with it, then this method will attempt to find it in the
-	 * database. Note that it is possible for the registration ID to not be
-	 * able to be found. This is nothing really to worry about, but just know
-	 * then that this Person will not be able to receive push notifications.
-	 * 
-	 * @param sqlConnection
-	 * An existing open connection to the database.
-	 * 
-	 * @throws SQLException
-	 * If a database connection or query problem occurs, then this Exception
-	 * will be thrown.
-	 */
-	public void findRegId(final Connection sqlConnection) throws SQLException
-	{
-		if (!hasRegId())
-		{
-			final String sqlStatementString =
-				"SELECT * " +
-				" FROM " + DatabaseUtilities.TABLE_USERS +
-				" WHERE " + DatabaseUtilities.TABLE_USERS_COLUMN_ID + " = ?";
-	
-			final PreparedStatement sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
-			sqlStatement.setLong(1, id);
-	
-			final ResultSet sqlResult = sqlStatement.executeQuery();
-	
-			if (sqlResult.next())
-			{
-				regId = sqlResult.getString(DatabaseUtilities.TABLE_USERS_COLUMN_REG_ID);
-			}
-		}
-	}
-
-
-	/**
 	 * Checks to see that this Person object has a valid Android registration
 	 * ID.
 	 * 
@@ -231,212 +233,59 @@ public class Person
 
 
 	/**
-	 * Checks to see that this Person object is valid. Valid means three
-	 * things:
-	 * <ol>
-	 * <li>This Person's Facebook ID is greater than or equal to 1.</li>
-	 * <li>This Person's name is not null.</li>
-	 * <li>This Person's name is not empty.</li>
-	 * </ol>
+	 * If this Person object does not already have an Android registration ID
+	 * associated with it, then this method will attempt to find it in the
+	 * database. Note that it is possible for the registration ID to not be
+	 * able to be found. This is nothing really to worry about, but just know
+	 * then that this Person will not be able to receive push notifications.
 	 * 
-	 * @return
-	 * Returns true if all of the above conditions are true. Returns false if
-	 * any single one of the above conditions are false.
+	 * @throws SQLException
+	 * If a database connection or query problem occurs, then this Exception
+	 * will be thrown.
 	 */
-	public boolean isValid()
+	private void readRegId() throws SQLException
 	{
-		return isIdValid(id) && isNameValid(name);
-	}
-
-
-
-
-	@Override
-	public String toString()
-	{
-		return name;
-	}
-
-
-
-
-	/**
-	 * When Facebook IDs are acquired throughout the app's runtime they should
-	 * be checked for validity. Use this method to check for that validity.
-	 * Valid means one thing:
-	 * <ol>
-	 * <li>This ID is greater than or equal to 1.</li>
-	 * </ol>
-	 * 
-	 * @param id
-	 * The Facebook ID to check for validity.
-	 * 
-	 * @return
-	 * Returns true if the above condition is true. Returns false if the above
-	 * condition is false.
-	 */
-	public static boolean isIdValid(final long id)
-	{
-		return id >= 1;
-	}
-
-
-	/**
-	 * When Facebook IDs are acquired throughout the app's runtime they should
-	 * be checked for validity. Use this method to check for that validity.
-	 * Valid means three things:
-	 * <ol>
-	 * <li>This String is not null.</li>
-	 * <li>This String has a length of greater than or equal to 1.</li>
-	 * <li>This String, when converted into a long, is greater than or equal to
-	 * 1.</li>
-	 * </ol>
-	 * 
-	 * @param id
-	 * The Facebook ID to check for validity. This parameter is converted into
-	 * a long. This String is 
-	 * 
-	 * @return
-	 * Returns true if the above condition is true. Returns false if the above
-	 * condition is false.
-	 */
-	public static boolean isIdValid(final String id)
-	{
-		if (Utilities.verifyValidString(id))
-		// First, ensure that we were given a valid String. If this proves true
-		// then we will check to see that the long value of this String is a
-		// valid ID value.
+		if (!hasRegId())
 		{
-			return isIdValid(Long.parseLong(id));
-		}
-		else
-		{
-			return false;
-		}
-	}
+			final String statementString =
+				"SELECT * " +
+				" FROM " + DBConstants.TABLE_USERS +
+				" WHERE " + DBConstants.TABLE_USERS_COLUMN_ID + " = ?";
 
+			final PreparedStatement statement = DB.connection.prepareStatement(statementString);
+			statement.setLong(1, id);
 
-	/**
-	 * When Facebook IDs are acquired throughout the app's runtime they should
-	 * be checked for validity. Use this method to check for that validity.
-	 * This method allows you to check a whole bunch of IDs at once. If any
-	 * single ID that is passed in is invalid, then this method will cease to
-	 * check the rest and will immediately return false.
-	 * 
-	 * @param ids
-	 * The Facebook IDs to check for validity.
-	 * 
-	 * @return
-	 * Returns true if <strong>all</strong> of the passed in Facebook IDs are
-	 * valid. Returns false if <strong>any single</strong> ID is invalid.
-	 */
-	public static boolean areIdsValid(final long... ids)
-	{
-		for (final long id : ids)
-		{
-			if (!isIdValid(id))
+			final ResultSet result = statement.executeQuery();
+
+			if (result.next())
 			{
-				return false;
+				regId = result.getString(DBConstants.TABLE_USERS_COLUMN_REG_ID);
 			}
+
+			DB.close(result);
+			DB.close(statement);
 		}
-
-		return true;
 	}
 
 
 	/**
-	 * When Facebook IDs are acquired throughout the app's runtime they should
-	 * be checked for validity. Use this method to check for that validity.
-	 * This method allows you to check a whole bunch of IDs at once. If any
-	 * single ID that is passed in is invalid, then this method will cease to
-	 * check the rest and will immediately return false.
-	 * 
-	 * @param ids
-	 * The Facebook IDs to check for validity.
-	 * 
-	 * @return
-	 * Returns true if <strong>all</strong> of the passed in Facebook IDs are
-	 * valid. Returns false if <strong>any single</strong> ID is invalid.
+	 * Saves this Person object's current data state to the database.
 	 */
-	public static boolean areIdsValid(final String... ids)
+	public void update() throws SQLException
 	{
-		for (final String id : ids)
-		{
-			if (!isIdValid(id))
-			{
-				return false;
-			}
-		}
+		final String statementString =
+			"UPDATE " + DBConstants.TABLE_USERS +
+			" SET " + DBConstants.TABLE_USERS_COLUMN_NAME + " = ?, " +
+			DBConstants.TABLE_USERS_COLUMN_REG_ID + " = ? " +
+			"WHERE " + DBConstants.TABLE_USERS_COLUMN_ID + " = ?";
 
-		return true;
-	}
+		final PreparedStatement statement = DB.connection.prepareStatement(statementString);
+		statement.setString(1, name);
+		statement.setString(2, regId);
+		statement.setLong(3, id);
 
-
-	/**
-	 * When Facebook names are acquired throughout the app's runtime they
-	 * should be checked to make sure they're not messed up in any way. Use
-	 * this method to check to make sure that they're not messed up. Valid
-	 * means three things:
-	 * <ol>
-	 * <li>This String is not null.</li>
-	 * <li>This String has a length of greater than or equal to 1.</li>
-	 * </ol>
-	 * 
-	 * @return
-	 * Returns true if the passed in Facebook name is valid.
-	 */
-	public static boolean isNameValid(final String name)
-	{
-		return Utilities.verifyValidString(name);
-	}
-
-
-	/**
-	 * When Facebook names are acquired throughout the app's runtime they
-	 * should be checked to make sure they're not messed up in any way. This
-	 * method allows you to check a whole bunch of names at once. If any single
-	 * name that is passed in is invalid, then this method will cease to check
-	 * the rest and will immediately return false.
-	 * 
-	 * @param names
-	 * The Facebook names to check for validity.
-	 * 
-	 * @return
-	 * Returns true if <strong>all</strong> of the passed in Facebook names are
-	 * valid. Returns false if <strong>any single</strong> name is invalid.
-	 */
-	public static boolean areNamesValid(final String... names)
-	{
-		for (final String name : names)
-		{
-			if (!isNameValid(name))
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-
-	/**
-	 * Checks a given ID and name for validity. Some of the other validity
-	 * verifying methods in this class define exactly what <i>validity</i> is.
-	 * See those for more information!
-	 *
-	 * @param id
-	 * The Facebook ID to check for validity.
-	 *
-	 * @param name
-	 * The name to check for validity.
-	 *
-	 * @return
-	 * Returns true if the values of both given parameters are detected as
-	 * being valid.
-	 */
-	public static boolean isIdAndNameValid(final long id, final String name)
-	{
-		return isIdValid(id) && isNameValid(name);
+		statement.executeUpdate();
+		DB.close(statement);
 	}
 
 

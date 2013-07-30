@@ -68,7 +68,7 @@ public class GCMUtilities
 		final String userNameToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType)
 		throws IOException, SQLException, Exception
 	{
-		final String regId = DatabaseUtilities.grabUsersRegId(sqlConnection, userIdOfReceiver.longValue());
+		final String regId = DBConstants.grabUsersRegId(sqlConnection, userIdOfReceiver.longValue());
 
 		if (Utilities.verifyValidString(regId))
 		// ensure that we were able to grab a valid regId for the user
@@ -100,7 +100,7 @@ public class GCMUtilities
 				// same device has more than one registration ID: update database. Replace
 				// the existing regId with this new one
 				{
-					DatabaseUtilities.updateUserRegId(sqlConnection, userIdOfReceiver.longValue(), canonicalRegId);
+					DBConstants.updateUserRegId(sqlConnection, userIdOfReceiver.longValue(), canonicalRegId);
 				}
 			}
 			else
@@ -110,7 +110,7 @@ public class GCMUtilities
 				if (errorCodeName.equals(Constants.ERROR_NOT_REGISTERED))
 				// application has been removed from device - unregister database
 				{
-					DatabaseUtilities.updateUserRegId(sqlConnection, userIdToShow, null);
+					DBConstants.updateUserRegId(sqlConnection, userIdToShow, null);
 				}
 			}
 		}
@@ -154,7 +154,7 @@ public class GCMUtilities
 	 */
 	public static void sendMessage(final Connection sqlConnection, final String gameId, final Long userIdToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType) throws IOException, SQLException, Exception
 	{
-		final String userNameToShow = DatabaseUtilities.grabUsersName(sqlConnection, userIdToShow.longValue());
+		final String userNameToShow = DBConstants.grabUsersName(sqlConnection, userIdToShow.longValue());
 		sendMessage(sqlConnection, gameId, userIdToShow, userNameToShow, userIdOfReceiver, gameType, messageType);
 	}
 
@@ -199,7 +199,7 @@ public class GCMUtilities
 	 */
 	public static void sendMessages(final Connection sqlConnection, final String gameId, final Long userIdToShow, final Long userIdOfReceiver, final Byte gameType, final Byte messageType, final String userNameOfReceiver) throws IOException, SQLException, Exception
 	{
-		final String userNameToShow = DatabaseUtilities.grabUsersName(sqlConnection, userIdToShow.longValue());
+		final String userNameToShow = DBConstants.grabUsersName(sqlConnection, userIdToShow.longValue());
 		sendMessage(sqlConnection, gameId, userIdToShow, userNameToShow, userIdOfReceiver, gameType, Byte.valueOf(Utilities.BOARD_LOSE));
 		sendMessage(sqlConnection, gameId, userIdOfReceiver, userNameOfReceiver, userIdToShow, gameType, Byte.valueOf(Utilities.BOARD_WIN));
 	}

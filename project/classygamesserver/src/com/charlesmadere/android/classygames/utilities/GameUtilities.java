@@ -7,7 +7,6 @@ import org.json.JSONObject;
 import com.charlesmadere.android.classygames.models.games.GenericBoard;
 
 
-
 public class GameUtilities
 {
 

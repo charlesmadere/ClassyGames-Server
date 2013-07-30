@@ -37,7 +37,6 @@ public final class GetStats extends Servlet
 		throws IOException, ServletException
 	{
 		prepare(response);
-
 		param_userId = request.getParameter(Utilities.POST_DATA_ID);
 
 		if (Utilities.verifyValidString(param_userId))

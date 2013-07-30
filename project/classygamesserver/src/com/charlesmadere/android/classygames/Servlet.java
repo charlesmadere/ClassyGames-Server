@@ -3,9 +3,6 @@ package com.charlesmadere.android.classygames;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -22,10 +19,7 @@ public abstract class Servlet extends HttpServlet
 	private static final long serialVersionUID = 1L;
 
 
-	protected Connection sqlConnection;
-	protected PreparedStatement sqlStatement;
 	protected PrintWriter printWriter;
-	protected ResultSet sqlResult;
 
 
 
@@ -36,8 +30,6 @@ public abstract class Servlet extends HttpServlet
 	}
 
 
-
-
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
 		throws IOException, ServletException
@@ -45,8 +37,6 @@ public abstract class Servlet extends HttpServlet
 		prepare(response);
 		printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_NOT_DETECTED));
 	}
-
-
 
 
 	protected void prepare(final HttpServletResponse response) throws IOException

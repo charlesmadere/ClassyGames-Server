@@ -8,7 +8,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.charlesmadere.android.classygames.utilities.DatabaseUtilities;
+import com.charlesmadere.android.classygames.utilities.DB;
+import com.charlesmadere.android.classygames.utilities.DBConstants;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
@@ -38,7 +39,6 @@ public final class RemoveRegId extends Servlet
 	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException
 	{
 		prepare(response);
-
 		param_userId = request.getParameter(Utilities.POST_DATA_ID);
 
 		if (Utilities.verifyValidString(param_userId))
@@ -63,7 +63,8 @@ public final class RemoveRegId extends Servlet
 				}
 				finally
 				{
-					DatabaseUtilities.closeSQLConnection(sqlConnection);
+					DB.close(sqlStatement);
+					DB.close();
 				}
 			}
 			else
@@ -91,8 +92,8 @@ public final class RemoveRegId extends Servlet
 	 */
 	private void removeRegId() throws SQLException, Exception
 	{
-		sqlConnection = DatabaseUtilities.acquireSQLConnection();
-		DatabaseUtilities.updateUserRegId(sqlConnection, userId.longValue(), null);
+		DB.open();
+		DBConstants.updateUserRegId(sqlConnection, userId.longValue(), null);
 		printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_REMOVED_FROM_DATABASE));
 	}
 

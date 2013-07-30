@@ -3,5 +3,9 @@ CREATE TABLE IF NOT EXISTS users
 	id BIGINT NOT NULL,
 	name VARCHAR(255) NOT NULL,
 	reg_id VARCHAR(255) DEFAULT NULL,
+	checkers_loses INTEGER DEFAULT 0,
+	checkers_wins INTEGER DEFAULT 0,
+	chess_loses INTEGER DEFAULT 0,
+	chess_wins INTEGER DEFAULT 0,
 	PRIMARY KEY (id)
 );

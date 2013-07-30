@@ -8,7 +8,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.charlesmadere.android.classygames.utilities.DatabaseUtilities;
+import com.charlesmadere.android.classygames.utilities.DB;
+import com.charlesmadere.android.classygames.utilities.DBConstants;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
@@ -37,7 +38,6 @@ public final class GetGame extends Servlet
 		throws IOException, ServletException
 	{
 		prepare(response);
-
 		param_gameId = request.getParameter(Utilities.POST_DATA_ID);
 
 		if (Utilities.verifyValidString(param_gameId))
@@ -57,7 +57,8 @@ public final class GetGame extends Servlet
 			}
 			finally
 			{
-				DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
+				DB.close(sqlStatement);
+				DB.close();
 			}
 		}
 		else
@@ -80,11 +81,11 @@ public final class GetGame extends Servlet
 	 */
 	private void getGame() throws SQLException, Exception
 	{
-		sqlConnection = DatabaseUtilities.acquireSQLConnection();
+		DB.open();
 
 		// prepare a SQL statement to be run on the database
-		final String sqlStatementString = "SELECT " + DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD + " FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
-		sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+		final String sqlStatementString = "SELECT " + DBConstants.TABLE_GAMES_COLUMN_BOARD + " FROM " + DBConstants.TABLE_GAMES + " WHERE " + DBConstants.TABLE_GAMES_COLUMN_ID + " = ?";
+		sqlStatement = DB.connection.prepareStatement(sqlStatementString);
 
 		// prevent SQL injection by inserting data this way
 		sqlStatement.setString(1, param_gameId);
@@ -96,7 +97,7 @@ public final class GetGame extends Servlet
 		// game with specified id was found in the database, send the board's
 		// data to the client
 		{
-			final String board = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD);
+			final String board = sqlResult.getString(DBConstants.TABLE_GAMES_COLUMN_BOARD);
 
 			if (Utilities.verifyValidString(board))
 			// return the board's data

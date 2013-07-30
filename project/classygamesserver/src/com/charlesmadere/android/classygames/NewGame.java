@@ -17,7 +17,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.charlesmadere.android.classygames.models.games.GenericBoard;
-import com.charlesmadere.android.classygames.utilities.DatabaseUtilities;
+import com.charlesmadere.android.classygames.utilities.DB;
+import com.charlesmadere.android.classygames.utilities.DBConstants;
 import com.charlesmadere.android.classygames.utilities.GCMUtilities;
 import com.charlesmadere.android.classygames.utilities.GameUtilities;
 import com.charlesmadere.android.classygames.utilities.Utilities;
@@ -58,7 +59,6 @@ public final class NewGame extends Servlet
 		throws IOException, ServletException
 	{
 		prepare(response);
-
 		param_userChallengedId = request.getParameter(Utilities.POST_DATA_USER_CHALLENGED);
 		param_userChallengedName = request.getParameter(Utilities.POST_DATA_NAME);
 		param_userCreatorId = request.getParameter(Utilities.POST_DATA_USER_CREATOR);
@@ -122,7 +122,8 @@ public final class NewGame extends Servlet
 				}
 				finally
 				{
-					DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
+					DB.close(sqlStatement);
+					DB.close();
 				}
 			}
 			else
@@ -168,8 +169,8 @@ public final class NewGame extends Servlet
 	 */
 	private void newGame() throws UnsupportedEncodingException, IOException, JSONException, NoSuchAlgorithmException, SQLException, Exception
 	{
-		sqlConnection = DatabaseUtilities.acquireSQLConnection();
-		DatabaseUtilities.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), param_userChallengedName);
+		DB.open();
+		DBConstants.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), param_userChallengedName);
 
 		board.flipTeams();
 		final JSONObject boardJSON = board.makeJSON();
@@ -204,30 +205,30 @@ public final class NewGame extends Servlet
 
 			// check to see if the digest we created is already taken by a game
 			// in the database
-			final ResultSet sqlResult = DatabaseUtilities.grabGamesInfo(sqlConnection, digest);
+			final ResultSet sqlResult = DBConstants.grabGamesInfo(sqlConnection, digest);
 
 			if (sqlResult != null && sqlResult.next())
 			// the digest we created to use as an ID already exists in the
 			// games table
 			{
-				if (sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED) == DatabaseUtilities.TABLE_GAMES_FINISHED_TRUE)
+				if (sqlResult.getByte(DBConstants.TABLE_GAMES_COLUMN_FINISHED) == DBConstants.TABLE_GAMES_FINISHED_TRUE)
 				// Game with the digest we created already exists, AND
 				// has been finished. Because of this, we can safely
 				// replace that game's data with our new game's data
 				{
-					DatabaseUtilities.closeSQLStatement(sqlStatement);
+					DB.close(sqlStatement);
 
 					// prepare a SQL statement to be run on the database
-					final String sqlStatementString = "UPDATE " + DatabaseUtilities.TABLE_GAMES + " SET " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_BOARD + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_TURN + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE + " = ?, " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " = ? WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
-					sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+					final String sqlStatementString = "UPDATE " + DBConstants.TABLE_GAMES + " SET " + DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR + " = ?, " + DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?, " + DBConstants.TABLE_GAMES_COLUMN_BOARD + " = ?, " + DBConstants.TABLE_GAMES_COLUMN_TURN + " = ?, " + DBConstants.TABLE_GAMES_COLUMN_GAME_TYPE + " = ?, " + DBConstants.TABLE_GAMES_COLUMN_FINISHED + " = ? WHERE " + DBConstants.TABLE_GAMES_COLUMN_ID + " = ?";
+					sqlStatement = DB.connection.prepareStatement(sqlStatementString);
 
 					// prevent SQL injection by inserting data this way
 					sqlStatement.setLong(1, userCreatorId.longValue());
 					sqlStatement.setLong(2, userChallengedId.longValue());
 					sqlStatement.setString(3, boardJSONString);
-					sqlStatement.setByte(4, DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED);
+					sqlStatement.setByte(4, DBConstants.TABLE_GAMES_TURN_CHALLENGED);
 					sqlStatement.setByte(5, gameType.byteValue());
-					sqlStatement.setByte(6, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
+					sqlStatement.setByte(6, DBConstants.TABLE_GAMES_FINISHED_FALSE);
 					sqlStatement.setString(7, digest);
 
 					// run the SQL statement
@@ -241,20 +242,20 @@ public final class NewGame extends Servlet
 			// exist in the games table. We we can now just simply insert
 			// this new game's data into the table.
 			{
-				DatabaseUtilities.closeSQLStatement(sqlStatement);
+				DB.close(sqlStatement);
 
 				// prepare a SQL statement to be run on the database
-				final String sqlStatementString = "INSERT INTO " + DatabaseUtilities.TABLE_GAMES + " " + DatabaseUtilities.TABLE_GAMES_FORMAT + " " + DatabaseUtilities.TABLE_GAMES_VALUES;
-				sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+				final String sqlStatementString = "INSERT INTO " + DBConstants.TABLE_GAMES + " " + DBConstants.TABLE_GAMES_FORMAT + " " + DBConstants.TABLE_GAMES_VALUES;
+				sqlStatement = DB.connection.prepareStatement(sqlStatementString);
 
 				// prevent SQL injection by inserting data this way
 				sqlStatement.setString(1, digest);
 				sqlStatement.setLong(2, userCreatorId.longValue());
 				sqlStatement.setLong(3, userChallengedId.longValue());
 				sqlStatement.setString(4, boardJSONString);
-				sqlStatement.setByte(5, DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED);
+				sqlStatement.setByte(5, DBConstants.TABLE_GAMES_TURN_CHALLENGED);
 				sqlStatement.setByte(6, gameType.byteValue());
-				sqlStatement.setByte(7, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
+				sqlStatement.setByte(7, DBConstants.TABLE_GAMES_FINISHED_FALSE);
 
 				// run the SQL statement
 				sqlStatement.executeUpdate();
@@ -301,7 +302,8 @@ public final class NewGame extends Servlet
 	 * time of this writing is SHA-256) doesn't exist, then this Exception will
 	 * be thrown.
 	 */
-	private String createDigest(final byte[] userChallengedBytes, final byte[] userCreatorBytes, final byte[] boardBytes) throws UnsupportedEncodingException, NoSuchAlgorithmException
+	private String createDigest(final byte[] userChallengedBytes, final byte[] userCreatorBytes,
+		final byte[] boardBytes) throws UnsupportedEncodingException, NoSuchAlgorithmException
 	{
 		// create a digest to use as the Game ID. We are going to be using the
 		// Utilities.MESSAGE_DIGEST_ALGORITHM as our hash generation algorithm.
@@ -406,7 +408,7 @@ public final class NewGame extends Servlet
 					digestBuilder.append('e');
 					break;
 
-				default:
+				case 15:
 					digestBuilder.append('f');
 					break;
 			}

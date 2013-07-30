@@ -13,7 +13,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.charlesmadere.android.classygames.utilities.DatabaseUtilities;
+import com.charlesmadere.android.classygames.utilities.DB;
+import com.charlesmadere.android.classygames.utilities.DBConstants;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
@@ -41,7 +42,6 @@ public final class GetGames extends Servlet
 	protected void doPost(final HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
 		prepare(response);
-
 		param_userId = request.getParameter(Utilities.POST_DATA_ID);
 
 		if (Utilities.verifyValidString(param_userId))
@@ -70,7 +70,8 @@ public final class GetGames extends Servlet
 				}
 				finally
 				{
-					DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
+					DB.close(sqlStatement);
+					DB.close();
 				}
 			}
 			else
@@ -102,14 +103,14 @@ public final class GetGames extends Servlet
 	 */
 	private void getGames() throws JSONException, SQLException, Exception
 	{
-		sqlConnection = DatabaseUtilities.acquireSQLConnection();
+		DB.open();
 
 		// prepare a SQL statement to be run on the MySQL database
-		final String sqlStatementString = "SELECT * FROM " + DatabaseUtilities.TABLE_GAMES + " WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " = ? AND (" + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR + " = ? OR " + DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?)";
-		sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+		final String sqlStatementString = "SELECT * FROM " + DBConstants.TABLE_GAMES + " WHERE " + DBConstants.TABLE_GAMES_COLUMN_FINISHED + " = ? AND (" + DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR + " = ? OR " + DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?)";
+		sqlStatement = DB.connection.prepareStatement(sqlStatementString);
 
 		// prevent SQL injection by inserting data this way
-		sqlStatement.setByte(1, DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE);
+		sqlStatement.setByte(1, DBConstants.TABLE_GAMES_FINISHED_FALSE);
 		sqlStatement.setLong(2, userId.longValue());
 		sqlStatement.setLong(3, userId.longValue());
 
@@ -149,11 +150,11 @@ public final class GetGames extends Servlet
 		do
 		// loop through all of the SQL return data
 		{
-			final String db_gameId = sqlResult.getString(DatabaseUtilities.TABLE_GAMES_COLUMN_ID);
-			final long db_userCreatorId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CREATOR);
-			final long db_userChallengedId = sqlResult.getLong(DatabaseUtilities.TABLE_GAMES_COLUMN_USER_CHALLENGED);
-			final byte db_gameType = sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_GAME_TYPE);
-			final Timestamp db_lastMove = sqlResult.getTimestamp(DatabaseUtilities.TABLE_GAMES_COLUMN_LAST_MOVE);
+			final String db_gameId = sqlResult.getString(DBConstants.TABLE_GAMES_COLUMN_ID);
+			final long db_userCreatorId = sqlResult.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR);
+			final long db_userChallengedId = sqlResult.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED);
+			final byte db_gameType = sqlResult.getByte(DBConstants.TABLE_GAMES_COLUMN_GAME_TYPE);
+			final Timestamp db_lastMove = sqlResult.getTimestamp(DBConstants.TABLE_GAMES_COLUMN_LAST_MOVE);
 
 			// Initialize a JSONObject. All of the current game's data will be
 			// stored here. At the end of this loop iteration this JSONObject
@@ -163,21 +164,21 @@ public final class GetGames extends Servlet
 			if (db_userCreatorId == userId.longValue())
 			{
 				game.put(Utilities.POST_DATA_ID, db_userChallengedId);
-				game.put(Utilities.POST_DATA_NAME, DatabaseUtilities.grabUsersName(sqlConnection, db_userChallengedId));
+				game.put(Utilities.POST_DATA_NAME, DBConstants.grabUsersName(sqlConnection, db_userChallengedId));
 			}
 			else
 			{
 				game.put(Utilities.POST_DATA_ID, db_userCreatorId);
-				game.put(Utilities.POST_DATA_NAME, DatabaseUtilities.grabUsersName(sqlConnection, db_userCreatorId));
+				game.put(Utilities.POST_DATA_NAME, DBConstants.grabUsersName(sqlConnection, db_userCreatorId));
 			}
 
 			game.put(Utilities.POST_DATA_GAME_ID, db_gameId);
 			game.put(Utilities.POST_DATA_GAME_TYPE, db_gameType);
 			game.put(Utilities.POST_DATA_LAST_MOVE, db_lastMove.getTime() / 1000);
 
-			switch (sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_TURN))
+			switch (sqlResult.getByte(DBConstants.TABLE_GAMES_COLUMN_TURN))
 			{
-				case DatabaseUtilities.TABLE_GAMES_TURN_CREATOR:
+				case DBConstants.TABLE_GAMES_TURN_CREATOR:
 				// it's the creator's turn
 					if (db_userCreatorId == userId.longValue())
 					{
@@ -189,7 +190,7 @@ public final class GetGames extends Servlet
 					}
 					break;
 
-				case DatabaseUtilities.TABLE_GAMES_TURN_CHALLENGED:
+				case DBConstants.TABLE_GAMES_TURN_CHALLENGED:
 				// it's the challenger's turn
 					if (db_userChallengedId == userId.longValue())
 					{

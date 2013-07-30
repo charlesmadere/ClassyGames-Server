@@ -9,7 +9,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.charlesmadere.android.classygames.utilities.DatabaseUtilities;
+import com.charlesmadere.android.classygames.utilities.DB;
+import com.charlesmadere.android.classygames.utilities.DBConstants;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
@@ -41,7 +42,6 @@ public final class NewRegId extends Servlet
 	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException
 	{
 		prepare(response);
-
 		param_userId = request.getParameter(Utilities.POST_DATA_ID);
 		param_userName = request.getParameter(Utilities.POST_DATA_NAME);
 		param_userRegId = request.getParameter(Utilities.POST_DATA_REG_ID);
@@ -68,7 +68,8 @@ public final class NewRegId extends Servlet
 				}
 				finally
 				{
-					DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
+					DB.close(sqlStatement);
+					DB.close();
 				}
 			}
 			else
@@ -96,11 +97,11 @@ public final class NewRegId extends Servlet
 	 */
 	private void newRegId() throws SQLException, Exception
 	{
-		sqlConnection = DatabaseUtilities.acquireSQLConnection();
+		DB.open();
 
 		// prepare a SQL statement to be run on the database
-		String sqlStatementString = "SELECT * FROM " + DatabaseUtilities.TABLE_USERS + " WHERE " + DatabaseUtilities.TABLE_USERS_COLUMN_ID + " = ?";
-		sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+		String sqlStatementString = "SELECT * FROM " + DBConstants.TABLE_USERS + " WHERE " + DBConstants.TABLE_USERS_COLUMN_ID + " = ?";
+		sqlStatement = DB.connection.prepareStatement(sqlStatementString);
 
 		// prevent SQL injection by inserting data this way
 		sqlStatement.setLong(1, userId.longValue());
@@ -111,11 +112,11 @@ public final class NewRegId extends Servlet
 		if (sqlResult.next())
 		// the id already exists in the table therefore it's data needs to be updated
 		{
-			DatabaseUtilities.closeSQLStatement(sqlStatement);
+			DB.close(sqlStatement);
 
 			// prepare a SQL statement to be run on the database
-			sqlStatementString = "UPDATE " + DatabaseUtilities.TABLE_USERS + " SET " + DatabaseUtilities.TABLE_USERS_COLUMN_NAME + " = ?, " + DatabaseUtilities.TABLE_USERS_COLUMN_REG_ID + " = ? WHERE " + DatabaseUtilities.TABLE_USERS_COLUMN_ID + " = ?";
-			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+			sqlStatementString = "UPDATE " + DBConstants.TABLE_USERS + " SET " + DBConstants.TABLE_USERS_COLUMN_NAME + " = ?, " + DBConstants.TABLE_USERS_COLUMN_REG_ID + " = ? WHERE " + DBConstants.TABLE_USERS_COLUMN_ID + " = ?";
+			sqlStatement = DB.connection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
 			sqlStatement.setString(1, param_userName);
@@ -125,11 +126,11 @@ public final class NewRegId extends Servlet
 		else
 		// id does not already exist in the table. let's insert it
 		{
-			DatabaseUtilities.closeSQLStatement(sqlStatement);
+			DB.close(sqlStatement);
 
 			// prepare a SQL statement to be run on the database
-			sqlStatementString = "INSERT INTO " + DatabaseUtilities.TABLE_USERS + " " + DatabaseUtilities.TABLE_USERS_FORMAT + " " + DatabaseUtilities.TABLE_USERS_VALUES;
-			sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+			sqlStatementString = "INSERT INTO " + DBConstants.TABLE_USERS + " " + DBConstants.TABLE_USERS_FORMAT + " " + DBConstants.TABLE_USERS_VALUES;
+			sqlStatement = DB.connection.prepareStatement(sqlStatementString);
 
 			// prevent SQL injection by inserting data this way
 			sqlStatement.setLong(1, userId.longValue());

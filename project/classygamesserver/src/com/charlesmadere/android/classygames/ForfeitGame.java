@@ -9,7 +9,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.charlesmadere.android.classygames.utilities.DatabaseUtilities;
+import com.charlesmadere.android.classygames.utilities.DB;
+import com.charlesmadere.android.classygames.utilities.DBConstants;
 import com.charlesmadere.android.classygames.utilities.GCMUtilities;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
@@ -22,7 +23,6 @@ public final class ForfeitGame extends Servlet
 
 
 	private String param_userChallengedId;
-	private String param_userChallengedName;
 	private String param_userCreatorId;
 	private String param_gameId;
 
@@ -45,13 +45,11 @@ public final class ForfeitGame extends Servlet
 		throws IOException, ServletException
 	{
 		prepare(response);
-
 		param_userChallengedId = request.getParameter(Utilities.POST_DATA_USER_CHALLENGED);
-		param_userChallengedName = request.getParameter(Utilities.POST_DATA_NAME);
 		param_userCreatorId = request.getParameter(Utilities.POST_DATA_USER_CREATOR);
 		param_gameId = request.getParameter(Utilities.POST_DATA_GAME_ID);
 
-		if (Utilities.verifyValidStrings(param_userChallengedId, param_userChallengedName, param_userCreatorId, param_gameId))
+		if (Utilities.verifyValidStrings(param_userChallengedId, param_userCreatorId, param_gameId))
 		// check inputs for validity
 		{
 			userChallengedId = Long.valueOf(param_userChallengedId);
@@ -77,7 +75,8 @@ public final class ForfeitGame extends Servlet
 				}
 				finally
 				{
-					DatabaseUtilities.closeSQL(sqlConnection, sqlStatement);
+					DB.close(sqlStatement);
+					DB.close();
 				}
 			}
 			else
@@ -109,21 +108,19 @@ public final class ForfeitGame extends Servlet
 	 */
 	private void forfeitGame() throws IOException, SQLException, Exception
 	{
-		sqlConnection = DatabaseUtilities.acquireSQLConnection();
-		DatabaseUtilities.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), param_userChallengedName);
-
-		final ResultSet sqlResult = DatabaseUtilities.grabGamesInfo(sqlConnection, param_gameId);
+		DB.open();
+		sqlResult = DBConstants.grabGamesInfo(sqlConnection, param_gameId);
 
 		if (sqlResult != null && sqlResult.next())
 		{
-			if (sqlResult.getByte(DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED) == DatabaseUtilities.TABLE_GAMES_FINISHED_FALSE)
+			if (sqlResult.getByte(DBConstants.TABLE_GAMES_COLUMN_FINISHED) == DBConstants.TABLE_GAMES_FINISHED_FALSE)
 			// make sure that the game has not been finished
 			{
-				final String sqlStatementString = "UPDATE " + DatabaseUtilities.TABLE_GAMES + " SET " + DatabaseUtilities.TABLE_GAMES_COLUMN_FINISHED + " = ? WHERE " + DatabaseUtilities.TABLE_GAMES_COLUMN_ID + " = ?";
-				sqlStatement = sqlConnection.prepareStatement(sqlStatementString);
+				final String sqlStatementString = "UPDATE " + DBConstants.TABLE_GAMES + " SET " + DBConstants.TABLE_GAMES_COLUMN_FINISHED + " = ? WHERE " + DBConstants.TABLE_GAMES_COLUMN_ID + " = ?";
+				sqlStatement = DB.connection.prepareStatement(sqlStatementString);
 
 				// prevent SQL injection by inserting data this way
-				sqlStatement.setByte(1, DatabaseUtilities.TABLE_GAMES_FINISHED_TRUE);
+				sqlStatement.setByte(1, DBConstants.TABLE_GAMES_FINISHED_TRUE);
 				sqlStatement.setString(2, param_gameId);
 
 				// run the SQL statement
