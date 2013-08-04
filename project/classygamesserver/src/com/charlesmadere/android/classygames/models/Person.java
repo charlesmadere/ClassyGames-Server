@@ -79,28 +79,7 @@ public final class Person
 	public Person(final long id) throws SQLException
 	{
 		this.id = id;
-		readRegId();
-	}
-
-
-	/**
-	 * Creates a Person object.
-	 * 
-	 * @param id
-	 * The Facebook ID of the user.
-	 * 
-	 * @param name
-	 * The Facebook name of the user.
-	 * 
-	 * @throws SQLException
-	 * If a database connection or query problem occurs, then this Exception
-	 * will be thrown.
-	 */
-	public Person(final long id, final String name) throws SQLException
-	{
-		this.id = id;
-		this.name = name;
-		readRegId();
+		readPersonData();
 	}
 
 
@@ -116,11 +95,12 @@ public final class Person
 	 * @param regId
 	 * The registration ID of the user's Android device.
 	 */
-	public Person(final long id, final String name, final String regId)
+	public Person(final long id, final String name, final String regId) throws SQLException
 	{
 		this.id = id;
 		this.name = name;
 		this.regId = regId;
+		readPersonData();
 	}
 
 
@@ -232,39 +212,56 @@ public final class Person
 	}
 
 
-	/**
-	 * If this Person object does not already have an Android registration ID
-	 * associated with it, then this method will attempt to find it in the
-	 * database. Note that it is possible for the registration ID to not be
-	 * able to be found. This is nothing really to worry about, but just know
-	 * then that this Person will not be able to receive push notifications.
-	 * 
-	 * @throws SQLException
-	 * If a database connection or query problem occurs, then this Exception
-	 * will be thrown.
-	 */
-	private void readRegId() throws SQLException
+	public void incrementCheckersLoses()
 	{
-		if (!hasRegId())
+		++checkersLoses;
+	}
+
+
+	public void incrementCheckersWins()
+	{
+		++checkersWins;
+	}
+
+
+	public void incrementChessLoses()
+	{
+		++chessLoses;
+	}
+
+
+	public void incrementChessWins()
+	{
+		++chessWins;
+	}
+
+
+	private void readPersonData() throws SQLException
+	{
+		final String statementString =
+			"SELECT * " +
+			" FROM " + DBConstants.TABLE_USERS +
+			" WHERE " + DBConstants.TABLE_USERS_COLUMN_ID + " = ?";
+
+		final PreparedStatement statement = DB.connection.prepareStatement(statementString);
+		statement.setLong(1, id);
+		final ResultSet result = statement.executeQuery();
+
+		if (result.next())
 		{
-			final String statementString =
-				"SELECT * " +
-				" FROM " + DBConstants.TABLE_USERS +
-				" WHERE " + DBConstants.TABLE_USERS_COLUMN_ID + " = ?";
-
-			final PreparedStatement statement = DB.connection.prepareStatement(statementString);
-			statement.setLong(1, id);
-
-			final ResultSet result = statement.executeQuery();
-
-			if (result.next())
+			if (!Utilities.verifyValidString(regId))
 			{
 				regId = result.getString(DBConstants.TABLE_USERS_COLUMN_REG_ID);
 			}
 
-			DB.close(result);
-			DB.close(statement);
+			checkersLoses = result.getInt(DBConstants.TABLE_USERS_COLUMN_CHECKERS_LOSES);
+			checkersWins = result.getInt(DBConstants.TABLE_USERS_COLUMN_CHECKERS_WINS);
+			chessLoses = result.getInt(DBConstants.TABLE_USERS_COLUMN_CHESS_LOSES);
+			chessWins = result.getInt(DBConstants.TABLE_USERS_COLUMN_CHESS_WINS);
 		}
+
+		DB.close(result);
+		DB.close(statement);
 	}
 
 
@@ -276,13 +273,21 @@ public final class Person
 		final String statementString =
 			"UPDATE " + DBConstants.TABLE_USERS +
 			" SET " + DBConstants.TABLE_USERS_COLUMN_NAME + " = ?, " +
-			DBConstants.TABLE_USERS_COLUMN_REG_ID + " = ? " +
+			DBConstants.TABLE_USERS_COLUMN_REG_ID + " = ?, " +
+			DBConstants.TABLE_USERS_COLUMN_CHECKERS_LOSES + " = ?, " +
+			DBConstants.TABLE_USERS_COLUMN_CHECKERS_WINS + " = ?, " +
+			DBConstants.TABLE_USERS_COLUMN_CHESS_LOSES + " = ?, " +
+			DBConstants.TABLE_USERS_COLUMN_CHESS_WINS + " = ?, " +
 			"WHERE " + DBConstants.TABLE_USERS_COLUMN_ID + " = ?";
 
 		final PreparedStatement statement = DB.connection.prepareStatement(statementString);
 		statement.setString(1, name);
 		statement.setString(2, regId);
-		statement.setLong(3, id);
+		statement.setInt(3, checkersLoses);
+		statement.setInt(4, checkersWins);
+		statement.setInt(5, chessLoses);
+		statement.setInt(6, chessWins);
+		statement.setLong(7, id);
 
 		statement.executeUpdate();
 		DB.close(statement);

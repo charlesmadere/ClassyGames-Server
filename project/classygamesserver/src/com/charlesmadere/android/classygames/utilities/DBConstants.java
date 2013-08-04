@@ -32,6 +32,10 @@ public final class DBConstants
 	public final static String TABLE_USERS_COLUMN_ID = "id";
 	public final static String TABLE_USERS_COLUMN_NAME = "name";
 	public final static String TABLE_USERS_COLUMN_REG_ID = "reg_id";
+	public final static String TABLE_USERS_COLUMN_CHECKERS_LOSES = "checkers_loses";
+	public final static String TABLE_USERS_COLUMN_CHECKERS_WINS = "checkers_wins";
+	public final static String TABLE_USERS_COLUMN_CHESS_LOSES = "chess_loses";
+	public final static String TABLE_USERS_COLUMN_CHESS_WINS = "chess_wins";
 	public final static String TABLE_USERS_FORMAT = "(" + TABLE_USERS_COLUMN_ID + ", " + TABLE_USERS_COLUMN_NAME + ", " + TABLE_USERS_COLUMN_REG_ID + ")";
 	public final static String TABLE_USERS_VALUES = "VALUES (?, ?, ?)";
 
