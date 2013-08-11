@@ -5,8 +5,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.json.JSONException;
+
+import com.charlesmadere.android.classygames.models.games.GenericBoard;
 import com.charlesmadere.android.classygames.utilities.DB;
 import com.charlesmadere.android.classygames.utilities.DBConstants;
+import com.charlesmadere.android.classygames.utilities.GameUtilities;
 
 
 public final class Game
@@ -21,6 +25,9 @@ public final class Game
 	private long userCreator;
 	private String board;
 	private String id;
+
+	private GenericBoard oldGameBoard;
+	private GenericBoard newGameBoard;
 
 
 
@@ -88,6 +95,40 @@ public final class Game
 	}
 
 
+	public void flipNewGameBoard() throws JSONException
+	{
+		newGameBoard.flipTeams();
+	}
+
+
+	public void flipOldGameBoard() throws JSONException
+	{
+		if (oldGameBoard == null)
+		{
+			oldGameBoard = GameUtilities.newGame(board, gameType);
+		}
+
+		oldGameBoard.flipTeams();
+	}
+
+
+	public boolean isTurn(final long id)
+	{
+		if (isChallengedsTurn() && id == userChallenged)
+		{
+			return true;
+		}
+		else if (isCreatorsTurn() && id == userCreator)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+
 	private void readGameData() throws SQLException
 	{
 		final String statementString =
@@ -110,20 +151,19 @@ public final class Game
 			board = result.getString(DBConstants.TABLE_GAMES_COLUMN_BOARD);
 		}
 
-		DB.close(result);
-		DB.close(statement);
-	}
-
-
-	public void setBoard(final String board)
-	{
-		this.board = board;
+		DB.close(result, statement);
 	}
 
 
 	public void setFinished()
 	{
 		finished = DBConstants.TABLE_GAMES_FINISHED_TRUE;
+	}
+
+
+	public void setNewGameBoard(final String board)
+	{
+		newGameBoard = GameUtilities.newGame(board, gameType);
 	}
 
 
@@ -143,7 +183,7 @@ public final class Game
 	/**
 	 * Saves this Game object's current data state to the database.
 	 */
-	public void update() throws SQLException
+	public void update() throws JSONException, SQLException
 	{
 		final String statementString =
 			"UPDATE " + DBConstants.TABLE_GAMES +
@@ -161,10 +201,20 @@ public final class Game
 		statement.setByte(3, turn);
 		statement.setLong(4, userChallenged);
 		statement.setLong(5, userCreator);
+
+		if (newGameBoard != null)
+		{
+			board = newGameBoard.makeJSON().toString();
+		}
+		else if (oldGameBoard != null)
+		{
+			board = oldGameBoard.makeJSON().toString();
+		}
+
 		statement.setString(6, board);
 		statement.setString(7, id);
-
 		statement.executeUpdate();
+
 		DB.close(statement);
 	}
 

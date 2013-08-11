@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.charlesmadere.android.classygames.models.Game;
+import com.charlesmadere.android.classygames.models.User;
 import com.charlesmadere.android.classygames.models.games.GenericBoard;
 import com.charlesmadere.android.classygames.utilities.DB;
 import com.charlesmadere.android.classygames.utilities.DBConstants;
@@ -64,11 +66,16 @@ public final class SkipMove extends Servlet
 			{
 				try
 				{
+					DB.open();
 					skipMove();
 				}
 				catch (final IOException e)
 				{
 					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND));
+				}
+				catch (final JSONException e)
+				{
+					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
 				}
 				catch (final SQLException e)
 				{
@@ -80,7 +87,6 @@ public final class SkipMove extends Servlet
 				}
 				finally
 				{
-					DB.close(sqlStatement);
 					DB.close();
 				}
 			}
@@ -115,9 +121,33 @@ public final class SkipMove extends Servlet
 	 * If the JDBC driver could not be loaded then this Exception will be
 	 * thrown.
 	 */
-	private void skipMove() throws IOException, SQLException, Exception
+	private void skipMove() throws IOException, JSONException, SQLException, Exception
 	{
-		DB.open();
+		final User user = new User(userChallengedId, param_userChallengedName);
+		user.update();
+
+		final Game game = new Game(param_gameId);
+
+		if (!game.isFinished())
+		{
+			if (game.isTurn(userCreatorId))
+			{
+				game.flipOldGameBoard();
+				game.switchTurns();
+				game.update();
+
+				printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_MOVE_ADDED_TO_DATABASE));
+			}
+			else
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_ITS_NOT_YOUR_TURN));
+			}
+		}
+		else
+		{
+			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GAME_IS_ALREADY_OVER));
+		}
+
 		DBConstants.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), param_userChallengedName);
 
 		sqlResult = DBConstants.grabGamesInfo(sqlConnection, param_gameId);

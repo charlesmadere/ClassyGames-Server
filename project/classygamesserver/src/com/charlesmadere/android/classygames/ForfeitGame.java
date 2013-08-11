@@ -59,6 +59,7 @@ public final class ForfeitGame extends Servlet
 			{
 				try
 				{
+					DB.open();
 					forfeitGame();
 				}
 				catch (final IOException e)
@@ -75,7 +76,6 @@ public final class ForfeitGame extends Servlet
 				}
 				finally
 				{
-					DB.close(sqlStatement);
 					DB.close();
 				}
 			}
@@ -108,7 +108,6 @@ public final class ForfeitGame extends Servlet
 	 */
 	private void forfeitGame() throws IOException, SQLException, Exception
 	{
-		DB.open();
 		sqlResult = DBConstants.grabGamesInfo(sqlConnection, param_gameId);
 
 		if (sqlResult != null && sqlResult.next())

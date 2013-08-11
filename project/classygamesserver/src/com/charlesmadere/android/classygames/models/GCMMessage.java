@@ -20,8 +20,8 @@ public class GCMMessage
 
 
 	private byte messageType;
-	private Person personToMention;
-	private Person personToReceive;
+	private User personToMention;
+	private User personToReceive;
 	private String gameId;
 
 
@@ -83,13 +83,13 @@ public class GCMMessage
 	}
 
 
-	public void setPersonToMention(final Person personToMention)
+	public void setPersonToMention(final User personToMention)
 	{
 		this.personToMention = personToMention;
 	}
 
 
-	public void setPersonToReceive(final Person personToReceive)
+	public void setPersonToReceive(final User personToReceive)
 	{
 		this.personToReceive = personToReceive;
 	}

@@ -8,8 +8,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.charlesmadere.android.classygames.models.User;
 import com.charlesmadere.android.classygames.utilities.DB;
-import com.charlesmadere.android.classygames.utilities.DBConstants;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
@@ -51,6 +51,7 @@ public final class RemoveRegId extends Servlet
 			{
 				try
 				{
+					DB.open();
 					removeRegId();
 				}
 				catch (final SQLException e)
@@ -63,7 +64,6 @@ public final class RemoveRegId extends Servlet
 				}
 				finally
 				{
-					DB.close(sqlStatement);
 					DB.close();
 				}
 			}
@@ -92,8 +92,10 @@ public final class RemoveRegId extends Servlet
 	 */
 	private void removeRegId() throws SQLException, Exception
 	{
-		DB.open();
-		DBConstants.updateUserRegId(sqlConnection, userId.longValue(), null);
+		final User user = new User(userId);
+		user.setRegId(null);
+		user.update();
+
 		printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_USER_REMOVED_FROM_DATABASE));
 	}
 

@@ -69,6 +69,7 @@ public final class NewMove extends Servlet
 			{
 				try
 				{
+					DB.open();
 					newMove();
 				}
 				catch (final IOException e)
@@ -89,7 +90,6 @@ public final class NewMove extends Servlet
 				}
 				finally
 				{
-					DB.close(sqlStatement);
 					DB.close();
 				}
 			}
@@ -126,7 +126,6 @@ public final class NewMove extends Servlet
 	 */
 	private void newMove() throws IOException, JSONException, SQLException, Exception
 	{
-		DB.open();
 		DBConstants.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), param_userChallengedName);
 
 		sqlResult = DBConstants.grabGamesInfo(sqlConnection, param_gameId);

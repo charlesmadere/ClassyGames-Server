@@ -10,27 +10,27 @@ import com.charlesmadere.android.classygames.utilities.DBConstants;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
-public final class Person
+public final class User
 {
 
 
 	/**
-	 * The person's Facebook ID. This is a unique, always positive, number
+	 * The user's Facebook ID. This is a unique, always positive, number
 	 * across the entire Facebook system.
 	 */
 	private long id;
 
 
 	/**
-	 * The person's Facebook name. It could be "Charles Madere". Obviously this
-	 * is not a unique identifier for this person. This class's long id
+	 * The user's Facebook name. It could be "Charles Madere". Obviously this
+	 * is not a unique identifier for this user. This class's long id
 	 * variable, however, <strong>is</strong> a unique identifier.
 	 */
 	private String name;
 
 
 	/**
-	 * The person's Android device's registration ID. This is the unique ID
+	 * The user's Android device's registration ID. This is the unique ID
 	 * that is necessary in order for a push notification to be sent to his or
 	 * her device. Note that this is just a single String. This means that
 	 * Classy Games can only send a push notification to one of the user's
@@ -40,25 +40,25 @@ public final class Person
 
 
 	/**
-	 * The number of checkers loses that this Person has.
+	 * The number of checkers loses that this User has.
 	 */
 	private int checkersLoses;
 
 
 	/**
-	 * The number of checkers wins that this Person has.
+	 * The number of checkers wins that this User has.
 	 */
 	private int checkersWins;
 
 
 	/**
-	 * The number of chess loses that this Person has.
+	 * The number of chess loses that this User has.
 	 */
 	private int chessLoses;
 
 
 	/**
-	 * The number of chess wins that this Person has.
+	 * The number of chess wins that this User has.
 	 */
 	private int chessWins;
 
@@ -66,7 +66,7 @@ public final class Person
 
 
 	/**
-	 * Creates a Person object from the given ID and then reads the remaining
+	 * Creates a User object from the given ID and then reads in the remaining
 	 * data from the database.
 	 * 
 	 * @param id
@@ -76,15 +76,34 @@ public final class Person
 	 * If a database connection or query problem occurs, then this Exception
 	 * will be thrown.
 	 */
-	public Person(final long id) throws SQLException
+	public User(final long id) throws SQLException
 	{
 		this.id = id;
-		readPersonData();
+		readUserData();
 	}
 
 
 	/**
-	 * Creates a Person object.
+	 * Creates a User object from the given Facebook information and then reads
+	 * in the remaining data from the database.
+	 * 
+	 * @param id
+	 * The Facebook ID of the user.
+	 * 
+	 * @param name
+	 * The Facebook name of the user.
+	 */
+	public User(final long id, final String name) throws SQLException
+	{
+		this.id = id;
+		this.name = name;
+		readUserData();
+	}
+
+
+	/**
+	 * Creates a User object from the given information and then reads in the
+	 * remaining data from the database.
 	 * 
 	 * @param id
 	 * The Facebook ID of the user.
@@ -95,12 +114,12 @@ public final class Person
 	 * @param regId
 	 * The registration ID of the user's Android device.
 	 */
-	public Person(final long id, final String name, final String regId) throws SQLException
+	public User(final long id, final String name, final String regId) throws SQLException
 	{
 		this.id = id;
 		this.name = name;
 		this.regId = regId;
-		readPersonData();
+		readUserData();
 	}
 
 
@@ -132,7 +151,7 @@ public final class Person
 
 	/**
 	 * @return
-	 * Returns this Person's Facebook ID.
+	 * Returns this User's Facebook ID.
 	 */
 	public long getId()
 	{
@@ -142,7 +161,7 @@ public final class Person
 
 	/**
 	 * @return
-	 * Returns this Person's Facebook name. This is that person's whole name.
+	 * Returns this User's Facebook name. This is that user's whole name.
 	 */
 	public String getName()
 	{
@@ -152,7 +171,7 @@ public final class Person
 
 	/**
 	 * @return
-	 * Returns this Person's Android device's registration ID.
+	 * Returns this User's Android device's registration ID.
 	 */
 	public String getRegId()
 	{
@@ -161,7 +180,7 @@ public final class Person
 
 
 	/**
-	 * Replaces this Person object's current Facebook ID with this newly given
+	 * Replaces this User object's current Facebook ID with this newly given
 	 * id. An ID should be a number that is always greater than 0.
 	 * 
 	 * @param id
@@ -174,7 +193,7 @@ public final class Person
 
 
 	/**
-	 * Replaces this Person object's current Facebook name with this newly
+	 * Replaces this User object's current Facebook name with this newly
 	 * given name. 
 	 * 
 	 * @param name
@@ -187,7 +206,7 @@ public final class Person
 
 
 	/**
-	 * Replaces this Person object's current Android registration ID with this
+	 * Replaces this User object's current Android registration ID with this
 	 * new one.
 	 * 
 	 * @param regId
@@ -200,11 +219,11 @@ public final class Person
 
 
 	/**
-	 * Checks to see that this Person object has a valid Android registration
+	 * Checks to see that this User object has a valid Android registration
 	 * ID.
 	 * 
 	 * @return
-	 * Returns true if this Person object has a valid Android registration ID.
+	 * Returns true if this User object has a valid Android registration ID.
 	 */
 	public boolean hasRegId()
 	{
@@ -236,7 +255,7 @@ public final class Person
 	}
 
 
-	private void readPersonData() throws SQLException
+	private void readUserData() throws SQLException
 	{
 		final String statementString =
 			"SELECT * " +
@@ -249,6 +268,11 @@ public final class Person
 
 		if (result.next())
 		{
+			if (!Utilities.verifyValidString(name))
+			{
+				name = result.getString(DBConstants.TABLE_USERS_COLUMN_NAME);
+			}
+
 			if (!Utilities.verifyValidString(regId))
 			{
 				regId = result.getString(DBConstants.TABLE_USERS_COLUMN_REG_ID);
@@ -260,13 +284,12 @@ public final class Person
 			chessWins = result.getInt(DBConstants.TABLE_USERS_COLUMN_CHESS_WINS);
 		}
 
-		DB.close(result);
-		DB.close(statement);
+		DB.close(result, statement);
 	}
 
 
 	/**
-	 * Saves this Person object's current data state to the database.
+	 * Saves this User object's current data state to the database.
 	 */
 	public void update() throws SQLException
 	{
@@ -288,8 +311,8 @@ public final class Person
 		statement.setInt(5, chessLoses);
 		statement.setInt(6, chessWins);
 		statement.setLong(7, id);
-
 		statement.executeUpdate();
+
 		DB.close(statement);
 	}
 

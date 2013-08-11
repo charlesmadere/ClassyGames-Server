@@ -45,6 +45,7 @@ public final class GetGame extends Servlet
 		{
 			try
 			{
+				DB.open();
 				getGame();
 			}
 			catch (final SQLException e)
@@ -57,7 +58,6 @@ public final class GetGame extends Servlet
 			}
 			finally
 			{
-				DB.close(sqlStatement);
 				DB.close();
 			}
 		}
@@ -81,8 +81,6 @@ public final class GetGame extends Servlet
 	 */
 	private void getGame() throws SQLException, Exception
 	{
-		DB.open();
-
 		// prepare a SQL statement to be run on the database
 		final String sqlStatementString = "SELECT " + DBConstants.TABLE_GAMES_COLUMN_BOARD + " FROM " + DBConstants.TABLE_GAMES + " WHERE " + DBConstants.TABLE_GAMES_COLUMN_ID + " = ?";
 		sqlStatement = DB.connection.prepareStatement(sqlStatementString);

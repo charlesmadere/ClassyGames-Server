@@ -54,6 +54,7 @@ public final class GetGames extends Servlet
 			{
 				try
 				{
+					DB.open();
 					getGames();
 				}
 				catch (final JSONException e)
@@ -70,7 +71,6 @@ public final class GetGames extends Servlet
 				}
 				finally
 				{
-					DB.close(sqlStatement);
 					DB.close();
 				}
 			}
@@ -103,8 +103,6 @@ public final class GetGames extends Servlet
 	 */
 	private void getGames() throws JSONException, SQLException, Exception
 	{
-		DB.open();
-
 		// prepare a SQL statement to be run on the MySQL database
 		final String sqlStatementString = "SELECT * FROM " + DBConstants.TABLE_GAMES + " WHERE " + DBConstants.TABLE_GAMES_COLUMN_FINISHED + " = ? AND (" + DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR + " = ? OR " + DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?)";
 		sqlStatement = DB.connection.prepareStatement(sqlStatementString);

@@ -23,22 +23,29 @@ public final class DB
 
 
 	/**
-	 * Releases a SQL resource.
+	 * Releases a set of SQL resources.
 	 * 
-	 * @parameter sql
-	 * A SQL object. It's okay if this object is null or if it was never used.
+	 * @parameter sqls
+	 * A set of SQL objects. It's okay if this object is null or if it was
+	 * never used.
 	 */
-	public static void close(final AutoCloseable sql)
+	public static void close(final AutoCloseable... sqls)
 	{
-		if (sql != null)
+		if (sqls != null && sqls.length >= 1)
 		{
-			try
+			for (final AutoCloseable sql : sqls)
 			{
-				sql.close();
-			}
-			catch (final Exception e)
-			{
-
+				if (sql != null)
+				{
+					try
+					{
+						sql.close();
+					}
+					catch (final Exception e)
+					{
+	
+					}
+				}
 			}
 		}
 	}

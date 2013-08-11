@@ -85,6 +85,7 @@ public final class NewGame extends Servlet
 
 				try
 				{
+					DB.open();
 					board = GameUtilities.newGame(param_board, gameType.byteValue());
 
 					if (board.checkValidity() == Utilities.BOARD_NEW_GAME)
@@ -122,7 +123,6 @@ public final class NewGame extends Servlet
 				}
 				finally
 				{
-					DB.close(sqlStatement);
 					DB.close();
 				}
 			}
@@ -169,7 +169,6 @@ public final class NewGame extends Servlet
 	 */
 	private void newGame() throws UnsupportedEncodingException, IOException, JSONException, NoSuchAlgorithmException, SQLException, Exception
 	{
-		DB.open();
 		DBConstants.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), param_userChallengedName);
 
 		board.flipTeams();
