@@ -15,35 +15,34 @@ public class GCMMessage
 {
 
 
+	public final static byte MESSAGE_TYPE_NEW_GAME = 1;
+	public final static byte MESSAGE_TYPE_NEW_MOVE = 2;
+	public final static byte MESSAGE_TYPE_GAME_OVER_LOSE = 7;
+	public final static byte MESSAGE_TYPE_GAME_OVER_WIN = 15;
+
 	private final static int RETRY_ATTEMPTS = 5;
 	private static Sender sender;
 
 
 	private byte messageType;
-	private User personToMention;
-	private User personToReceive;
+	private User userToMention;
+	private User userToReceive;
 	private String gameId;
 
 
 
 
-	public boolean isValid()
-	{
-		return personToReceive != null && personToReceive.hasRegId() &&
-			personToMention != null && verifyValidMessageType(messageType);
-	}
-
-
 	public void sendMessage() throws IOException
 	{
-		if (isValid())
+		if (userToReceive != null && userToReceive.hasRegId() && userToMention != null &&
+			userToMention.hasId() && userToMention.hasName() && verifyValidMessageType(messageType))
 		{
 			final Message message = new Message.Builder()
 				.addData(Utilities.POST_DATA_GAME_ID, gameId)
 				.build();
 
 			final Sender sender = getSender();
-			final Result result = sender.send(message, personToReceive.getRegId(), RETRY_ATTEMPTS);
+			final Result result = sender.send(message, userToReceive.getRegId(), RETRY_ATTEMPTS);
 			final String resultMessageId = result.getMessageId();
 
 			if (Utilities.verifyValidString(resultMessageId))
@@ -55,7 +54,7 @@ public class GCMMessage
 				// update database the database. Replacing the existing regId
 				// with this new one.
 				{
-					personToReceive.setRegId(canonicalRegId);
+					userToReceive.setRegId(canonicalRegId);
 				}
 			}
 			else
@@ -64,7 +63,7 @@ public class GCMMessage
 
 				if (errorCodeName.equalsIgnoreCase(Constants.ERROR_NOT_REGISTERED))
 				{
-					personToReceive.setRegId(null);
+					userToReceive.setRegId(null);
 				}
 			}
 		}
@@ -77,21 +76,39 @@ public class GCMMessage
 	}
 
 
-	public void setMessageType(final byte messageType)
+	public void setMessageTypeNewGame()
 	{
-		this.messageType = messageType;
+		messageType = MESSAGE_TYPE_NEW_GAME;
 	}
 
 
-	public void setPersonToMention(final User personToMention)
+	public void setMessageTypeNewMove()
 	{
-		this.personToMention = personToMention;
+		messageType = MESSAGE_TYPE_NEW_MOVE;
 	}
 
 
-	public void setPersonToReceive(final User personToReceive)
+	public void setMessageTypeGameOverLose()
 	{
-		this.personToReceive = personToReceive;
+		messageType = MESSAGE_TYPE_GAME_OVER_LOSE;
+	}
+
+
+	public void setMessageTypeGameOverWin()
+	{
+		messageType = MESSAGE_TYPE_GAME_OVER_WIN;
+	}
+
+
+	public void setUserToMention(final User userToMention)
+	{
+		this.userToMention = userToMention;
+	}
+
+
+	public void setUserToReceive(final User userToReceive)
+	{
+		this.userToReceive = userToReceive;
 	}
 
 
@@ -110,10 +127,10 @@ public class GCMMessage
 	{
 		switch (messageType)
 		{
-			case Utilities.POST_DATA_MESSAGE_TYPE_NEW_GAME:
-			case Utilities.POST_DATA_MESSAGE_TYPE_NEW_MOVE:
-			case Utilities.POST_DATA_MESSAGE_TYPE_GAME_OVER_LOSE:
-			case Utilities.POST_DATA_MESSAGE_TYPE_GAME_OVER_WIN:
+			case MESSAGE_TYPE_NEW_GAME:
+			case MESSAGE_TYPE_NEW_MOVE:
+			case MESSAGE_TYPE_GAME_OVER_LOSE:
+			case MESSAGE_TYPE_GAME_OVER_WIN:
 				return true;
 
 			default:

@@ -218,6 +218,18 @@ public final class User
 	}
 
 
+	public boolean hasId()
+	{
+		return id >= 0;
+	}
+
+
+	public boolean hasName()
+	{
+		return Utilities.verifyValidString(name);
+	}
+
+
 	/**
 	 * Checks to see that this User object has a valid Android registration
 	 * ID.

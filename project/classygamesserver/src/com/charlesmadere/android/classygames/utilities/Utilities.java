@@ -39,10 +39,6 @@ public class Utilities
 	public final static byte POST_DATA_GAME_TYPE_CHESS = 2;
 	public final static String POST_DATA_LAST_MOVE = DBConstants.TABLE_GAMES_COLUMN_LAST_MOVE;
 	public final static String POST_DATA_MESSAGE_TYPE = "message_type";
-	public final static byte POST_DATA_MESSAGE_TYPE_NEW_GAME = 1;
-	public final static byte POST_DATA_MESSAGE_TYPE_NEW_MOVE = 2;
-	public final static byte POST_DATA_MESSAGE_TYPE_GAME_OVER_LOSE = 7;
-	public final static byte POST_DATA_MESSAGE_TYPE_GAME_OVER_WIN = 15;
 	public final static String POST_DATA_NAME = DBConstants.TABLE_USERS_COLUMN_NAME;
 	public final static String POST_DATA_REG_ID = DBConstants.TABLE_USERS_COLUMN_REG_ID;
 	public final static String POST_DATA_TURN = DBConstants.TABLE_GAMES_COLUMN_TURN;
@@ -301,7 +297,7 @@ public class Utilities
 	 */
 	public static boolean verifyValidString(final String string)
 	{
-		return string != null && string.length() >= 1;
+		return string != null && !string.isEmpty();
 	}
 
 
