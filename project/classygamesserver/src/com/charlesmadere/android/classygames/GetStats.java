@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.charlesmadere.android.classygames.models.User;
 import com.charlesmadere.android.classygames.utilities.DB;
@@ -80,7 +81,8 @@ public final class GetStats extends Servlet
 	private void getStats() throws JSONException, SQLException, Exception
 	{
 		final User user = new User(userId);
-		printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_GENERIC));
+		final JSONObject stats = user.makeStatsJSON();
+		printWriter.write(Utilities.makePostDataSuccess(stats));
 	}
 
 

@@ -133,12 +133,12 @@ public final class SkipMove extends Servlet
 				game.switchTurns();
 				game.update();
 
-				final GCMMessage gcm = new GCMMessage();
-				gcm.setGameId(game.getId());
-				gcm.setMessageTypeNewMove();
-				gcm.setUserToMention(userCreator);
-				gcm.setUserToReceive(userChallenged);
-				gcm.sendMessage();
+				new GCMMessage()
+					.setGameId(game.getId())
+					.setMessageTypeNewMove()
+					.setUserToMention(userCreator)
+					.setUserToReceive(userChallenged)
+					.sendMessage();
 
 				printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_MOVE_ADDED_TO_DATABASE));
 			}

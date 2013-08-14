@@ -5,6 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.charlesmadere.android.classygames.utilities.DB;
 import com.charlesmadere.android.classygames.utilities.DBConstants;
 import com.charlesmadere.android.classygames.utilities.Utilities;
@@ -267,6 +270,24 @@ public final class User
 	}
 
 
+	public JSONObject makeStatsJSON() throws JSONException
+	{
+		final JSONObject checkers = new JSONObject();
+		checkers.put(Utilities.POST_DATA_LOSES, checkersLoses);
+		checkers.put(Utilities.POST_DATA_WINS, checkersWins);
+
+		final JSONObject chess = new JSONObject();
+		chess.put(Utilities.POST_DATA_LOSES, chessLoses);
+		chess.put(Utilities.POST_DATA_WINS, chessWins);
+
+		final JSONObject stats = new JSONObject();
+		stats.put(Utilities.POST_DATA_CHECKERS, checkers);
+		stats.put(Utilities.POST_DATA_CHESS, chess);
+
+		return stats;
+	}
+
+
 	private void readUserData() throws SQLException
 	{
 		final String statementString =
@@ -301,7 +322,7 @@ public final class User
 
 
 	/**
-	 * Saves this User object's current data state to the database.
+	 * Write out this User object's current data state to the database.
 	 */
 	public void update() throws SQLException
 	{

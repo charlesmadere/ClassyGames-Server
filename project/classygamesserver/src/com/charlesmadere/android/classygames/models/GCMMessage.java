@@ -70,45 +70,52 @@ public class GCMMessage
 	}
 
 
-	public void setGameId(final String gameId)
+	public GCMMessage setGameId(final String gameId)
 	{
 		this.gameId = gameId;
+		return this;
 	}
 
 
-	public void setMessageTypeNewGame()
+	public GCMMessage setMessageTypeNewGame()
 	{
 		messageType = MESSAGE_TYPE_NEW_GAME;
+		return this;
 	}
 
 
-	public void setMessageTypeNewMove()
+	public GCMMessage setMessageTypeNewMove()
 	{
 		messageType = MESSAGE_TYPE_NEW_MOVE;
+		return this;
 	}
 
 
-	public void setMessageTypeGameOverLose()
+	public GCMMessage setMessageTypeGameOverLose()
 	{
 		messageType = MESSAGE_TYPE_GAME_OVER_LOSE;
+		return this;
 	}
 
 
-	public void setMessageTypeGameOverWin()
+	public GCMMessage setMessageTypeGameOverWin()
 	{
 		messageType = MESSAGE_TYPE_GAME_OVER_WIN;
+		return this;
 	}
 
 
-	public void setUserToMention(final User userToMention)
+	public GCMMessage setUserToMention(final User userToMention)
 	{
 		this.userToMention = userToMention;
+		return this;
 	}
 
 
-	public void setUserToReceive(final User userToReceive)
+	public GCMMessage setUserToReceive(final User userToReceive)
 	{
 		this.userToReceive = userToReceive;
+		return this;
 	}
 
 

@@ -31,6 +31,8 @@ public class Utilities
 	public final static String CONTENT_TYPE_JSON = MIMETYPE_JSON + "; " + CHARSET;
 
 	public final static String POST_DATA_BOARD = DBConstants.TABLE_GAMES_COLUMN_BOARD;
+	public final static String POST_DATA_CHECKERS = "checkers";
+	public final static String POST_DATA_CHESS = "chess";
 	public final static String POST_DATA_FINISHED = DBConstants.TABLE_GAMES_COLUMN_FINISHED;
 	public final static String POST_DATA_ID = DBConstants.TABLE_USERS_COLUMN_ID;
 	public final static String POST_DATA_GAME_ID = "game_id";
@@ -38,6 +40,7 @@ public class Utilities
 	public final static byte POST_DATA_GAME_TYPE_CHECKERS = 1;
 	public final static byte POST_DATA_GAME_TYPE_CHESS = 2;
 	public final static String POST_DATA_LAST_MOVE = DBConstants.TABLE_GAMES_COLUMN_LAST_MOVE;
+	public final static String POST_DATA_LOSES = "loses";
 	public final static String POST_DATA_MESSAGE_TYPE = "message_type";
 	public final static String POST_DATA_NAME = DBConstants.TABLE_USERS_COLUMN_NAME;
 	public final static String POST_DATA_REG_ID = DBConstants.TABLE_USERS_COLUMN_REG_ID;
@@ -46,6 +49,7 @@ public class Utilities
 	public final static String POST_DATA_TURN_YOURS = "turn_yours";
 	public final static String POST_DATA_USER_CHALLENGED = DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED;
 	public final static String POST_DATA_USER_CREATOR = DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR;
+	public final static String POST_DATA_WINS = "wins";
 
 	public final static String POST_ERROR_BOARD_INVALID = "Invalid board!";
 	public final static String POST_ERROR_COULD_NOT_CREATE_GAME_ID = "Was unable to create a Game ID.";
@@ -117,47 +121,39 @@ public class Utilities
 	 * @return
 	 * Output message that should be written out using the PrintWriter.
 	 */
-	private static String makePostData(final Object data, final boolean hasError)
+	private static String makePostData(final Object data, final boolean hasError) throws JSONException
 	{
 		String outputString = null;
+		final JSONObject result = new JSONObject();
 
-		try
+		if (hasError)
 		{
-			final JSONObject result = new JSONObject();
-
-			if (hasError)
+			try
 			{
-				try
-				{
-					final JSONObject dataJSON = (JSONObject) data;
-					result.put("error", dataJSON);
-				}
-				catch (final ClassCastException e)
-				{
-					result.put("error", data);
-				}
+				final JSONObject dataJSON = (JSONObject) data;
+				result.put("error", dataJSON);
 			}
-			else
+			catch (final ClassCastException e)
 			{
-				try
-				{
-					final JSONObject dataJSON = (JSONObject) data;
-					result.put("success", dataJSON);
-				}
-				catch (final ClassCastException e)
-				{
-					result.put("success", data);
-				}
+				result.put("error", data);
 			}
-
-			final JSONObject output = new JSONObject();
-			output.put("result", result);
-			outputString = output.toString();
 		}
-		catch (final JSONException e)
+		else
 		{
-
+			try
+			{
+				final JSONObject dataJSON = (JSONObject) data;
+				result.put("success", dataJSON);
+			}
+			catch (final ClassCastException e)
+			{
+				result.put("success", data);
+			}
 		}
+
+		final JSONObject output = new JSONObject();
+		output.put("result", result);
+		outputString = output.toString();
 
 		return outputString;
 	}

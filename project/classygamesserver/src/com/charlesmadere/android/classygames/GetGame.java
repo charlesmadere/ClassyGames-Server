@@ -8,8 +8,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.charlesmadere.android.classygames.models.Game;
 import com.charlesmadere.android.classygames.utilities.DB;
-import com.charlesmadere.android.classygames.utilities.DBConstants;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
@@ -81,38 +81,9 @@ public final class GetGame extends Servlet
 	 */
 	private void getGame() throws SQLException, Exception
 	{
-		// prepare a SQL statement to be run on the database
-		final String sqlStatementString = "SELECT " + DBConstants.TABLE_GAMES_COLUMN_BOARD + " FROM " + DBConstants.TABLE_GAMES + " WHERE " + DBConstants.TABLE_GAMES_COLUMN_ID + " = ?";
-		sqlStatement = DB.connection.prepareStatement(sqlStatementString);
-
-		// prevent SQL injection by inserting data this way
-		sqlStatement.setString(1, param_gameId);
-
-		// run the SQL statement and acquire any return information
-		sqlResult = sqlStatement.executeQuery();
-
-		if (sqlResult.next())
-		// game with specified id was found in the database, send the board's
-		// data to the client
-		{
-			final String board = sqlResult.getString(DBConstants.TABLE_GAMES_COLUMN_BOARD);
-
-			if (Utilities.verifyValidString(board))
-			// return the board's data
-			{
-				printWriter.write(Utilities.makePostDataSuccess(board));
-			}
-			else
-			{
-				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_GET_BOARD_DATA));
-			}
-		}
-		else
-		// We could not find a game with specified id in the database. This
-		// should never happen.
-		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_FIND_GAME_WITH_SPECIFIED_ID));
-		}
+		final Game game = new Game(param_gameId);
+		final String board = game.getBoard();
+		printWriter.write(Utilities.makePostDataSuccess(board));
 	}
 
 

@@ -11,6 +11,7 @@ import com.charlesmadere.android.classygames.models.games.GenericBoard;
 import com.charlesmadere.android.classygames.utilities.DB;
 import com.charlesmadere.android.classygames.utilities.DBConstants;
 import com.charlesmadere.android.classygames.utilities.GameUtilities;
+import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
 public final class Game
@@ -32,7 +33,7 @@ public final class Game
 
 
 
-	public Game(final String id) throws SQLException
+	public Game(final String id) throws SQLException, Exception
 	{
 		this.id = id;
 		readGameData();
@@ -56,12 +57,6 @@ public final class Game
 	public boolean isCreatorsTurn()
 	{
 		return turn == DBConstants.TABLE_GAMES_TURN_CREATOR;
-	}
-
-
-	public byte getGameType()
-	{
-		return gameType;
 	}
 
 
@@ -129,7 +124,19 @@ public final class Game
 	}
 
 
-	private void readGameData() throws SQLException
+	public boolean isTypeCheckers()
+	{
+		return gameType == Utilities.POST_DATA_GAME_TYPE_CHECKERS;
+	}
+
+
+	public boolean isTypeChess()
+	{
+		return gameType == Utilities.POST_DATA_GAME_TYPE_CHESS;
+	}
+
+
+	private void readGameData() throws SQLException, Exception
 	{
 		final String statementString =
 			"SELECT * " +
@@ -149,6 +156,10 @@ public final class Game
 			userChallenged = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED);
 			userCreator = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR);
 			board = result.getString(DBConstants.TABLE_GAMES_COLUMN_BOARD);
+		}
+		else
+		{
+			throw new Exception("Could not find game with ID of \"" + id + "\".");
 		}
 
 		DB.close(result, statement);

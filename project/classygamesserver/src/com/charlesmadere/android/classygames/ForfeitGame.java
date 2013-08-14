@@ -2,16 +2,16 @@ package com.charlesmadere.android.classygames;
 
 
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.charlesmadere.android.classygames.models.GCMMessage;
+import com.charlesmadere.android.classygames.models.Game;
+import com.charlesmadere.android.classygames.models.User;
 import com.charlesmadere.android.classygames.utilities.DB;
-import com.charlesmadere.android.classygames.utilities.DBConstants;
-import com.charlesmadere.android.classygames.utilities.GCMUtilities;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
@@ -108,36 +108,49 @@ public final class ForfeitGame extends Servlet
 	 */
 	private void forfeitGame() throws IOException, SQLException, Exception
 	{
-		sqlResult = DBConstants.grabGamesInfo(sqlConnection, param_gameId);
+		final Game game = new Game(param_gameId);
 
-		if (sqlResult != null && sqlResult.next())
+		if (game.isFinished())
 		{
-			if (sqlResult.getByte(DBConstants.TABLE_GAMES_COLUMN_FINISHED) == DBConstants.TABLE_GAMES_FINISHED_FALSE)
-			// make sure that the game has not been finished
-			{
-				final String sqlStatementString = "UPDATE " + DBConstants.TABLE_GAMES + " SET " + DBConstants.TABLE_GAMES_COLUMN_FINISHED + " = ? WHERE " + DBConstants.TABLE_GAMES_COLUMN_ID + " = ?";
-				sqlStatement = DB.connection.prepareStatement(sqlStatementString);
-
-				// prevent SQL injection by inserting data this way
-				sqlStatement.setByte(1, DBConstants.TABLE_GAMES_FINISHED_TRUE);
-				sqlStatement.setString(2, param_gameId);
-
-				// run the SQL statement
-				sqlStatement.executeUpdate();
-
-				GCMUtilities.sendMessage(sqlConnection, param_gameId, userCreatorId, userChallengedId, Byte.valueOf(Utilities.POST_DATA_GAME_TYPE_CHECKERS), Byte.valueOf(Utilities.BOARD_WIN));
-				GCMUtilities.sendMessage(sqlConnection, param_gameId, userChallengedId, userCreatorId, Byte.valueOf(Utilities.POST_DATA_GAME_TYPE_CHECKERS), Byte.valueOf(Utilities.BOARD_LOSE));
-
-				printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_GENERIC));
-			}
-			else
-			{
-				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GAME_IS_ALREADY_OVER));
-			}
+			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GAME_IS_ALREADY_OVER));
 		}
 		else
 		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_FIND_GAME_WITH_SPECIFIED_ID));
+			game.setFinished();
+			game.update();
+
+			final User challenged = new User(userChallengedId);
+			final User creator = new User(userCreatorId);
+
+			if (game.isTypeCheckers())
+			{
+				challenged.incrementCheckersWins();
+				creator.incrementCheckersLoses();
+			}
+			else if (game.isTypeChess())
+			{
+				challenged.incrementChessWins();
+				creator.incrementChessLoses();
+			}
+
+			challenged.update();
+			creator.update();
+
+			new GCMMessage()
+				.setGameId(param_gameId)
+				.setMessageTypeGameOverWin()
+				.setUserToMention(creator)
+				.setUserToReceive(challenged)
+				.sendMessage();
+
+			new GCMMessage()
+				.setGameId(param_gameId)
+				.setMessageTypeGameOverLose()
+				.setUserToMention(challenged)
+				.setUserToReceive(creator)
+				.sendMessage();
+
+			printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_GENERIC));
 		}
 	}
 
