@@ -4,7 +4,9 @@ package com.charlesmadere.android.classygames.models;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -64,6 +66,20 @@ public final class User
 	 * The number of chess wins that this User has.
 	 */
 	private int chessWins;
+
+
+	/**
+	 * A LinkedList of games that are this user's turn. This variable will be
+	 * null until you call this class's readGames() method.
+	 */
+	private LinkedList<Game> myTurnGames;
+
+
+	/**
+	 * A LinkedList of games that are the opponent's turn. This variable will
+	 * be null until you call this class's readGames() method.
+	 */
+	private LinkedList<Game> theirTurnGames;
 
 
 
@@ -149,6 +165,30 @@ public final class User
 	public int getChessWins()
 	{
 		return chessWins;
+	}
+
+
+	/**
+	 * @return
+	 * Returns to you this Game object's myTurnGames LinkedList variable. Note
+	 * that <strong>it will be null</strong> unless you explicitly called this
+	 * class's readGames() method.
+	 */
+	public LinkedList<Game> getMyTurnGames()
+	{
+		return myTurnGames;
+	}
+
+
+	/**
+	 * @return
+	 * Returns to you this Game object's theirTurnGames LinkedList variable.
+	 * Note that <strong>it will be null</strong> unless you explicitly called
+	 * this class's readGames() method.
+	 */
+	public LinkedList<Game> getTheirTurnGames()
+	{
+		return theirTurnGames;
 	}
 
 
@@ -270,6 +310,35 @@ public final class User
 	}
 
 
+	public JSONArray makeMyTurnGamesJSON() throws JSONException
+	{
+		return makeTurnGamesJSON(myTurnGames);
+	}
+
+
+	public JSONArray makeTheirTurnGamesJSON() throws JSONException
+	{
+		return makeTurnGamesJSON(theirTurnGames);
+	}
+
+
+	private JSONArray makeTurnGamesJSON(final LinkedList<Game> turnGames) throws JSONException
+	{
+		final JSONArray gamesJSON = new JSONArray();
+
+		if (turnGames != null && !turnGames.isEmpty())
+		{
+			for (Game game : turnGames)
+			{
+				final JSONObject gameJSON = game.makeJSON();
+				gamesJSON.put(gameJSON);
+			}
+		}
+
+		return gamesJSON;
+	}
+
+
 	public JSONObject makeStatsJSON() throws JSONException
 	{
 		final JSONObject checkers = new JSONObject();
@@ -285,6 +354,43 @@ public final class User
 		stats.put(Utilities.POST_DATA_CHESS, chess);
 
 		return stats;
+	}
+
+
+	public void readGames() throws SQLException
+	{
+		myTurnGames = new LinkedList<Game>();
+		theirTurnGames = new LinkedList<Game>();
+
+		final String statementString =
+			"SELECT * " +
+			" FROM " + DBConstants.TABLE_GAMES +
+			" WHERE " + DBConstants.TABLE_GAMES_COLUMN_FINISHED + " = ?, AND (" +
+			DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ? OR " +
+			DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR + " = ?)";
+
+		final PreparedStatement statement = DB.connection.prepareStatement(statementString);
+		statement.setByte(1, DBConstants.TABLE_GAMES_FINISHED_FALSE);
+		statement.setLong(2, id);
+		statement.setLong(3, id);
+
+		final ResultSet result = statement.executeQuery();
+
+		while (result.next())
+		{
+			final Game game = new Game(result);
+
+			if (game.isChallengedsTurn())
+			{
+				theirTurnGames.add(game);
+			}
+			else if (game.isCreatorsTurn())
+			{
+				myTurnGames.add(game);
+			}
+		}
+
+		DB.close(result, statement);
 	}
 
 

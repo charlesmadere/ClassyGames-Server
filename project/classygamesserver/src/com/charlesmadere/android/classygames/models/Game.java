@@ -4,8 +4,10 @@ package com.charlesmadere.android.classygames.models;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.charlesmadere.android.classygames.models.games.GenericBoard;
 import com.charlesmadere.android.classygames.utilities.DB;
@@ -21,11 +23,11 @@ public final class Game
 	private byte finished;
 	private byte gameType;
 	private byte turn;
-	private long lastMove;
 	private long userChallenged;
 	private long userCreator;
 	private String board;
 	private String id;
+	private Timestamp lastMove;
 
 	private GenericBoard oldGameBoard;
 	private GenericBoard newGameBoard;
@@ -37,6 +39,12 @@ public final class Game
 	{
 		this.id = id;
 		readGameData();
+	}
+
+
+	public Game(final ResultSet result) throws SQLException
+	{
+		initFromSQLResult(result);
 	}
 
 
@@ -57,12 +65,6 @@ public final class Game
 	public boolean isCreatorsTurn()
 	{
 		return turn == DBConstants.TABLE_GAMES_TURN_CREATOR;
-	}
-
-
-	public long getLastMove()
-	{
-		return lastMove;
 	}
 
 
@@ -90,6 +92,18 @@ public final class Game
 	}
 
 
+	public Timestamp getLastMove()
+	{
+		return lastMove;
+	}
+
+
+	public long getLastMoveAsLong()
+	{
+		return lastMove.getTime() / 1000L;
+	}
+
+
 	public void flipNewGameBoard() throws JSONException
 	{
 		newGameBoard.flipTeams();
@@ -104,6 +118,23 @@ public final class Game
 		}
 
 		oldGameBoard.flipTeams();
+	}
+
+
+	private void initFromSQLResult(final ResultSet result) throws SQLException
+	{
+		if (!Utilities.verifyValidString(id))
+		{
+			id = result.getString(DBConstants.TABLE_GAMES_COLUMN_ID);
+		}
+
+		finished = result.getByte(DBConstants.TABLE_GAMES_COLUMN_FINISHED);
+		gameType = result.getByte(DBConstants.TABLE_GAMES_COLUMN_GAME_TYPE);
+		turn = result.getByte(DBConstants.TABLE_GAMES_COLUMN_TURN);
+		userChallenged = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED);
+		userCreator = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR);
+		board = result.getString(DBConstants.TABLE_GAMES_COLUMN_BOARD);
+		lastMove = result.getTimestamp(DBConstants.TABLE_GAMES_COLUMN_LAST_MOVE);
 	}
 
 
@@ -136,6 +167,20 @@ public final class Game
 	}
 
 
+	public JSONObject makeJSON() throws JSONException
+	{
+		final JSONObject gameJSON = new JSONObject();
+		gameJSON.put(Utilities.POST_DATA_GAME_ID, id);
+		gameJSON.put(Utilities.POST_DATA_GAME_TYPE, gameType);
+		gameJSON.put(Utilities.POST_DATA_USER_CHALLENGED, userChallenged);
+		gameJSON.put(Utilities.POST_DATA_USER_CREATOR, userCreator);
+		gameJSON.put(Utilities.POST_DATA_BOARD, board);
+		gameJSON.put(Utilities.POST_DATA_LAST_MOVE, getLastMoveAsLong());
+
+		return gameJSON;
+	}
+
+
 	private void readGameData() throws SQLException, Exception
 	{
 		final String statementString =
@@ -149,13 +194,7 @@ public final class Game
 
 		if (result.next())
 		{
-			finished = result.getByte(DBConstants.TABLE_GAMES_COLUMN_FINISHED);
-			gameType = result.getByte(DBConstants.TABLE_GAMES_COLUMN_GAME_TYPE);
-			turn = result.getByte(DBConstants.TABLE_GAMES_COLUMN_TURN);
-			lastMove = result.getLong(DBConstants.TABLE_GAMES_COLUMN_LAST_MOVE);
-			userChallenged = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED);
-			userCreator = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR);
-			board = result.getString(DBConstants.TABLE_GAMES_COLUMN_BOARD);
+			initFromSQLResult(result);
 		}
 		else
 		{
