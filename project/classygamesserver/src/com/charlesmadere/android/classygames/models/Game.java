@@ -46,6 +46,17 @@ public final class Game
 	}
 
 
+	public Game(final String id, final String board) throws SQLException, Exception
+	{
+		this.id = id;
+		this.board = board;
+
+		
+
+		readGameData();
+	}
+
+
 	public Game(final ResultSet result) throws SQLException
 	{
 		initFromSQLResult(result);
@@ -142,13 +153,32 @@ public final class Game
 		finished = result.getByte(DBConstants.TABLE_GAMES_COLUMN_FINISHED);
 		gameType = result.getByte(DBConstants.TABLE_GAMES_COLUMN_GAME_TYPE);
 		turn = result.getByte(DBConstants.TABLE_GAMES_COLUMN_TURN);
-		final long userChallengedId = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED);
-		final long userCreatorId = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR);
-		board = result.getString(DBConstants.TABLE_GAMES_COLUMN_BOARD);
 		lastMove = result.getTimestamp(DBConstants.TABLE_GAMES_COLUMN_LAST_MOVE);
 
-		userChallenged = new User(userChallengedId);
-		userCreator = new User(userCreatorId);
+		if (Utilities.verifyValidString(board))
+		{
+			newGameBoard = GameUtilities.newGame(board, gameType);
+
+			final String oldBoard = result.getString(DBConstants.TABLE_GAMES_COLUMN_BOARD);
+			oldGameBoard = GameUtilities.newGame(oldBoard, gameType);
+		}
+		else
+		{
+			board = result.getString(DBConstants.TABLE_GAMES_COLUMN_BOARD);
+			newGameBoard = GameUtilities.newGame(board, gameType);
+		}
+
+		if (userChallenged == null)
+		{
+			final long userChallengedId = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED);
+			userChallenged = new User(userChallengedId);
+		}
+
+		if (userCreator == null)
+		{
+			final long userCreatorId = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR);
+			userCreator = new User(userCreatorId);
+		}
 	}
 
 

@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.charlesmadere.android.classygames.models.Game;
+import com.charlesmadere.android.classygames.models.User;
 import com.charlesmadere.android.classygames.models.games.GenericBoard;
 import com.charlesmadere.android.classygames.utilities.DB;
 import com.charlesmadere.android.classygames.utilities.DBConstants;
@@ -32,8 +34,8 @@ public final class NewMove extends Servlet
 	private String param_gameId;
 	private String param_board;
 
-	private Long userChallengedId;
-	private Long userCreatorId;
+	private long userChallengedId;
+	private long userCreatorId;
 
 	private GenericBoard board;
 
@@ -126,6 +128,21 @@ public final class NewMove extends Servlet
 	 */
 	private void newMove() throws IOException, JSONException, SQLException, Exception
 	{
+		final User userChallenged = new User(userChallengedId, param_userChallengedName);
+		userChallenged.update();
+
+		final User userCreator = new User(userCreatorId);
+		final Game game = new Game(param_gameId, param_board);
+
+		if (game.isNewMoveValid())
+		{
+			
+		}
+		else
+		{
+			
+		}
+
 		DBConstants.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), param_userChallengedName);
 
 		sqlResult = DBConstants.grabGamesInfo(sqlConnection, param_gameId);
