@@ -24,7 +24,7 @@ public final class NewRegId extends Servlet
 	private String param_userName;
 	private String param_userRegId;
 
-	private Long userId;
+	private long userId;
 
 
 

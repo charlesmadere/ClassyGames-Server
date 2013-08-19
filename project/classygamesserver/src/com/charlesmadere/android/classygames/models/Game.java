@@ -1,6 +1,10 @@
 package com.charlesmadere.android.classygames.models;
 
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,14 +27,14 @@ public final class Game
 	private byte finished;
 	private byte gameType;
 	private byte turn;
-	private long userChallenged;
-	private long userCreator;
 	private String board;
 	private String id;
 	private Timestamp lastMove;
+	private User userChallenged;
+	private User userCreator;
 
-	private GenericBoard oldGameBoard;
 	private GenericBoard newGameBoard;
+	private GenericBoard oldGameBoard;
 
 
 
@@ -48,36 +52,19 @@ public final class Game
 	}
 
 
-
-
-	public boolean isFinished()
+	public Game(final User userChallenged, final User userCreator, final String board, final byte gameType)
+		throws SQLException
 	{
-		return finished == DBConstants.TABLE_GAMES_FINISHED_TRUE;
+		this.userChallenged = userChallenged;
+		this.userCreator = userCreator;
+		this.board = board;
+		this.gameType = gameType;
+		finished = DBConstants.TABLE_GAMES_FINISHED_FALSE;
+
+		newGameBoard = GameUtilities.newGame(board, gameType);
 	}
 
 
-	public boolean isChallengedsTurn()
-	{
-		return turn == DBConstants.TABLE_GAMES_TURN_CHALLENGED;
-	}
-
-
-	public boolean isCreatorsTurn()
-	{
-		return turn == DBConstants.TABLE_GAMES_TURN_CREATOR;
-	}
-
-
-	public long getUserChallenged()
-	{
-		return userChallenged;
-	}
-
-
-	public long getUserCreator()
-	{
-		return userCreator;
-	}
 
 
 	public String getBoard()
@@ -101,6 +88,30 @@ public final class Game
 	public long getLastMoveAsLong()
 	{
 		return lastMove.getTime() / 1000L;
+	}
+
+
+	public GenericBoard getNewGameBoard()
+	{
+		return newGameBoard;
+	}
+
+
+	public GenericBoard getOldGameBoard()
+	{
+		return oldGameBoard;
+	}
+
+
+	public User getUserChallenged()
+	{
+		return userChallenged;
+	}
+
+
+	public User getUserCreator()
+	{
+		return userCreator;
 	}
 
 
@@ -131,20 +142,60 @@ public final class Game
 		finished = result.getByte(DBConstants.TABLE_GAMES_COLUMN_FINISHED);
 		gameType = result.getByte(DBConstants.TABLE_GAMES_COLUMN_GAME_TYPE);
 		turn = result.getByte(DBConstants.TABLE_GAMES_COLUMN_TURN);
-		userChallenged = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED);
-		userCreator = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR);
+		final long userChallengedId = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED);
+		final long userCreatorId = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR);
 		board = result.getString(DBConstants.TABLE_GAMES_COLUMN_BOARD);
 		lastMove = result.getTimestamp(DBConstants.TABLE_GAMES_COLUMN_LAST_MOVE);
+
+		userChallenged = new User(userChallengedId);
+		userCreator = new User(userCreatorId);
+	}
+
+
+	public boolean isChallengedsTurn()
+	{
+		return turn == DBConstants.TABLE_GAMES_TURN_CHALLENGED;
+	}
+
+
+	public boolean isCreatorsTurn()
+	{
+		return turn == DBConstants.TABLE_GAMES_TURN_CREATOR;
+	}
+
+
+	public boolean isFinished()
+	{
+		return finished == DBConstants.TABLE_GAMES_FINISHED_TRUE;
+	}
+
+
+	private boolean isGameValid(final GenericBoard game)
+	{
+		final byte validity = game.checkValidity();
+		return validity == Utilities.BOARD_NEW_GAME;
+	}
+
+
+	public boolean isNewGameValid()
+	{
+		return isGameValid(newGameBoard);
+	}
+
+
+	public boolean isOldGameValid()
+	{
+		return isGameValid(oldGameBoard);
 	}
 
 
 	public boolean isTurn(final long id)
 	{
-		if (isChallengedsTurn() && id == userChallenged)
+		if (isChallengedsTurn() && id == userChallenged.getId())
 		{
 			return true;
 		}
-		else if (isCreatorsTurn() && id == userCreator)
+		else if (isCreatorsTurn() && id == userCreator.getId())
 		{
 			return true;
 		}
@@ -164,6 +215,150 @@ public final class Game
 	public boolean isTypeChess()
 	{
 		return gameType == Utilities.POST_DATA_GAME_TYPE_CHESS;
+	}
+
+
+	public void makeId() throws UnsupportedEncodingException, NoSuchAlgorithmException, SQLException
+	{
+		if (!Utilities.verifyValidString(id))
+		{
+			final String userChallenged = String.valueOf(this.userChallenged);
+			final String userCreator = String.valueOf(this.userCreator);
+			final String random = String.valueOf(Utilities.getRandom().nextInt());
+
+			boolean idCollisionOccurred = false;
+
+			do
+			{
+				final MessageDigest digest = MessageDigest.getInstance(Utilities.MESSAGE_DIGEST_ALGORITHM);
+				digest.update(gameType);
+				digest.update(userChallenged.getBytes(Utilities.UTF8));
+				digest.update(userCreator.getBytes(Utilities.UTF8));
+				digest.update(board.getBytes(Utilities.UTF8));
+				digest.update(random.getBytes(Utilities.UTF8));
+
+				final BigInteger digestValue = new BigInteger(digest.digest());
+				final StringBuilder digestBuilder = new StringBuilder(digestValue.toString(Utilities.MESSAGE_DIGEST_RADIX));
+
+				for (int nibble = 0; digestBuilder.length() < Utilities.MESSAGE_DIGEST_LENGTH; )
+				// We want a digest that's Utilities.MESSAGE_DIGEST_LENGTH
+				// characters in length. At the time of this writing, we are aiming
+				// for 80 characters long. The digest algorithm alone will give us
+				// a few less than that. So here we're making up for that deficit
+				// by continuously adding random characters to the digest until we
+				// get a digest that is 80 characters long.
+				{
+					do
+					// We don't want a negative number. Keep generating random ints
+					// until we get one that's positive.
+					{
+						// don't allow the random number we've generated to be
+						// greater than 15
+						nibble = Utilities.getRandom().nextInt() % 16;
+					}
+					while (nibble < 0);
+
+					switch (nibble)
+					{
+						case 0:
+							digestBuilder.append('0');
+							break;
+
+						case 1:
+							digestBuilder.append('1');
+							break;
+
+						case 2:
+							digestBuilder.append('2');
+							break;
+
+						case 3:
+							digestBuilder.append('3');
+							break;
+
+						case 4:
+							digestBuilder.append('4');
+							break;
+
+						case 5:
+							digestBuilder.append('5');
+							break;
+
+						case 6:
+							digestBuilder.append('6');
+							break;
+
+						case 7:
+							digestBuilder.append('7');
+							break;
+
+						case 8:
+							digestBuilder.append('8');
+							break;
+
+						case 9:
+							digestBuilder.append('9');
+							break;
+
+						case 10:
+							digestBuilder.append('a');
+							break;
+
+						case 11:
+							digestBuilder.append('b');
+							break;
+
+						case 12:
+							digestBuilder.append('c');
+							break;
+
+						case 13:
+							digestBuilder.append('d');
+							break;
+
+						case 14:
+							digestBuilder.append('e');
+							break;
+
+						case 15:
+							digestBuilder.append('f');
+							break;
+					}
+				}
+
+				id = digestBuilder.toString();
+
+				final String statementString =
+					"SELECT * " +
+					" FROM " + DBConstants.TABLE_GAMES +
+					" WHERE " + DBConstants.TABLE_GAMES_COLUMN_ID + " = ?";
+
+				final PreparedStatement statement = DB.connection.prepareStatement(statementString);
+				statement.setString(1, id);
+				final ResultSet result = statement.executeQuery();
+
+				if (result.next())
+				{
+					final byte finished = result.getByte(DBConstants.TABLE_GAMES_COLUMN_FINISHED);
+
+					if (finished == DBConstants.TABLE_GAMES_FINISHED_FALSE)
+					{
+						idCollisionOccurred = true;
+					}
+					else
+					{
+						idCollisionOccurred = false;
+					}
+				}
+				else
+				{
+					idCollisionOccurred = false;
+				}
+
+				DB.close(result, statement);
+			}
+			while (idCollisionOccurred);
+		}
 	}
 
 
@@ -211,12 +406,6 @@ public final class Game
 	}
 
 
-	public void setNewGameBoard(final String board)
-	{
-		newGameBoard = GameUtilities.newGame(board, gameType);
-	}
-
-
 	public void switchTurns()
 	{
 		if (isChallengedsTurn())
@@ -249,14 +438,14 @@ public final class Game
 		statement.setByte(1, finished);
 		statement.setByte(2, gameType);
 		statement.setByte(3, turn);
-		statement.setLong(4, userChallenged);
-		statement.setLong(5, userCreator);
+		statement.setLong(4, userChallenged.getId());
+		statement.setLong(5, userCreator.getId());
 
 		if (newGameBoard != null)
 		{
 			board = newGameBoard.makeJSON().toString();
 		}
-		else if (oldGameBoard != null)
+		else
 		{
 			board = oldGameBoard.makeJSON().toString();
 		}

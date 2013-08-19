@@ -22,7 +22,7 @@ public final class RemoveRegId extends Servlet
 
 	private String param_userId;
 
-	private Long userId;
+	private long userId;
 
 
 

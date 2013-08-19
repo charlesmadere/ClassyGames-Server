@@ -29,8 +29,8 @@ public final class SkipMove extends Servlet
 	private String param_userCreatorId;
 	private String param_gameId;
 
-	private Long userChallengedId;
-	private Long userCreatorId;
+	private long userChallengedId;
+	private long userCreatorId;
 
 
 

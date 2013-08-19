@@ -20,7 +20,7 @@ public class Utilities
 	// list of digest algorithms found here
 	// http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html#MessageDigest
 	public final static String MESSAGE_DIGEST_ALGORITHM = "SHA-256";
-	public final static int MESSAGE_DIGEST_LENGTH = 64;
+	public final static int MESSAGE_DIGEST_LENGTH = 80;
 	public final static int MESSAGE_DIGEST_RADIX = 16;
 
 	public final static String UTF8 = "UTF-8";
