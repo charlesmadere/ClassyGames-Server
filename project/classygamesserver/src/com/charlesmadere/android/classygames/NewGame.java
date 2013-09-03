@@ -63,56 +63,48 @@ public final class NewGame extends Servlet
 			userChallengedId = Long.valueOf(param_userChallengedId);
 			userCreatorId = Long.valueOf(param_userCreatorId);
 
-			if (Utilities.verifyValidLongs(userChallengedId, userCreatorId))
-			// check inputs for validity
+			if (Utilities.verifyValidString(param_gameType))
+			// check to see if we were given a gameType parameter
 			{
-				if (Utilities.verifyValidString(param_gameType))
-				// check to see if we were given a gameType parameter
-				{
-					gameType = Byte.valueOf(param_gameType);
-				}
-				else
-				{
-					gameType = Byte.valueOf(Utilities.POST_DATA_GAME_TYPE_CHECKERS);
-				}
-
-				try
-				{
-					DB.open();
-					newGame();
-				}
-				catch (final UnsupportedEncodingException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DIGEST_HAD_IMPROPER_ENCODING));
-				}
-				catch (final IOException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND));
-				}
-				catch (final JSONException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
-				}
-				catch (final NoSuchAlgorithmException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DIGEST_HAD_UNSUPPORTED_ALGORITHM));
-				}
-				catch (final SQLException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
-				}
-				catch (final Exception e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC));
-				}
-				finally
-				{
-					DB.close();
-				}
+				gameType = Byte.valueOf(param_gameType);
 			}
 			else
 			{
-				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
+				gameType = Byte.valueOf(Utilities.POST_DATA_GAME_TYPE_CHECKERS);
+			}
+
+			try
+			{
+				DB.open();
+				newGame();
+			}
+			catch (final UnsupportedEncodingException e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DIGEST_HAD_IMPROPER_ENCODING));
+			}
+			catch (final IOException e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND));
+			}
+			catch (final JSONException e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
+			}
+			catch (final NoSuchAlgorithmException e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DIGEST_HAD_UNSUPPORTED_ALGORITHM));
+			}
+			catch (final SQLException e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+			}
+			catch (final Exception e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC));
+			}
+			finally
+			{
+				DB.close();
 			}
 		}
 		else

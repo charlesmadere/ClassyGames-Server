@@ -58,37 +58,30 @@ public final class SkipMove extends Servlet
 			userChallengedId = Long.valueOf(param_userChallengedId);
 			userCreatorId = Long.valueOf(param_userCreatorId);
 
-			if (Utilities.verifyValidLong(userCreatorId))
+			try
 			{
-				try
-				{
-					DB.open();
-					skipMove();
-				}
-				catch (final IOException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND));
-				}
-				catch (final JSONException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
-				}
-				catch (final SQLException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
-				}
-				catch (final Exception e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC));
-				}
-				finally
-				{
-					DB.close();
-				}
+				DB.open();
+				skipMove();
 			}
-			else
+			catch (final IOException e)
 			{
-				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND));
+			}
+			catch (final JSONException e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
+			}
+			catch (final SQLException e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+			}
+			catch (final Exception e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC));
+			}
+			finally
+			{
+				DB.close();
 			}
 		}
 		else

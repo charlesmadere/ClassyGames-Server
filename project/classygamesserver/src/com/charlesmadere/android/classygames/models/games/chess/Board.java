@@ -8,7 +8,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-
 /**
  * Class representing a Chess board. This board is made up of a bunch of
  * positions. Chess is 8 by 8, so that's 64 positions.
@@ -19,6 +18,11 @@ public final class Board extends GenericBoard
 
 	private final static byte LENGTH_HORIZONTAL = 8;
 	private final static byte LENGTH_VERTICAL = 8;
+
+
+	public final static byte BOARD_NORMAL = 0;
+	public final static byte BOARD_CHECK = 1;
+	public final static byte BOARD_CHECKMATE = 2;
 
 
 	/**
@@ -78,7 +82,7 @@ public final class Board extends GenericBoard
 
 
 	@Override
-	public byte checkValidity(final JSONObject boardJSON)
+	public byte checkValidity(final GenericBoard board)
 	{
 		return (byte) 0;
 	}
@@ -125,7 +129,6 @@ public final class Board extends GenericBoard
 	}
 
 
-
 	@Override
 	public boolean move(final Position previous, final Position current)
 	{
@@ -148,55 +151,45 @@ public final class Board extends GenericBoard
 		{
 			final Piece piece = (Piece) previous.getPiece();
 			final Coordinate start = previous.getCoordinate();
-			final byte startX = start.getX();
-			final byte startY = start.getY();
+			final int startX = start.getX();
+			final int startY = start.getY();
 			final Coordinate end = current.getCoordinate();
-			final byte endX = end.getX();
-			final byte endY = end.getY();
+			final int endX = end.getX();
+			final int endY = end.getY();
 
 			switch (piece.getType())
 			{
-				case Piece.TYPE_PAWN:
+				case Piece.TYPE_BISHOP:
+					break;
+
+				case Piece.TYPE_KING:
 					break;
 
 				case Piece.TYPE_KNIGHT:
-					if (Math.abs(startX - endX) == 1)
+					if ((Math.abs(startX - endX) == 1 && Math.abs(startY - endY) == 2)
+						|| (Math.abs(startX - endX) == 2 && Math.abs(startY - endY) == 1))
 					{
-						if (Math.abs(startY - endY) == 2)
+						if (current.hasPiece())
 						{
-							if (current.hasPiece())
-							{
-								final Piece p = (Piece) current.getPiece();
+							final Piece p = (Piece) current.getPiece();
 
-								if (p.isTeamOpponent())
-								{
-									current.removePiece();
-									isMoveValid = true;
-								}
-								else
-								{
-									return false;
-								}
+							if (p.isTeamOpponent() && !p.isTypeKing())
+							{
+								current.removePiece();
+								current.setPiece(new Piece(piece));
+								previous.removePiece();
+								isMoveValid = true;
 							}
 							else
 							{
-								isMoveValid = true;
+								return false;
 							}
 						}
 						else
 						{
-							return false;
-						}
-					}
-					else if (Math.abs(startX - endX) == 2)
-					{
-						if (Math.abs(startY - endY) == 1)
-						{
-
-						}
-						else
-						{
-							return false;
+							current.setPiece(new Piece(piece));
+							previous.removePiece();
+							isMoveValid = true;
 						}
 					}
 					else
@@ -205,16 +198,49 @@ public final class Board extends GenericBoard
 					}
 					break;
 
+				case Piece.TYPE_QUEEN:
+					break;
+
+				case Piece.TYPE_PAWN:
+					break;
+
 				case Piece.TYPE_ROOK:
-					if (startX == endX && startY != endY)
+					if ((startX == endX && startY != endY) || (startX != endX && startY == endY))
 					{
+						if (current.hasPiece())
+						{
+							final Piece p = (Piece) current.getPiece();
 
+							if (p.isTeamOpponent() && !p.isTypeKing())
+							{
+								current.removePiece();
+								current.setPiece(new Piece(piece));
+								previous.removePiece();
+								isMoveValid = true;
+							}
+							else
+							{
+								return false;
+							}
+						}
+						else
+						{
+							current.setPiece(new Piece(piece));
+							previous.removePiece();
+							isMoveValid = true;
+						}
 					}
-					else if (startX != endX && startY == endY)
+					else
 					{
-
+						return false;
 					}
 					break;
+			}
+
+			if (isMoveValid)
+			{
+				hasMoveBeenMade = true;
+				isBoardLocked = true;
 			}
 		}
 
@@ -258,6 +284,22 @@ public final class Board extends GenericBoard
 
 			return false;
 		}
+	}
+
+
+	/**
+	 * Performs a series of checks on the game board to see if the opponent is
+	 * in check or checkmate. https://en.wikipedia.org/wiki/Check_(chess)
+	 * https://en.wikipedia.org/wiki/Checkmate
+	 *
+	 * @return
+	 * Returns one of this class's BOARD_* bytes depending on the determined
+	 * board condition.
+	 */
+	public int isBoardInCheckOrCheckmate()
+	{
+		// TODO
+		return BOARD_NORMAL;
 	}
 
 

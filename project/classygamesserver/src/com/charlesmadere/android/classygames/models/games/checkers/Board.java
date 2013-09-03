@@ -8,7 +8,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-
 /**
  * Class representing a Checkers board. This board is made up of a bunch of
  * positions. Checkers is 8 by 8, so that's 64 positions.
@@ -202,60 +201,52 @@ public final class Board extends GenericBoard
 
 
 	@Override
-	public byte checkValidity(final JSONObject boardJSON)
+	public byte checkValidity(final GenericBoard board)
 	{
-		try
+		byte piecesCountOpponent = 0;
+		byte piecesCountPlayer = 0;
+
+		for (byte x = 0; x < lengthHorizontal; ++x)
 		{
-			final Board board = new Board(boardJSON);
-			byte piecesCountOpponent = 0;
-			byte piecesCountPlayer = 0;
-
-			for (byte x = 0; x < lengthHorizontal; ++x)
+			for (byte y = 0; y < lengthVertical; ++y)
 			{
-				for (byte y = 0; y < lengthVertical; ++y)
+				final Coordinate coordinate = new Coordinate(x, y);
+				final Position positionNew = board.getPosition(coordinate);
+				final Piece pieceNew = (Piece) positionNew.getPiece();
+
+				if (coordinate.areBothEitherEvenOrOdd())
+				// check to see if this piece is in an invalid position on
+				// the board
 				{
-					final Coordinate coordinate = new Coordinate(x, y);
-					final Position positionNew = board.getPosition(coordinate);
-					final Piece pieceNew = (Piece) positionNew.getPiece();
-
-					if (coordinate.areBothEitherEvenOrOdd())
-					// check to see if this piece is in an invalid position on
-					// the board
-					{
-						if (pieceNew != null)
-						{
-							return BOARD_INVALID;
-						}
-					}
-
 					if (pieceNew != null)
-					// count the size of the teams
-					{
-						if (pieceNew.isTeamOpponent())
-						{
-							++piecesCountOpponent;
-						}
-						else if (pieceNew.isTeamPlayer())
-						{
-							++piecesCountPlayer;
-						}
-					}
-
-					if (piecesCountOpponent > MAX_TEAM_SIZE || piecesCountPlayer > MAX_TEAM_SIZE)
 					{
 						return BOARD_INVALID;
 					}
 				}
-			}
 
-			if (piecesCountOpponent == 0)
-			{
-				return BOARD_WIN;
+				if (pieceNew != null)
+				// count the size of the teams
+				{
+					if (pieceNew.isTeamOpponent())
+					{
+						++piecesCountOpponent;
+					}
+					else if (pieceNew.isTeamPlayer())
+					{
+						++piecesCountPlayer;
+					}
+				}
+
+				if (piecesCountOpponent > MAX_TEAM_SIZE || piecesCountPlayer > MAX_TEAM_SIZE)
+				{
+					return BOARD_INVALID;
+				}
 			}
 		}
-		catch (final JSONException e)
+
+		if (piecesCountOpponent == 0)
 		{
-			return BOARD_INVALID;
+			return BOARD_WIN;
 		}
 
 		return BOARD_NEW_MOVE;
@@ -379,8 +370,8 @@ public final class Board extends GenericBoard
 			// hasMoveBeenMade variable. This is for double jumping purposes.
 			// Also note how a difference of 2 is being checked this time. This
 			// should be thought of as the jump condition. In order for a
-			// checkers piece to jump over another, their X coordinate must
-			// change by 2.
+			// checkers piece to jump over another, their X and Y coordinates
+			// must both change by 2.
 			{
 				boolean isJumpValid = false;
 
@@ -390,14 +381,19 @@ public final class Board extends GenericBoard
 				{
 					case Piece.TYPE_KING:
 						if (previous.getCoordinate().getY() == current.getCoordinate().getY() + 2)
-						//
+						// Check to see if this King piece has moved down 2
+						// positions. Note how we purposely left the break
+						// command out. That is because a King piece has its
+						// own set of jump rules in addition to having the
+						// exact jump rules that a Normal piece has.
 						{
 							isJumpValid = true;
 						}
 
 					case Piece.TYPE_NORMAL:
 						if (previous.getCoordinate().getY() == current.getCoordinate().getY() - 2)
-						//
+						// Check to see if this Normal (or King) piece has
+						// moved up 2 positions.
 						{
 							isJumpValid = true;
 						}
@@ -430,7 +426,7 @@ public final class Board extends GenericBoard
 						// made. This is for double jumping purposes.
 						{
 							lastMovedPiece = piece;
-							middlePosition.getPiece().kill();
+							middlePosition.removePiece();
 							isMoveValid = true;
 						}
 						else if (lastMovedPiece == piece)
@@ -438,7 +434,7 @@ public final class Board extends GenericBoard
 						// verify that the piece that is being moved right now
 						// is the same piece that moved last time.
 						{
-							middlePosition.getPiece().kill();
+							middlePosition.removePiece();
 							isMoveValid = true;
 						}
 					}

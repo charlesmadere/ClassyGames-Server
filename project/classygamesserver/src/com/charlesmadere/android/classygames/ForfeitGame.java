@@ -52,36 +52,29 @@ public final class ForfeitGame extends Servlet
 		if (Utilities.verifyValidStrings(param_userChallengedId, param_userCreatorId, param_gameId))
 		// check inputs for validity
 		{
-			userChallengedId = Long.valueOf(param_userChallengedId);
-			userCreatorId = Long.valueOf(param_userCreatorId);
+			userChallengedId = Long.parseLong(param_userChallengedId);
+			userCreatorId = Long.parseLong(param_userCreatorId);
 
-			if (Utilities.verifyValidLongs(userChallengedId, userCreatorId))
+			try
 			{
-				try
-				{
-					DB.open();
-					forfeitGame();
-				}
-				catch (final IOException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND));
-				}
-				catch (final SQLException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
-				}
-				catch (final Exception e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC));
-				}
-				finally
-				{
-					DB.close();
-				}
+				DB.open();
+				forfeitGame();
 			}
-			else
+			catch (final IOException e)
 			{
-				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND));
+			}
+			catch (final SQLException e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+			}
+			catch (final Exception e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC));
+			}
+			finally
+			{
+				DB.close();
 			}
 		}
 		else

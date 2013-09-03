@@ -9,15 +9,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
+import com.charlesmadere.android.classygames.models.GCMMessage;
 import com.charlesmadere.android.classygames.models.Game;
 import com.charlesmadere.android.classygames.models.User;
-import com.charlesmadere.android.classygames.models.games.GenericBoard;
 import com.charlesmadere.android.classygames.utilities.DB;
-import com.charlesmadere.android.classygames.utilities.DBConstants;
-import com.charlesmadere.android.classygames.utilities.GCMUtilities;
-import com.charlesmadere.android.classygames.utilities.GameUtilities;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
@@ -36,8 +32,6 @@ public final class NewMove extends Servlet
 
 	private long userChallengedId;
 	private long userCreatorId;
-
-	private GenericBoard board;
 
 
 
@@ -66,38 +60,30 @@ public final class NewMove extends Servlet
 			userChallengedId = Long.valueOf(param_userChallengedId);
 			userCreatorId = Long.valueOf(param_userCreatorId);
 
-			if (Utilities.verifyValidLongs(userChallengedId, userCreatorId))
-			// check inputs for validity
+			try
 			{
-				try
-				{
-					DB.open();
-					newMove();
-				}
-				catch (final IOException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND));
-				}
-				catch (final JSONException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
-				}
-				catch (final SQLException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
-				}
-				catch (final Exception e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC));
-				}
-				finally
-				{
-					DB.close();
-				}
+				DB.open();
+				newMove();
 			}
-			else
+			catch (final IOException e)
 			{
-				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GCM_FAILED_TO_SEND));
+			}
+			catch (final JSONException e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_JSON_EXCEPTION));
+			}
+			catch (final SQLException e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+			}
+			catch (final Exception e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC));
+			}
+			finally
+			{
+				DB.close();
 			}
 		}
 		else
@@ -134,105 +120,82 @@ public final class NewMove extends Servlet
 		final User userCreator = new User(userCreatorId);
 		final Game game = new Game(param_gameId, param_board);
 
-		if (game.isNewMoveValid())
+		if (!game.isFinished())
 		{
-			
-		}
-		else
-		{
-			
-		}
-
-		DBConstants.ensureUserExistsInDatabase(sqlConnection, userChallengedId.longValue(), param_userChallengedName);
-
-		sqlResult = DBConstants.grabGamesInfo(sqlConnection, param_gameId);
-
-		if (sqlResult != null && sqlResult.next())
-		{
-			if (sqlResult.getByte(DBConstants.TABLE_GAMES_COLUMN_FINISHED) == DBConstants.TABLE_GAMES_FINISHED_FALSE)
-			// make sure that the game has not been finished
+			if (game.isTurn(userCreatorId))
 			{
-				final long db_userChallengedId = sqlResult.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED);
-				final long db_userCreatorId = sqlResult.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR);
-				final Byte db_gameType = Byte.valueOf(sqlResult.getByte(DBConstants.TABLE_GAMES_COLUMN_GAME_TYPE));
-				final byte db_turn = sqlResult.getByte(DBConstants.TABLE_GAMES_COLUMN_TURN);
+				final byte moveType = game.isNewMoveValid();
 
-				if ((userCreatorId.longValue() == db_userChallengedId && db_turn == DBConstants.TABLE_GAMES_TURN_CHALLENGED)
-					|| (userCreatorId.longValue() == db_userCreatorId && db_turn == DBConstants.TABLE_GAMES_TURN_CREATOR))
+				if (moveType == Utilities.BOARD_NEW_MOVE || moveType == Utilities.BOARD_LOSE
+					|| moveType == Utilities.BOARD_WIN)
 				{
-					final String db_oldBoard = sqlResult.getString(DBConstants.TABLE_GAMES_COLUMN_BOARD);
-
-					board = GameUtilities.newGame(db_oldBoard, db_gameType.byteValue());
-					final JSONObject param_boardJSON = new JSONObject(param_board);
-					final Byte boardValidationResult = Byte.valueOf(board.checkValidity(param_boardJSON));
-
-					if (boardValidationResult.byteValue() == Utilities.BOARD_NEW_MOVE || boardValidationResult.byteValue() == Utilities.BOARD_WIN)
+					if (moveType == Utilities.BOARD_NEW_MOVE)
 					{
-						board = GameUtilities.newGame(param_board, db_gameType.byteValue());
-						board.flipTeams();
-						final JSONObject newBoardJSON = board.makeJSON();
-						final String newBoardJSONString = newBoardJSON.toString();
+						game.flipNewGameBoard();
+						game.switchTurns();
+						game.update();
 
-						// prepare a SQL statement to be run on the database
-						final String sqlStatementString = "UPDATE " + DBConstants.TABLE_GAMES + " SET " + DBConstants.TABLE_GAMES_COLUMN_BOARD + " = ?, " + DBConstants.TABLE_GAMES_COLUMN_TURN + " = ?, " + DBConstants.TABLE_GAMES_COLUMN_FINISHED + " = ?, " + DBConstants.TABLE_GAMES_COLUMN_LAST_MOVE + " = NOW() WHERE " + DBConstants.TABLE_GAMES_COLUMN_ID + " = ?";
-						sqlStatement = DB.connection.prepareStatement(sqlStatementString);
-
-						// prevent SQL injection by inserting data this way
-						sqlStatement.setString(1, newBoardJSONString);
-
-						if (db_turn == DBConstants.TABLE_GAMES_TURN_CHALLENGED)
-						{
-							sqlStatement.setByte(2, DBConstants.TABLE_GAMES_TURN_CREATOR);
-						}
-						else if (db_turn == DBConstants.TABLE_GAMES_TURN_CREATOR)
-						{
-							sqlStatement.setByte(2, DBConstants.TABLE_GAMES_TURN_CHALLENGED);
-						}
-
-						if (boardValidationResult.byteValue() == Utilities.BOARD_WIN)
-						{
-							sqlStatement.setByte(3, DBConstants.TABLE_GAMES_FINISHED_TRUE);
-						}
-						else if (boardValidationResult.byteValue() == Utilities.BOARD_NEW_MOVE)
-						{
-							sqlStatement.setByte(3, DBConstants.TABLE_GAMES_FINISHED_FALSE);
-						}
-
-						sqlStatement.setString(4, param_gameId);
-
-						// run the SQL statement
-						sqlStatement.executeUpdate();
-
-						if (boardValidationResult.byteValue() == Utilities.BOARD_WIN)
-						{
-							GCMUtilities.sendMessages(sqlConnection, param_gameId, userCreatorId, userChallengedId, boardValidationResult, db_gameType, param_userChallengedName);
-						}
-						else if (boardValidationResult.byteValue() == Utilities.BOARD_NEW_MOVE)
-						{
-							GCMUtilities.sendMessage(sqlConnection, param_gameId, userCreatorId, userChallengedId, db_gameType, boardValidationResult);
-						}
-
-						printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_MOVE_ADDED_TO_DATABASE));
+						new GCMMessage()
+							.setGameId(game.getId())
+							.setMessageTypeNewMove()
+							.setUserToMention(userCreator)
+							.setUserToReceive(userChallenged)
+							.sendMessage();
 					}
 					else
 					{
-						printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_ERROR_BOARD_INVALID));
+						game.setFinished();
+						game.update();
+
+						if (moveType == Utilities.BOARD_LOSE)
+						{
+							new GCMMessage()
+								.setGameId(game.getId())
+								.setMessageTypeGameOverLose()
+								.setUserToMention(userChallenged)
+								.setUserToReceive(userCreator)
+								.sendMessage();
+
+							new GCMMessage()
+								.setGameId(game.getId())
+								.setMessageTypeGameOverWin()
+								.setUserToMention(userCreator)
+								.setUserToReceive(userChallenged)
+								.sendMessage();
+						}
+						else
+						{
+							new GCMMessage()
+								.setGameId(game.getId())
+								.setMessageTypeGameOverLose()
+								.setUserToMention(userCreator)
+								.setUserToReceive(userChallenged)
+								.sendMessage();
+
+							new GCMMessage()
+								.setGameId(game.getId())
+								.setMessageTypeGameOverLose()
+								.setUserToMention(userCreator)
+								.setUserToReceive(userChallenged)
+								.sendMessage();
+						}
 					}
+
+					printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_SUCCESS_MOVE_ADDED_TO_DATABASE));
 				}
 				else
 				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_ITS_NOT_YOUR_TURN));
+					printWriter.write(Utilities.makePostDataSuccess(Utilities.POST_ERROR_BOARD_INVALID));
 				}
 			}
 			else
-			// we are trying to add a new move to a game that is already finished. this should never happen
 			{
-				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GAME_IS_ALREADY_OVER));
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_ITS_NOT_YOUR_TURN));
 			}
 		}
 		else
 		{
-			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_FIND_GAME_WITH_SPECIFIED_ID));
+			printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GAME_IS_ALREADY_OVER));
 		}
 	}
 

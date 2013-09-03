@@ -50,30 +50,22 @@ public final class NewRegId extends Servlet
 		{
 			userId = Long.valueOf(param_userId);
 
-			if (Utilities.verifyValidLong(userId))
-			// check inputs for validity
+			try
 			{
-				try
-				{
-					DB.open();
-					newRegId();
-				}
-				catch (final SQLException e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
-				}
-				catch (final Exception e)
-				{
-					printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC));
-				}
-				finally
-				{
-					DB.close();
-				}
+				DB.open();
+				newRegId();
 			}
-			else
+			catch (final SQLException e)
 			{
-				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATA_IS_MALFORMED));
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_DATABASE_COULD_NOT_CONNECT));
+			}
+			catch (final Exception e)
+			{
+				printWriter.write(Utilities.makePostDataError(Utilities.POST_ERROR_GENERIC));
+			}
+			finally
+			{
+				DB.close();
 			}
 		}
 		else

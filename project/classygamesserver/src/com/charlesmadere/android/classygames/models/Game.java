@@ -50,9 +50,6 @@ public final class Game
 	{
 		this.id = id;
 		this.board = board;
-
-		
-
 		readGameData();
 	}
 
@@ -96,7 +93,7 @@ public final class Game
 	}
 
 
-	public long getLastMoveAsLong()
+	public long getLastMoveInSeconds()
 	{
 		return lastMove.getTime() / 1000L;
 	}
@@ -210,6 +207,12 @@ public final class Game
 	public boolean isNewGameValid()
 	{
 		return isGameValid(newGameBoard);
+	}
+
+
+	public byte isNewMoveValid()
+	{
+		return oldGameBoard.checkValidity(newGameBoard);
 	}
 
 
@@ -400,7 +403,7 @@ public final class Game
 		gameJSON.put(Utilities.POST_DATA_USER_CHALLENGED, userChallenged);
 		gameJSON.put(Utilities.POST_DATA_USER_CREATOR, userCreator);
 		gameJSON.put(Utilities.POST_DATA_BOARD, board);
-		gameJSON.put(Utilities.POST_DATA_LAST_MOVE, getLastMoveAsLong());
+		gameJSON.put(Utilities.POST_DATA_LAST_MOVE, getLastMoveInSeconds());
 
 		return gameJSON;
 	}

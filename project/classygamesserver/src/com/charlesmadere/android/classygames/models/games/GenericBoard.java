@@ -5,6 +5,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.charlesmadere.android.classygames.utilities.Utilities;
+
 
 /**
  * A generic Board class. All games need to have their own Board class that
@@ -14,10 +16,11 @@ public abstract class GenericBoard
 {
 
 
-	protected final static byte BOARD_INVALID = -1;
-	protected final static byte BOARD_NEW_GAME = 1;
-	protected final static byte BOARD_NEW_MOVE = 2;
-	protected final static byte BOARD_WIN = 3;
+	protected final static byte BOARD_INVALID = Utilities.BOARD_INVALID;
+	protected final static byte BOARD_LOSE = Utilities.BOARD_LOSE;
+	protected final static byte BOARD_NEW_GAME = Utilities.BOARD_NEW_GAME;
+	protected final static byte BOARD_NEW_MOVE = Utilities.BOARD_NEW_MOVE;
+	protected final static byte BOARD_WIN = Utilities.BOARD_WIN;
 
 
 
@@ -519,7 +522,8 @@ public abstract class GenericBoard
 
 
 	/**
-	 * Checks this GenericBoard object for validity.
+	 * Checks this GenericBoard object for validity. This should treat the
+	 * board as if it's had only 1 turned played on it.
 	 * 
 	 * @return
 	 * A byte that represents if the board is valid or not.
@@ -529,16 +533,16 @@ public abstract class GenericBoard
 
 	/**
 	 * Checks this GenericBoard object for validity against the board given in
-	 * the boardJSON parameter.
+	 * the board parameter.
 	 * 
-	 * @param boardJSON
+	 * @param board
 	 * The board to check against. This is a newer game board than the one
-	 * stored in this GenericBoard object.
+	 * that's already stored in this GenericBoard object.
 	 * 
 	 * @return
 	 * A byte that represents if the board is valid or not.
 	 */
-	public abstract byte checkValidity(final JSONObject boardJSON);
+	public abstract byte checkValidity(final GenericBoard board);
 
 
 	/**

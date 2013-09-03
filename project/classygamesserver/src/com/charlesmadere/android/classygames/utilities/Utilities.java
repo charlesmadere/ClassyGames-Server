@@ -6,6 +6,8 @@ import java.util.Random;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.charlesmadere.android.classygames.models.GCMMessage;
+
 
 /**
  * Class filled with a bunch of miscellaneous utility methods and constants.
@@ -79,10 +81,10 @@ public class Utilities
 	public final static String POST_SUCCESS_USER_REMOVED_FROM_DATABASE = "You've been successfully unregistered from " + APP_NAME + ".";
 
 	public final static byte BOARD_INVALID = -1;
-	public final static byte BOARD_NEW_GAME = POST_DATA_MESSAGE_TYPE_NEW_GAME;
-	public final static byte BOARD_NEW_MOVE = POST_DATA_MESSAGE_TYPE_NEW_MOVE;
-	public final static byte BOARD_LOSE = POST_DATA_MESSAGE_TYPE_GAME_OVER_LOSE;
-	public final static byte BOARD_WIN = POST_DATA_MESSAGE_TYPE_GAME_OVER_WIN;
+	public final static byte BOARD_NEW_GAME = GCMMessage.MESSAGE_TYPE_NEW_GAME;
+	public final static byte BOARD_NEW_MOVE = GCMMessage.MESSAGE_TYPE_NEW_MOVE;
+	public final static byte BOARD_LOSE = GCMMessage.MESSAGE_TYPE_GAME_OVER_LOSE;
+	public final static byte BOARD_WIN = GCMMessage.MESSAGE_TYPE_GAME_OVER_WIN;
 
 
 
@@ -99,10 +101,10 @@ public class Utilities
 	{
 		if (random == null)
 		{
-			// create a Random object. We're seeding it with the epoch in milliseconds because
-			// this will 100% certainly always be a different value every single time that it's
-			// run, guaranteeing a strong seed.
-			random = new Random(System.currentTimeMillis());
+			// Create a Random object. We're seeding it with the nano time
+			// because this will always be a difficult-to-predict value,
+			// meaning that it's a relatively strong seed.
+			random = new Random(System.nanoTime());
 		}
 
 		return random;
@@ -186,99 +188,6 @@ public class Utilities
 	public static String makePostDataSuccess(final Object data)
 	{
 		return makePostData(data, false);
-	}
-
-
-	public static boolean validGameTypeValue(final byte gameType)
-	{
-		switch (gameType)
-		{
-			case BOARD_INVALID:
-			case BOARD_NEW_GAME:
-			case BOARD_NEW_MOVE:
-			case BOARD_LOSE:
-			case BOARD_WIN:
-				return true;
-
-			default:
-				return false;
-		}
-	}
-
-
-	/**
-	 * Verifies a Byte object for validity.
-	 * 
-	 * @param theByte
-	 * The Byte to check.
-	 * 
-	 * @return
-	 * Returns true if the given Byte is valid.
-	 */
-	public static boolean verifyValidByte(final Byte theByte)
-	{
-		return theByte != null && theByte.byteValue() >= 1;
-	}
-
-
-	/**
-	 * Verifies a set of Byte objects for validity.
-	 * 
-	 * @param bytes
-	 * The Bytes to check.
-	 * 
-	 * @return
-	 * Returns true if all of the given Bytes are valid.
-	 */
-	public static boolean verifyValidBytes(final Byte... bytes)
-	{
-		for (int i = 0; i < bytes.length; ++i)
-		{
-			if (!verifyValidByte(bytes[i]))
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-
-	/**
-	 * Verifies a Long object for validity.
-	 * 
-	 * @param theLong
-	 * The Long to check.
-	 * 
-	 * @return
-	 * Returns true if the given Long is valid.
-	 */
-	public static boolean verifyValidLong(final Long theLong)
-	{
-		return theLong != null && theLong.longValue() >= 1;
-	}
-
-
-	/**
-	 * Verifies a set of Long objects for validity.
-	 * 
-	 * @param longs
-	 * The Longs to check.
-	 * 
-	 * @return
-	 * Returns true if all of the given Longs are valid.
-	 */
-	public static boolean verifyValidLongs(final Long... longs)
-	{
-		for (int i = 0; i < longs.length; ++i)
-		{
-			if (!verifyValidLong(longs[i]))
-			{
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 
