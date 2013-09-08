@@ -58,7 +58,7 @@ public final class NewGame extends Servlet
 		param_gameType = request.getParameter(Utilities.POST_DATA_GAME_TYPE);
 		param_board = request.getParameter(Utilities.POST_DATA_BOARD);
 
-		if (Utilities.verifyValidStrings(param_userChallengedId, param_userChallengedName, param_userCreatorId, param_board))
+		if (Utilities.verifyValidString(param_userChallengedId, param_userChallengedName, param_userCreatorId, param_board))
 		{
 			userChallengedId = Long.valueOf(param_userChallengedId);
 			userCreatorId = Long.valueOf(param_userCreatorId);

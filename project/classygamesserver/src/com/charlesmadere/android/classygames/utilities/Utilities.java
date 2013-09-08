@@ -6,7 +6,8 @@ import java.util.Random;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.charlesmadere.android.classygames.models.GCMMessage;
+import com.charlesmadere.android.classygames.models.Game;
+import com.charlesmadere.android.classygames.models.User;
 
 
 /**
@@ -16,7 +17,6 @@ public class Utilities
 {
 
 
-	public final static String APP_NAME = "Classy Games";
 	private static Random random;
 
 	// list of digest algorithms found here
@@ -25,6 +25,9 @@ public class Utilities
 	public final static int MESSAGE_DIGEST_LENGTH = 80;
 	public final static int MESSAGE_DIGEST_RADIX = 16;
 
+
+	public final static String APP_NAME = "Classy Games";
+
 	public final static String UTF8 = "UTF-8";
 	public final static String CHARSET = "charset=" + UTF8;
 	public final static String MIMETYPE_HTML = "text/html";
@@ -32,25 +35,25 @@ public class Utilities
 	public final static String CONTENT_TYPE_HTML = MIMETYPE_HTML + "; " + CHARSET;
 	public final static String CONTENT_TYPE_JSON = MIMETYPE_JSON + "; " + CHARSET;
 
-	public final static String POST_DATA_BOARD = DBConstants.TABLE_GAMES_COLUMN_BOARD;
+	public final static String POST_DATA_BOARD = Game.Table.TABLE;
 	public final static String POST_DATA_CHECKERS = "checkers";
 	public final static String POST_DATA_CHESS = "chess";
-	public final static String POST_DATA_FINISHED = DBConstants.TABLE_GAMES_COLUMN_FINISHED;
-	public final static String POST_DATA_ID = DBConstants.TABLE_USERS_COLUMN_ID;
+	public final static String POST_DATA_FINISHED = Game.Table.COLUMN_FINISHED;
+	public final static String POST_DATA_ID = User.Table.COLUMN_ID;
 	public final static String POST_DATA_GAME_ID = "game_id";
-	public final static String POST_DATA_GAME_TYPE = DBConstants.TABLE_GAMES_COLUMN_GAME_TYPE;
+	public final static String POST_DATA_GAME_TYPE = Game.Table.COLUMN_GAME_TYPE;
 	public final static byte POST_DATA_GAME_TYPE_CHECKERS = 1;
 	public final static byte POST_DATA_GAME_TYPE_CHESS = 2;
-	public final static String POST_DATA_LAST_MOVE = DBConstants.TABLE_GAMES_COLUMN_LAST_MOVE;
+	public final static String POST_DATA_LAST_MOVE = Game.Table.COLUMN_LAST_MOVE;
 	public final static String POST_DATA_LOSES = "loses";
 	public final static String POST_DATA_MESSAGE_TYPE = "message_type";
-	public final static String POST_DATA_NAME = DBConstants.TABLE_USERS_COLUMN_NAME;
-	public final static String POST_DATA_REG_ID = DBConstants.TABLE_USERS_COLUMN_REG_ID;
-	public final static String POST_DATA_TURN = DBConstants.TABLE_GAMES_COLUMN_TURN;
+	public final static String POST_DATA_NAME = User.Table.COLUMN_NAME;
+	public final static String POST_DATA_REG_ID = User.Table.COLUMN_REG_ID;
+	public final static String POST_DATA_TURN = Game.Table.COLUMN_TURN;
 	public final static String POST_DATA_TURN_THEIRS = "turn_theirs";
 	public final static String POST_DATA_TURN_YOURS = "turn_yours";
-	public final static String POST_DATA_USER_CHALLENGED = DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED;
-	public final static String POST_DATA_USER_CREATOR = DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR;
+	public final static String POST_DATA_USER_CHALLENGED = Game.Table.COLUMN_USER_CHALLENGED;
+	public final static String POST_DATA_USER_CREATOR = Game.Table.COLUMN_USER_CREATOR;
 	public final static String POST_DATA_WINS = "wins";
 
 	public final static String POST_ERROR_BOARD_INVALID = "Invalid board!";
@@ -79,12 +82,6 @@ public class Utilities
 	public final static String POST_SUCCESS_NO_ACTIVE_GAMES = "Player has no active games!";
 	public final static String POST_SUCCESS_USER_ADDED_TO_DATABASE = "You've been successfully registered with " + APP_NAME + ".";
 	public final static String POST_SUCCESS_USER_REMOVED_FROM_DATABASE = "You've been successfully unregistered from " + APP_NAME + ".";
-
-	public final static byte BOARD_INVALID = -1;
-	public final static byte BOARD_NEW_GAME = GCMMessage.MESSAGE_TYPE_NEW_GAME;
-	public final static byte BOARD_NEW_MOVE = GCMMessage.MESSAGE_TYPE_NEW_MOVE;
-	public final static byte BOARD_LOSE = GCMMessage.MESSAGE_TYPE_GAME_OVER_LOSE;
-	public final static byte BOARD_WIN = GCMMessage.MESSAGE_TYPE_GAME_OVER_WIN;
 
 
 
@@ -130,24 +127,24 @@ public class Utilities
 
 		if (hasError)
 		{
-			try
+			if (data instanceof JSONObject)
 			{
 				final JSONObject dataJSON = (JSONObject) data;
 				result.put("error", dataJSON);
 			}
-			catch (final ClassCastException e)
+			else
 			{
 				result.put("error", data);
 			}
 		}
 		else
 		{
-			try
+			if (data instanceof JSONObject)
 			{
 				final JSONObject dataJSON = (JSONObject) data;
 				result.put("success", dataJSON);
 			}
-			catch (final ClassCastException e)
+			else
 			{
 				result.put("success", data);
 			}
@@ -192,21 +189,6 @@ public class Utilities
 
 
 	/**
-	 * Verifies a String object for validity.
-	 * 
-	 * @param string
-	 * The String to check.
-	 * 
-	 * @return
-	 * Returns true if the given String is valid.
-	 */
-	public static boolean verifyValidString(final String string)
-	{
-		return string != null && !string.isEmpty();
-	}
-
-
-	/**
 	 * Verifies a set of String objects for validity.
 	 * 
 	 * @param strings
@@ -215,11 +197,11 @@ public class Utilities
 	 * @return
 	 * Returns true if all of the given Strings are valid.
 	 */
-	public static boolean verifyValidStrings(final String... strings)
+	public static boolean verifyValidString(final String... strings)
 	{
-		for (int i = 0; i < strings.length; ++i)
+		for (final String string : strings)
 		{
-			if (!verifyValidString(strings[i]))
+			if (string == null || string.isEmpty())
 			{
 				return false;
 			}

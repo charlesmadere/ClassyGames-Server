@@ -11,12 +11,32 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.charlesmadere.android.classygames.utilities.DB;
-import com.charlesmadere.android.classygames.utilities.DBConstants;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
 public final class User
 {
+
+
+
+
+	public final static class Table
+	{
+
+
+		public final static String TABLE = "users";
+		public final static String COLUMN_CHECKERS_LOSES = "checkers_loses";
+		public final static String COLUMN_CHECKERS_WINS = "checkers_wins";
+		public final static String COLUMN_CHESS_LOSES = "chess_loses";
+		public final static String COLUMN_CHESS_WINS = "chess_wins";
+		public final static String COLUMN_ID = "id";
+		public final static String COLUMN_NAME = "name";
+		public final static String COLUMN_REG_ID = "reg_id";
+
+
+	}
+
+
 
 
 	/**
@@ -328,7 +348,7 @@ public final class User
 
 		if (turnGames != null && !turnGames.isEmpty())
 		{
-			for (Game game : turnGames)
+			for (final Game game : turnGames)
 			{
 				final JSONObject gameJSON = game.makeJSON();
 				gamesJSON.put(gameJSON);
@@ -364,13 +384,13 @@ public final class User
 
 		final String statementString =
 			"SELECT * " +
-			" FROM " + DBConstants.TABLE_GAMES +
-			" WHERE " + DBConstants.TABLE_GAMES_COLUMN_FINISHED + " = ?, AND (" +
-			DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ? OR " +
-			DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR + " = ?)";
+			" FROM " + Game.Table.TABLE +
+			" WHERE " + Game.Table.COLUMN_FINISHED + " = ?, AND (" +
+			Game.Table.COLUMN_USER_CHALLENGED + " = ? OR " +
+			Game.Table.COLUMN_USER_CREATOR + " = ?)";
 
 		final PreparedStatement statement = DB.connection.prepareStatement(statementString);
-		statement.setByte(1, DBConstants.TABLE_GAMES_FINISHED_FALSE);
+		statement.setByte(1, Game.Table.FINISHED_FALSE);
 		statement.setLong(2, id);
 		statement.setLong(3, id);
 
@@ -398,8 +418,8 @@ public final class User
 	{
 		final String statementString =
 			"SELECT * " +
-			" FROM " + DBConstants.TABLE_USERS +
-			" WHERE " + DBConstants.TABLE_USERS_COLUMN_ID + " = ?";
+			" FROM " + Table.TABLE +
+			" WHERE " + Table.COLUMN_ID + " = ?";
 
 		final PreparedStatement statement = DB.connection.prepareStatement(statementString);
 		statement.setLong(1, id);
@@ -409,18 +429,18 @@ public final class User
 		{
 			if (!Utilities.verifyValidString(name))
 			{
-				name = result.getString(DBConstants.TABLE_USERS_COLUMN_NAME);
+				name = result.getString(Table.COLUMN_NAME);
 			}
 
 			if (!Utilities.verifyValidString(regId))
 			{
-				regId = result.getString(DBConstants.TABLE_USERS_COLUMN_REG_ID);
+				regId = result.getString(Table.COLUMN_REG_ID);
 			}
 
-			checkersLoses = result.getInt(DBConstants.TABLE_USERS_COLUMN_CHECKERS_LOSES);
-			checkersWins = result.getInt(DBConstants.TABLE_USERS_COLUMN_CHECKERS_WINS);
-			chessLoses = result.getInt(DBConstants.TABLE_USERS_COLUMN_CHESS_LOSES);
-			chessWins = result.getInt(DBConstants.TABLE_USERS_COLUMN_CHESS_WINS);
+			checkersLoses = result.getInt(Table.COLUMN_CHECKERS_LOSES);
+			checkersWins = result.getInt(Table.COLUMN_CHECKERS_WINS);
+			chessLoses = result.getInt(Table.COLUMN_CHESS_LOSES);
+			chessWins = result.getInt(Table.COLUMN_CHESS_WINS);
 		}
 
 		DB.close(result, statement);
@@ -433,14 +453,14 @@ public final class User
 	public void update() throws SQLException
 	{
 		final String statementString =
-			"UPDATE " + DBConstants.TABLE_USERS +
-			" SET " + DBConstants.TABLE_USERS_COLUMN_NAME + " = ?, " +
-			DBConstants.TABLE_USERS_COLUMN_REG_ID + " = ?, " +
-			DBConstants.TABLE_USERS_COLUMN_CHECKERS_LOSES + " = ?, " +
-			DBConstants.TABLE_USERS_COLUMN_CHECKERS_WINS + " = ?, " +
-			DBConstants.TABLE_USERS_COLUMN_CHESS_LOSES + " = ?, " +
-			DBConstants.TABLE_USERS_COLUMN_CHESS_WINS + " = ?, " +
-			"WHERE " + DBConstants.TABLE_USERS_COLUMN_ID + " = ?";
+			"UPDATE " + Table.TABLE +
+			" SET " + Table.COLUMN_NAME + " = ?, " +
+			Table.COLUMN_REG_ID + " = ?, " +
+			Table.COLUMN_CHECKERS_LOSES + " = ?, " +
+			Table.COLUMN_CHECKERS_WINS + " = ?, " +
+			Table.COLUMN_CHESS_LOSES + " = ?, " +
+			Table.COLUMN_CHESS_WINS + " = ?, " +
+			"WHERE " + Table.COLUMN_ID + " = ?";
 
 		final PreparedStatement statement = DB.connection.prepareStatement(statementString);
 		statement.setString(1, name);

@@ -15,13 +15,40 @@ import org.json.JSONObject;
 
 import com.charlesmadere.android.classygames.models.games.GenericBoard;
 import com.charlesmadere.android.classygames.utilities.DB;
-import com.charlesmadere.android.classygames.utilities.DBConstants;
 import com.charlesmadere.android.classygames.utilities.GameUtilities;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
 public final class Game
 {
+
+
+
+
+	public final static class Table
+	{
+
+
+		public final static String TABLE = "games";
+		public final static String COLUMN_ID = "id";
+		public final static String COLUMN_USER_CREATOR = "user_creator";
+		public final static String COLUMN_USER_CHALLENGED = "user_challenged";
+		public final static String COLUMN_BOARD = "board";
+		public final static String COLUMN_TURN = "turn";
+		public final static String COLUMN_GAME_TYPE = "game_type";
+		public final static String COLUMN_LAST_MOVE = "last_move";
+		public final static String COLUMN_FINISHED = "finished";
+		public final static byte TURN_CREATOR = 1;
+		public final static byte TURN_CHALLENGED = 2;
+		public final static byte FINISHED_FALSE = 1;
+		public final static byte FINISHED_TRUE = 2;
+
+
+	}
+
+
+
+
 
 
 	private byte finished;
@@ -67,7 +94,7 @@ public final class Game
 		this.userCreator = userCreator;
 		this.board = board;
 		this.gameType = gameType;
-		finished = DBConstants.TABLE_GAMES_FINISHED_FALSE;
+		finished = Table.FINISHED_FALSE;
 
 		newGameBoard = GameUtilities.newGame(board, gameType);
 	}
@@ -144,36 +171,36 @@ public final class Game
 	{
 		if (!Utilities.verifyValidString(id))
 		{
-			id = result.getString(DBConstants.TABLE_GAMES_COLUMN_ID);
+			id = result.getString(Table.COLUMN_ID);
 		}
 
-		finished = result.getByte(DBConstants.TABLE_GAMES_COLUMN_FINISHED);
-		gameType = result.getByte(DBConstants.TABLE_GAMES_COLUMN_GAME_TYPE);
-		turn = result.getByte(DBConstants.TABLE_GAMES_COLUMN_TURN);
-		lastMove = result.getTimestamp(DBConstants.TABLE_GAMES_COLUMN_LAST_MOVE);
+		finished = result.getByte(Table.COLUMN_FINISHED);
+		gameType = result.getByte(Table.COLUMN_GAME_TYPE);
+		turn = result.getByte(Table.COLUMN_TURN);
+		lastMove = result.getTimestamp(Table.COLUMN_LAST_MOVE);
 
 		if (Utilities.verifyValidString(board))
 		{
 			newGameBoard = GameUtilities.newGame(board, gameType);
 
-			final String oldBoard = result.getString(DBConstants.TABLE_GAMES_COLUMN_BOARD);
+			final String oldBoard = result.getString(Table.COLUMN_BOARD);
 			oldGameBoard = GameUtilities.newGame(oldBoard, gameType);
 		}
 		else
 		{
-			board = result.getString(DBConstants.TABLE_GAMES_COLUMN_BOARD);
+			board = result.getString(Table.COLUMN_BOARD);
 			newGameBoard = GameUtilities.newGame(board, gameType);
 		}
 
 		if (userChallenged == null)
 		{
-			final long userChallengedId = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED);
+			final long userChallengedId = result.getLong(Table.COLUMN_USER_CHALLENGED);
 			userChallenged = new User(userChallengedId);
 		}
 
 		if (userCreator == null)
 		{
-			final long userCreatorId = result.getLong(DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR);
+			final long userCreatorId = result.getLong(Table.COLUMN_USER_CREATOR);
 			userCreator = new User(userCreatorId);
 		}
 	}
@@ -181,26 +208,26 @@ public final class Game
 
 	public boolean isChallengedsTurn()
 	{
-		return turn == DBConstants.TABLE_GAMES_TURN_CHALLENGED;
+		return turn == Table.TURN_CHALLENGED;
 	}
 
 
 	public boolean isCreatorsTurn()
 	{
-		return turn == DBConstants.TABLE_GAMES_TURN_CREATOR;
+		return turn == Table.TURN_CREATOR;
 	}
 
 
 	public boolean isFinished()
 	{
-		return finished == DBConstants.TABLE_GAMES_FINISHED_TRUE;
+		return finished == Table.FINISHED_TRUE;
 	}
 
 
 	private boolean isGameValid(final GenericBoard game)
 	{
 		final byte validity = game.checkValidity();
-		return validity == Utilities.BOARD_NEW_GAME;
+		return validity == GameUtilities.BOARD_NEW_GAME;
 	}
 
 
@@ -362,9 +389,9 @@ public final class Game
 				id = digestBuilder.toString();
 
 				final String statementString =
-					"SELECT * " +
-					" FROM " + DBConstants.TABLE_GAMES +
-					" WHERE " + DBConstants.TABLE_GAMES_COLUMN_ID + " = ?";
+					"SELECT " + Table.COLUMN_ID +
+					" FROM " + Table.TABLE +
+					" WHERE " + Table.COLUMN_ID + " = ?";
 
 				final PreparedStatement statement = DB.connection.prepareStatement(statementString);
 				statement.setString(1, id);
@@ -372,9 +399,9 @@ public final class Game
 
 				if (result.next())
 				{
-					final byte finished = result.getByte(DBConstants.TABLE_GAMES_COLUMN_FINISHED);
+					final byte finished = result.getByte(Table.COLUMN_FINISHED);
 
-					if (finished == DBConstants.TABLE_GAMES_FINISHED_FALSE)
+					if (finished == Table.FINISHED_FALSE)
 					{
 						idCollisionOccurred = true;
 					}
@@ -413,8 +440,8 @@ public final class Game
 	{
 		final String statementString =
 			"SELECT * " +
-			" FROM " + DBConstants.TABLE_GAMES +
-			" WHERE " + DBConstants.TABLE_GAMES_COLUMN_ID + " = ?";
+			" FROM " + Table.TABLE +
+			" WHERE " + Table.COLUMN_ID + " = ?";
 
 		final PreparedStatement statement = DB.connection.prepareStatement(statementString);
 		statement.setString(1, id);
@@ -435,7 +462,7 @@ public final class Game
 
 	public void setFinished()
 	{
-		finished = DBConstants.TABLE_GAMES_FINISHED_TRUE;
+		finished = Table.FINISHED_TRUE;
 	}
 
 
@@ -443,11 +470,11 @@ public final class Game
 	{
 		if (isChallengedsTurn())
 		{
-			turn = DBConstants.TABLE_GAMES_TURN_CREATOR;
+			turn = Table.TURN_CREATOR;
 		}
 		else
 		{
-			turn = DBConstants.TABLE_GAMES_TURN_CHALLENGED;
+			turn = Table.TURN_CHALLENGED;
 		}
 	}
 
@@ -458,14 +485,14 @@ public final class Game
 	public void update() throws JSONException, SQLException
 	{
 		final String statementString =
-			"UPDATE " + DBConstants.TABLE_GAMES +
-			" SET " + DBConstants.TABLE_GAMES_COLUMN_FINISHED + " = ?, " +
-			DBConstants.TABLE_GAMES_COLUMN_GAME_TYPE + " = ?, " +
-			DBConstants.TABLE_GAMES_COLUMN_TURN + " = ?, " +
-			DBConstants.TABLE_GAMES_COLUMN_USER_CHALLENGED + " = ?, " +
-			DBConstants.TABLE_GAMES_COLUMN_USER_CREATOR + " = ?, " +
-			DBConstants.TABLE_GAMES_COLUMN_BOARD + " = ? " +
-			"WHERE " + DBConstants.TABLE_GAMES_COLUMN_ID + " = ?";
+			"UPDATE " + Table.TABLE +
+			" SET " + Table.COLUMN_FINISHED + " = ?, " +
+			Table.COLUMN_GAME_TYPE + " = ?, " +
+			Table.COLUMN_TURN + " = ?, " +
+			Table.COLUMN_USER_CHALLENGED + " = ?, " +
+			Table.COLUMN_USER_CREATOR + " = ?, " +
+			Table.COLUMN_BOARD + " = ? " +
+			"WHERE " + Table.COLUMN_ID + " = ?";
 
 		final PreparedStatement statement = DB.connection.prepareStatement(statementString);
 		statement.setByte(1, finished);

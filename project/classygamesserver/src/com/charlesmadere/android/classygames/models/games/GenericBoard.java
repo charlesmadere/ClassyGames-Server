@@ -5,7 +5,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.charlesmadere.android.classygames.utilities.Utilities;
+import com.charlesmadere.android.classygames.utilities.GameUtilities;
 
 
 /**
@@ -16,11 +16,11 @@ public abstract class GenericBoard
 {
 
 
-	protected final static byte BOARD_INVALID = Utilities.BOARD_INVALID;
-	protected final static byte BOARD_LOSE = Utilities.BOARD_LOSE;
-	protected final static byte BOARD_NEW_GAME = Utilities.BOARD_NEW_GAME;
-	protected final static byte BOARD_NEW_MOVE = Utilities.BOARD_NEW_MOVE;
-	protected final static byte BOARD_WIN = Utilities.BOARD_WIN;
+	protected final static byte BOARD_INVALID = GameUtilities.BOARD_INVALID;
+	protected final static byte BOARD_LOSE = GameUtilities.BOARD_LOSE;
+	protected final static byte BOARD_NEW_GAME = GameUtilities.BOARD_NEW_GAME;
+	protected final static byte BOARD_NEW_MOVE = GameUtilities.BOARD_NEW_MOVE;
+	protected final static byte BOARD_WIN = GameUtilities.BOARD_WIN;
 
 
 

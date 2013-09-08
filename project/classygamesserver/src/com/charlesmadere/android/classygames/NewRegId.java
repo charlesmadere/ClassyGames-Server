@@ -45,7 +45,7 @@ public final class NewRegId extends Servlet
 		param_userName = request.getParameter(Utilities.POST_DATA_NAME);
 		param_userRegId = request.getParameter(Utilities.POST_DATA_REG_ID);
 
-		if (Utilities.verifyValidStrings(param_userId, param_userName, param_userRegId))
+		if (Utilities.verifyValidString(param_userId, param_userName, param_userRegId))
 		// check inputs for validity
 		{
 			userId = Long.valueOf(param_userId);

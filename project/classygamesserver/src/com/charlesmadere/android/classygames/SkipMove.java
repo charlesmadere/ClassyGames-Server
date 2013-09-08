@@ -53,7 +53,7 @@ public final class SkipMove extends Servlet
 		param_userCreatorId = request.getParameter(Utilities.POST_DATA_USER_CREATOR);
 		param_gameId = request.getParameter(Utilities.POST_DATA_GAME_ID);
 
-		if (Utilities.verifyValidStrings(param_userChallengedId, param_userChallengedName, param_userCreatorId, param_gameId))
+		if (Utilities.verifyValidString(param_userChallengedId, param_userChallengedName, param_userCreatorId, param_gameId))
 		{
 			userChallengedId = Long.valueOf(param_userChallengedId);
 			userCreatorId = Long.valueOf(param_userCreatorId);

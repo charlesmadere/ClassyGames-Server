@@ -14,6 +14,7 @@ import com.charlesmadere.android.classygames.models.GCMMessage;
 import com.charlesmadere.android.classygames.models.Game;
 import com.charlesmadere.android.classygames.models.User;
 import com.charlesmadere.android.classygames.utilities.DB;
+import com.charlesmadere.android.classygames.utilities.GameUtilities;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
@@ -54,7 +55,7 @@ public final class NewMove extends Servlet
 		param_gameId = request.getParameter(Utilities.POST_DATA_GAME_ID);
 		param_board = request.getParameter(Utilities.POST_DATA_BOARD);
 
-		if (Utilities.verifyValidStrings(param_userChallengedId, param_userChallengedName, param_userCreatorId, param_gameId, param_board))
+		if (Utilities.verifyValidString(param_userChallengedId, param_userChallengedName, param_userCreatorId, param_gameId, param_board))
 		// check inputs for validity
 		{
 			userChallengedId = Long.valueOf(param_userChallengedId);
@@ -126,10 +127,10 @@ public final class NewMove extends Servlet
 			{
 				final byte moveType = game.isNewMoveValid();
 
-				if (moveType == Utilities.BOARD_NEW_MOVE || moveType == Utilities.BOARD_LOSE
-					|| moveType == Utilities.BOARD_WIN)
+				if (moveType == GameUtilities.BOARD_NEW_MOVE || moveType == GameUtilities.BOARD_LOSE
+					|| moveType == GameUtilities.BOARD_WIN)
 				{
-					if (moveType == Utilities.BOARD_NEW_MOVE)
+					if (moveType == GameUtilities.BOARD_NEW_MOVE)
 					{
 						game.flipNewGameBoard();
 						game.switchTurns();
@@ -147,7 +148,7 @@ public final class NewMove extends Servlet
 						game.setFinished();
 						game.update();
 
-						if (moveType == Utilities.BOARD_LOSE)
+						if (moveType == GameUtilities.BOARD_LOSE)
 						{
 							new GCMMessage()
 								.setGameId(game.getId())
