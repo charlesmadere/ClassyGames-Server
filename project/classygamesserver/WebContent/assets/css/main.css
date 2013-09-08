@@ -7,7 +7,7 @@ html
 body
 {
 	background-image: url("../img/bg.png");
-	margin: 0px;
+	margin: 0em;
 	height: 100%;
 }
 
@@ -20,7 +20,7 @@ a
 
 img
 {
-	border: 0px;
+	border: 0em;
 }
 
 
@@ -60,14 +60,14 @@ div#facebook
 	letter-spacing: -2pt;
 	margin-left: -240px;
 	position: fixed;
-	text-shadow: 0px 0px 24px #717495;
+	text-shadow: 0em 0em 24px #717495;
 	width: 480px;
 }
 
 
 img#facebookImage
 {
-	box-shadow: 0px 0px 8px #717495;
+	box-shadow: 0em 0em 8px #717495;
 	margin-right: 10px;
 	vertical-align: middle;
 }
