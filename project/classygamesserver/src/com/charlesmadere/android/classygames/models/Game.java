@@ -19,12 +19,19 @@ import com.charlesmadere.android.classygames.utilities.GameUtilities;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
+/**
+ * Represents the Game database table. All of that table's properties can be
+ * found and accessed here.
+ */
 public final class Game
 {
 
 
 
 
+	/**
+	 * This class's database table column information is stored here.
+	 */
 	public final static class Table
 	{
 
@@ -49,16 +56,60 @@ public final class Game
 
 
 
-
-
+	/**
+	 * Represents whether this Game object is finished or not. Will equal
+	 * Table.FINISHED_FALSE if it's not yet finished, or Table.FINISHED_TRUE if
+	 * it is finished.
+	 */
 	private byte finished;
+
+
+	/**
+	 * Represents what type of Game this is. Currently this could be Checkers
+	 * or Chess.
+	 */
 	private byte gameType;
+
+
+	/**
+	 * Represents which user's turn it currently is for this Game. Will equal
+	 * either Table.TURN_CREATOR or Table.TURN_CHALLENGED.
+	 */
 	private byte turn;
+
+
+	/**
+	 * Represents the current state of the Game board as it exists in the
+	 * database. This String is actually JSON data and can be converted
+	 * directly to that form for proper reading.
+	 */
 	private String board;
+
+
+	/**
+	 * This Game's ID. Is a kinda long String (around 64+ characters) that is a
+	 * hash of alphanumeric characters.
+	 */
 	private String id;
+
+
+	/**
+	 * The Unix epoch of when the last move in this Game took place.
+	 */
 	private Timestamp lastMove;
+
+
+	/**
+	 * The User that this Game's original creator decided to play against.
+	 */
 	private User userChallenged;
+
+
+	/**
+	 * This Game's original creator.
+	 */
 	private User userCreator;
+
 
 	private GenericBoard newGameBoard;
 	private GenericBoard oldGameBoard;
@@ -424,13 +475,13 @@ public final class Game
 
 	public JSONObject makeJSON() throws JSONException
 	{
-		final JSONObject gameJSON = new JSONObject();
-		gameJSON.put(Utilities.POST_DATA_GAME_ID, id);
-		gameJSON.put(Utilities.POST_DATA_GAME_TYPE, gameType);
-		gameJSON.put(Utilities.POST_DATA_USER_CHALLENGED, userChallenged);
-		gameJSON.put(Utilities.POST_DATA_USER_CREATOR, userCreator);
-		gameJSON.put(Utilities.POST_DATA_BOARD, board);
-		gameJSON.put(Utilities.POST_DATA_LAST_MOVE, getLastMoveInSeconds());
+		final JSONObject gameJSON = new JSONObject()
+			.put(Utilities.POST_DATA_GAME_ID, id)
+			.put(Utilities.POST_DATA_GAME_TYPE, gameType)
+			.put(Utilities.POST_DATA_USER_CHALLENGED, userChallenged)
+			.put(Utilities.POST_DATA_USER_CREATOR, userCreator)
+			.put(Utilities.POST_DATA_BOARD, board)
+			.put(Utilities.POST_DATA_LAST_MOVE, getLastMoveInSeconds());
 
 		return gameJSON;
 	}

@@ -100,9 +100,9 @@ public final class GetGames extends Servlet
 		final JSONArray myTurnGames = user.makeMyTurnGamesJSON();
 		final JSONArray theirTurnGames = user.makeTheirTurnGamesJSON();
 
-		final JSONObject games = new JSONObject();
-		games.put(Utilities.POST_DATA_TURN_YOURS, myTurnGames);
-		games.put(Utilities.POST_DATA_TURN_THEIRS, theirTurnGames);
+		final JSONObject games = new JSONObject()
+			.put(Utilities.POST_DATA_TURN_YOURS, myTurnGames)
+			.put(Utilities.POST_DATA_TURN_THEIRS, theirTurnGames);
 
 		printWriter.write(Utilities.makePostDataSuccess(games));
 	}

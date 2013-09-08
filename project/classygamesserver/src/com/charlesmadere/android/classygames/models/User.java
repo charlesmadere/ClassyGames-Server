@@ -14,12 +14,19 @@ import com.charlesmadere.android.classygames.utilities.DB;
 import com.charlesmadere.android.classygames.utilities.Utilities;
 
 
+/**
+ * Represents the User database table. All of that table's properties can be
+ * found and accessed here.
+ */
 public final class User
 {
 
 
 
 
+	/**
+	 * This class's database table column information is stored here.
+	 */
 	public final static class Table
 	{
 
@@ -361,17 +368,17 @@ public final class User
 
 	public JSONObject makeStatsJSON() throws JSONException
 	{
-		final JSONObject checkers = new JSONObject();
-		checkers.put(Utilities.POST_DATA_LOSES, checkersLoses);
-		checkers.put(Utilities.POST_DATA_WINS, checkersWins);
+		final JSONObject checkers = new JSONObject()
+			.put(Utilities.POST_DATA_LOSES, checkersLoses)
+			.put(Utilities.POST_DATA_WINS, checkersWins);
 
-		final JSONObject chess = new JSONObject();
-		chess.put(Utilities.POST_DATA_LOSES, chessLoses);
-		chess.put(Utilities.POST_DATA_WINS, chessWins);
+		final JSONObject chess = new JSONObject()
+			.put(Utilities.POST_DATA_LOSES, chessLoses)
+			.put(Utilities.POST_DATA_WINS, chessWins);
 
-		final JSONObject stats = new JSONObject();
-		stats.put(Utilities.POST_DATA_CHECKERS, checkers);
-		stats.put(Utilities.POST_DATA_CHESS, chess);
+		final JSONObject stats = new JSONObject()
+			.put(Utilities.POST_DATA_CHECKERS, checkers)
+			.put(Utilities.POST_DATA_CHESS, chess);
 
 		return stats;
 	}
